@@ -5,8 +5,10 @@
 go get github.com/Kamva/kitty
 ```
 
+
+
 #### Todo:
-- [ ] Tests
+- [ ] Write Tests
+- [ ] Add more services like log,...
 - [ ] Add badges to readme.
 - [ ] CI 
-
