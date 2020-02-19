@@ -19,7 +19,7 @@ func (i i18nTranslator) Localize(langs ...string) kitty.Translator {
 }
 
 func (i i18nTranslator) Translate(key string, keyParams ...interface{}) (string, error) {
-	params, err := gutil.KeyValuesToMap(keyParams)
+	params, err := gutil.KeyValuesToMap(keyParams...)
 
 	if err != nil {
 		return "", err
@@ -42,7 +42,7 @@ func (i i18nTranslator) MustTranslate(key string, keyParams ...interface{}) stri
 }
 
 func (i i18nTranslator) TranslateDefault(key string, fallback string, keyParams ...interface{}) (string, error) {
-	params, err := gutil.KeyValuesToMap(keyParams)
+	params, err := gutil.KeyValuesToMap(keyParams...)
 
 	if err != nil {
 		return "", err
