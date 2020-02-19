@@ -4,9 +4,16 @@ type Translator interface {
 	// Localize function returns new localized translator function.
 	Localize(langs ...string) Translator
 
-	// Translate method get key and keyParams to translate.
-	// it can return key if translation not found.
-	Translate(key string, keyParams ...interface{}) string
+	// Translate get key and params nad return translation.
+	Translate(key string, keyParams ...interface{}) (string, error)
 
-	TranslateDefault(key string, fallback string, keyParams ...interface{}) string
+	// MustTranslate get key and params and translate,
+	//otherwise panic relative error.
+	MustTranslate(key string, keyParams ...interface{}) string
+
+	// TranslateDefault translate with default message.
+	TranslateDefault(key string, fallback string, keyParams ...interface{}) (string, error)
+
+	// MustTranslateDefault translate with default message, on occur error,will panic it.
+	MustTranslateDefault(key string, fallback string, keyParams ...interface{}) string
 }
