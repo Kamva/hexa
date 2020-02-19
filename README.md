@@ -6,8 +6,9 @@ go get github.com/Kamva/kitty
 ```
 
 #### Available Services:
-- Config: to use as app config service.
-- Translator: to use as translator.
+- Config: config service.
+- Logger: logger service
+- Translator: translator service.
 
 #### How to use:
 example:
