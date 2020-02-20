@@ -5,6 +5,8 @@ github.com/Kamva/gutil v0.0.0-20200219112905-2a335f0f6cd0 h1:ZDXdQPZMQXg4dIK6T6q
 github.com/Kamva/gutil v0.0.0-20200219112905-2a335f0f6cd0/go.mod h1:YT1t6WMVNyhTWa7/KUGKUXMxBffvws0g27bU4DL3s30=
 github.com/Kamva/gutil v0.0.0-20200220075141-19a4e6d66fca h1:RX9ankH5a2FUXPEYgG+/bxRiCnqWHJ2KSp/70Lb2a50=
 github.com/Kamva/gutil v0.0.0-20200220075141-19a4e6d66fca/go.mod h1:YT1t6WMVNyhTWa7/KUGKUXMxBffvws0g27bU4DL3s30=
+github.com/Kamva/gutil v0.0.0-20200220090603-f3d8cdcee96d h1:DAZVM0irbYsl20Fn2fz5CXTQpF0nMHKi1Z2l0tl5kN0=
+github.com/Kamva/gutil v0.0.0-20200220090603-f3d8cdcee96d/go.mod h1:YT1t6WMVNyhTWa7/KUGKUXMxBffvws0g27bU4DL3s30=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=

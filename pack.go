@@ -40,21 +40,21 @@ func (p *Pack) SetTranslator(translator Translator) {
 
 // Config returns the config service.
 func (p *Pack) Config() Config {
-	gutil.PanicIfNil(p.config, errNilConfig)
+	gutil.PanicNil(p.config, errNilConfig)
 
 	return p.config
 }
 
 // Log returns the logger service.
 func (p *Pack) Log() Logger {
-	gutil.PanicIfNil(p.log, errNilLogger)
+	gutil.PanicNil(p.log, errNilLogger)
 
 	return p.log
 }
 
 // Translator returns the translator service.
 func (p *Pack) Translator() Translator {
-	gutil.PanicIfNil(p.translator, errNilTranslator)
+	gutil.PanicNil(p.translator, errNilTranslator)
 
 	return p.translator
 }
