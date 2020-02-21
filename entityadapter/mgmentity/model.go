@@ -15,4 +15,3 @@ func (model *Entity) Creating() error {
 func (model *Entity) Saving() error {
 	return model.DateFields.Saving()
 }
-
