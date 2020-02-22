@@ -1,5 +1,9 @@
 package kitty
 
+const (
+	ErrorKeyInternalError = "internal_error"
+)
+
 // ErrorData is extra data of the error to show to the user.
 type ErrorData map[string]interface{}
 
