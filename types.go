@@ -1,8 +1,8 @@
 package kitty
 
-type Password string
+type Secret string
 
-func (p Password) String() string {
+func (p Secret) String() string {
 	return "****"
 }
 
