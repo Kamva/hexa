@@ -45,7 +45,7 @@ func (p *Pack) Config() Config {
 	return p.config
 }
 
-// Log returns the logger service.
+// Logger returns the logger service.
 func (p *Pack) Log() Logger {
 	gutil.PanicNil(p.log, errNilLogger)
 

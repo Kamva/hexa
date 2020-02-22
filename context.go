@@ -13,8 +13,8 @@ type Context interface {
 	// User returns the user
 	User() User
 
-	// Log returns the kitty logger customized for specific request.
-	Log() Logger
+	// Logger returns the kitty logger customized for specific request.
+	Logger() Logger
 
 	// Translator returns the translator localized relative to the users request.
 	Translator() Translator
@@ -36,7 +36,7 @@ func (c defaultContext) User() User {
 	return c.user
 }
 
-func (c defaultContext) Log() Logger {
+func (c defaultContext) Logger() Logger {
 	return c.logger
 }
 
