@@ -30,4 +30,5 @@ func NewGuestUser() User {
 	return guestUser{}
 }
 
+// Assert guestUser implements the User interface.
 var _ User = &guestUser{}

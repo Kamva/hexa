@@ -21,6 +21,10 @@ func (l *logrusLogger) WithFields(keyValues ...interface{}) kitty.Logger {
 	return NewLogrusDriver(l.entry.WithFields(fields))
 }
 
+func (l *logrusLogger) Core() interface{} {
+	return l.entry
+}
+
 func (l *logrusLogger) Debug(i ...interface{}) {
 	l.entry.Debug(i...)
 }
