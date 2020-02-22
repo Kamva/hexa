@@ -9,6 +9,12 @@ type ErrorParams map[string]interface{}
 type Error interface {
 	error
 
+	// ShouldReport method specify that error should report to the error center or no.
+	ShouldReport() bool
+
+	// HTTPCode returns the http code for the error.
+	HTTPCode() int
+
 	// Code return the error edentifier code
 	Code() string
 
@@ -30,15 +36,25 @@ type Error interface {
 
 // defaultError implements Error interface.
 type defaultError struct {
-	code   string
-	key    string
-	err    string
-	params ErrorParams
-	data   ErrorData
+	shouldReport bool
+	httpCode     int
+	code         string
+	key          string
+	err          string
+	params       ErrorParams
+	data         ErrorData
 }
 
 func (e defaultError) Error() string {
 	return e.err
+}
+
+func (e defaultError) ShouldReport() bool {
+	return e.shouldReport
+}
+
+func (e defaultError) HTTPCode() int {
+	return e.httpCode
 }
 
 func (e defaultError) Code() string {
@@ -68,11 +84,13 @@ func (e defaultError) SetData(data ErrorData) Error {
 }
 
 // NewError returns new Error instance.
-func NewError(code string, key string, err string) Error {
+func NewError(shouldReport bool, httpCode int, code string, key string, err string) Error {
 	return defaultError{
-		code: code,
-		key:  key,
-		err:  err,
+		shouldReport: shouldReport,
+		httpCode:     httpCode,
+		code:         code,
+		key:          key,
+		err:          err,
 	}
 }
 
