@@ -5,7 +5,7 @@ type Logger interface {
 	// Core function returns the logger core concrete struct.
 	// this is because in sometimes we need to convert one logger
 	// interface to another and need to logger code.
-	Core()interface{}
+	Core() interface{}
 
 	// With method set key,values and return new logger
 	// contains this key values as log fields.

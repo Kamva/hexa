@@ -25,6 +25,9 @@ type Error interface {
 	// Key returns unique key for each error to use as translation key,...
 	Key() string
 
+	// SetError set the error string
+	SetError(err string) Error
+
 	// Params returns params of the error to use in translation,...
 	Params() ErrorParams
 
@@ -67,6 +70,11 @@ func (e defaultError) Code() string {
 
 func (e defaultError) Key() string {
 	return e.code
+}
+
+func (e defaultError) SetError(err string) Error {
+	e.err = err
+	return e
 }
 
 func (e defaultError) Params() ErrorParams {

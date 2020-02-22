@@ -10,6 +10,10 @@ type logrusLogger struct {
 	entry *logrus.Entry
 }
 
+func (l *logrusLogger) Core() interface{} {
+	return l.entry
+}
+
 func (l *logrusLogger) WithFields(keyValues ...interface{}) kitty.Logger {
 	// if key values is not odd, add another item to make it odd.
 	if len(keyValues)%2 != 0 {
@@ -19,10 +23,6 @@ func (l *logrusLogger) WithFields(keyValues ...interface{}) kitty.Logger {
 	fields, _ := gutil.KeyValuesToMap(keyValues...)
 
 	return NewLogrusDriver(l.entry.WithFields(fields))
-}
-
-func (l *logrusLogger) Core() interface{} {
-	return l.entry
 }
 
 func (l *logrusLogger) Debug(i ...interface{}) {
@@ -51,7 +51,9 @@ func (l *logrusLogger) Panic(i ...interface{}) {
 
 // NewLogrusDriver return new instance of logrus that implements kitty entry.
 func NewLogrusDriver(logger *logrus.Entry) kitty.Logger {
-	return &logrusLogger{entry: logger.WithFields(nil)}
+	return &logrusLogger{
+		entry: logger.WithFields(nil),
+	}
 }
 
 // Assert logrusLogger implements kitty Logger.
