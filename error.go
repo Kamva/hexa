@@ -12,10 +12,10 @@ type Error interface {
 	// ShouldReport method specify that error should report to the error center or no.
 	ShouldReport() bool
 
-	// HTTPCode returns the http code for the error.
-	HTTPCode() int
+	// HTTPStatus returns the http status code for the error.
+	HTTPStatus() int
 
-	// Code return the error edentifier code
+	// Code return the error identifier code
 	Code() string
 
 	// Key returns unique key for each error to use as translation key,...
@@ -37,7 +37,7 @@ type Error interface {
 // defaultError implements Error interface.
 type defaultError struct {
 	shouldReport bool
-	httpCode     int
+	httpSatus    int
 	code         string
 	key          string
 	err          string
@@ -53,8 +53,8 @@ func (e defaultError) ShouldReport() bool {
 	return e.shouldReport
 }
 
-func (e defaultError) HTTPCode() int {
-	return e.httpCode
+func (e defaultError) HTTPStatus() int {
+	return e.httpSatus
 }
 
 func (e defaultError) Code() string {
@@ -84,10 +84,10 @@ func (e defaultError) SetData(data ErrorData) Error {
 }
 
 // NewError returns new Error instance.
-func NewError(shouldReport bool, httpCode int, code string, key string, err string) Error {
+func NewError(shouldReport bool, httpStatus int, code string, key string, err string) Error {
 	return defaultError{
 		shouldReport: shouldReport,
-		httpCode:     httpCode,
+		httpSatus:    httpStatus,
 		code:         code,
 		key:          key,
 		err:          err,
