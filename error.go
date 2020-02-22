@@ -37,7 +37,7 @@ type Error interface {
 // defaultError implements Error interface.
 type defaultError struct {
 	shouldReport bool
-	httpSatus    int
+	httpStatus   int
 	code         string
 	key          string
 	err          string
@@ -54,7 +54,7 @@ func (e defaultError) ShouldReport() bool {
 }
 
 func (e defaultError) HTTPStatus() int {
-	return e.httpSatus
+	return e.httpStatus
 }
 
 func (e defaultError) Code() string {
@@ -87,7 +87,7 @@ func (e defaultError) SetData(data ErrorData) Error {
 func NewError(shouldReport bool, httpStatus int, code string, key string, err string) Error {
 	return defaultError{
 		shouldReport: shouldReport,
-		httpSatus:    httpStatus,
+		httpStatus:   httpStatus,
 		code:         code,
 		key:          key,
 		err:          err,
