@@ -4,6 +4,10 @@ import (
 	"context"
 )
 
+// ContextKey is identifier to set kitty context as field in the user context.
+// e.g ctx.Set(kitty.ContextKey,kittyCtx) // kittyCtx is kitty Context.
+const ContextKey = "KITTY_CONTEXT"
+
 // Context is the kitty context to use in services.
 type Context interface {
 	context.Context
