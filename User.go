@@ -7,6 +7,9 @@ type User interface {
 	// Return users identifier (if guestUser return just empty string or something like this.)
 	GetID() interface{}
 
+	// Return the user name.
+	GetName() string
+
 	// Username can be unique username,email,phone number or everything else that can use as username.
 	GetUsername() string
 }
@@ -20,6 +23,10 @@ func (g guestUser) IsGuest() bool {
 
 func (g guestUser) GetID() interface{} {
 	return "__guest_id__"
+}
+
+func (g guestUser) GetName() string {
+	return "__guest__"
 }
 
 func (g guestUser) GetUsername() string {
