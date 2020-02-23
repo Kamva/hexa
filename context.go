@@ -10,6 +10,10 @@ type Context interface {
 
 	// RequestID returns the request id.
 	RequestID() string
+
+	// Correlation returns the request correlation id.
+	CorrelationID() string
+
 	// User returns the user
 	User() User
 
@@ -22,14 +26,19 @@ type Context interface {
 
 type defaultContext struct {
 	context.Context
-	requestID  string
-	user       User
-	logger     Logger
-	translator Translator
+	requestID     string
+	correlationID string
+	user          User
+	logger        Logger
+	translator    Translator
 }
 
 func (c defaultContext) RequestID() string {
 	return c.requestID
+}
+
+func (c defaultContext) CorrelationID() string {
+	return c.correlationID
 }
 
 func (c defaultContext) User() User {
@@ -45,13 +54,14 @@ func (c defaultContext) Translator() Translator {
 }
 
 // NewCtx returns new kitty Context.
-func NewCtx(requestID string, user User, logger Logger, translator Translator) Context {
+func NewCtx(requestID, correlationID string, user User, logger Logger, translator Translator) Context {
 	return &defaultContext{
-		Context:    context.Background(),
-		requestID:  requestID,
-		user:       user,
-		logger:     logger,
-		translator: translator,
+		Context:       context.Background(),
+		requestID:     requestID,
+		correlationID: correlationID,
+		user:          user,
+		logger:        logger,
+		translator:    translator,
 	}
 }
 
