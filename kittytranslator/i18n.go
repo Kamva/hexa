@@ -50,8 +50,13 @@ func (i i18nTranslator) TranslateDefault(key string, fallback string, keyParams 
 
 	return i.localizer.Localize(&i18n.LocalizeConfig{
 		DefaultMessage: &i18n.Message{
-			ID:  key,
-			One: fallback,
+			ID:    key,
+			Zero:  fallback,
+			One:   fallback,
+			Two:   fallback,
+			Few:   fallback,
+			Many:  fallback,
+			Other: fallback,
 		},
 		TemplateData: params,
 	})
