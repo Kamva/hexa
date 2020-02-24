@@ -7,6 +7,8 @@ github.com/Kamva/gutil v0.0.0-20200220075141-19a4e6d66fca h1:RX9ankH5a2FUXPEYgG+
 github.com/Kamva/gutil v0.0.0-20200220075141-19a4e6d66fca/go.mod h1:YT1t6WMVNyhTWa7/KUGKUXMxBffvws0g27bU4DL3s30=
 github.com/Kamva/gutil v0.0.0-20200220090603-f3d8cdcee96d h1:DAZVM0irbYsl20Fn2fz5CXTQpF0nMHKi1Z2l0tl5kN0=
 github.com/Kamva/gutil v0.0.0-20200220090603-f3d8cdcee96d/go.mod h1:YT1t6WMVNyhTWa7/KUGKUXMxBffvws0g27bU4DL3s30=
+github.com/Kamva/gutil v0.0.0-20200223213106-083cc09e3b52 h1:dflulaQzHMAzCiopT8N1oxJCpXyC2IA3hfGC8jSaO0Q=
+github.com/Kamva/gutil v0.0.0-20200223213106-083cc09e3b52/go.mod h1:KvaAPqUTtjac/70L9pCuNEJX0FSH7+WrTo6sariE4FM=
 github.com/Kamva/mgm v1.2.3 h1:EokuP5HyjsURC/YyFrarQkMx4IecKq7yz3j2tC6oTcI=
 github.com/Kamva/mgm/v2 v2.0.0 h1:+H50tUCKnY7V5SwS69IPAUCxtgcLWNB9otq5Zw8769Q=
 github.com/Kamva/mgm/v2 v2.0.0/go.mod h1:DgcNZxH74WB3FMcxV6e/MKNdNzu3EI1vuStdOjkasTE=
@@ -127,6 +129,7 @@ github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJyk=
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
+github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/subosito/gotenv v1.2.0 h1:Slr1R9HxAlEKefgq5jn9U+DnETlIUa6HfgEzj0g5d7s=
 github.com/subosito/gotenv v1.2.0/go.mod h1:N0PQaV/YGNqwC0u51sEeR/aUtSLEXKX9iv69rRypqCw=
 github.com/tidwall/pretty v1.0.0/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhVysOjyk=
