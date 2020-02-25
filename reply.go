@@ -1,6 +1,9 @@
 package kitty
 
-import "github.com/Kamva/gutil"
+import (
+	"encoding/json"
+	"github.com/Kamva/gutil"
+)
 
 type (
 
@@ -201,6 +204,16 @@ func NewError(shouldReport bool, httpStatus int, code string, key string, err st
 			internalMsg:  err,
 		},
 	}
+}
+
+// NewReplyDataFromStruct convert struct to reply data
+func NewReplyDataFromStruct(input interface{}) ReplyData {
+	var rd ReplyData
+	encodedJson, _ := json.Marshal(input)
+
+	_ = json.Unmarshal(encodedJson, &rd)
+
+	return rd
 }
 
 // Assert defaultReply implements the Error interface.
