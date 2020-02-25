@@ -241,6 +241,8 @@ func NewReply(shouldReport bool, httpStatus int, code string, key string, iMsg s
 		code:         code,
 		key:          key,
 		internalMsg:  iMsg,
+		params:       make(ReplyParams),
+		data:         make(ReplyData),
 	}
 }
 
@@ -254,6 +256,8 @@ func NewError(shouldReport bool, httpStatus int, code string, key string, err st
 			code:         code,
 			key:          key,
 			internalMsg:  err,
+			params:       make(ReplyParams),
+			data:         make(ReplyData),
 		},
 	}
 }
