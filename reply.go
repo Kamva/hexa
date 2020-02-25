@@ -99,7 +99,7 @@ func (e defaultReply) Type() interface{} {
 
 // Error implements to just satisfy the Reply interface.
 func (e defaultReply) Error() string {
-	return "__reply_error__"
+	return "__default_reply___"
 }
 
 func (e defaultReply) InternalMessage() string {
@@ -125,7 +125,7 @@ func (e defaultReply) Report(l Logger, t Translator) {
 		"__http_status__": e.HTTPStatus(),
 	}
 
-	fields := append(gutil.MapToKeyValue(data), gutil.MapToKeyValue(e.Data()))
+	fields := append(gutil.MapToKeyValue(data), gutil.MapToKeyValue(e.Data())...)
 
 	l.WithFields(fields...).Info(e.Error())
 }
@@ -163,6 +163,18 @@ func (e defaultReply) SetData(data ReplyData) Reply {
 // Error method returns the error message.
 func (e defaultError) Error() string {
 	return e.internalMsg
+}
+
+func (e defaultError) Report(l Logger, t Translator) {
+	data := map[string]interface{}{
+		"__type__":        e.replyType,
+		"__code__":        e.Code(),
+		"__http_status__": e.HTTPStatus(),
+	}
+
+	fields := append(gutil.MapToKeyValue(data), gutil.MapToKeyValue(e.Data())...)
+
+	l.WithFields(fields...).Error(e.Error())
 }
 
 // NewReply returns new instance the Reply interface implemented by defaultReply.
