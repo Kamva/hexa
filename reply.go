@@ -1,7 +1,6 @@
 package kitty
 
 import (
-	"encoding/json"
 	"github.com/Kamva/gutil"
 )
 
@@ -266,12 +265,7 @@ func NewError(shouldReport bool, httpStatus int, code string, key string, err st
 
 // NewReplyDataFromStruct convert struct to reply data
 func NewReplyDataFromStruct(input interface{}) ReplyData {
-	var rd ReplyData
-	encodedJson, _ := json.Marshal(input)
-
-	_ = json.Unmarshal(encodedJson, &rd)
-
-	return rd
+	return gutil.StructToMap(input)
 }
 
 // reportFields return fields that need to include in reply report.
