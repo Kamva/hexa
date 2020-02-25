@@ -33,9 +33,11 @@ func (b HttpRespBody) MarshalJSON() ([]byte, error) {
 }
 
 // Debug set debug flag and debug data.
-func (b HttpRespBody) Debug(debug bool, debugData Data) {
+func (b HttpRespBody) Debug(debug bool, debugData Data) HttpRespBody {
 	b.debug = debug
 	b.debugData = debugData
+
+	return b
 }
 
 // NewBody return new instance of the HttpRespBody
