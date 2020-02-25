@@ -46,14 +46,10 @@ type (
 		// e.g _,ok:=r.Type().(kitty.ReplyTypeDefault)
 		Type() interface{}
 
-		// ShouldReport method specify that whether reply should report to the log system or no.
-		ShouldReport() bool
-
-		// SetShouldReport set flag that specify this error should report or no.
-		SetShouldReport(bool) Reply
-
-		// Report function report the reply to the log system.
-		Report(Logger, Translator)
+		// ReportIfNeeded function report the reply to the log system if
+		// http status code is in range 5XX.
+		// return value specify that reported or no.
+		ReportIfNeeded(Logger, Translator) bool
 
 		// HTTPStatus returns the http status code for the reply.
 		HTTPStatus() int
@@ -96,15 +92,14 @@ type (
 
 	// defaultReply implements the Reply interface.
 	defaultReply struct {
-		replyType    interface{}
-		shouldReport bool
-		httpStatus   int
-		code         string
-		key          string
-		internalMsg  string
-		params       ReplyParams
-		data         ReplyData
-		reportData   ReplyReportData
+		replyType   interface{}
+		httpStatus  int
+		code        string
+		key         string
+		internalMsg string
+		params      ReplyParams
+		data        ReplyData
+		reportData  ReplyReportData
 	}
 
 	defaultError struct {
@@ -141,17 +136,17 @@ func (r defaultReply) SetInternalMsg() string {
 	return r.internalMsg
 }
 
-func (r defaultReply) ShouldReport() bool {
-	return r.shouldReport
+func (r defaultReply) shouldReport() bool {
+	return r.HTTPStatus() >= 500
 }
 
-func (r defaultReply) SetShouldReport(a bool) Reply {
-	r.shouldReport = a
-	return r
-}
+func (r defaultReply) ReportIfNeeded(l Logger, t Translator) bool {
+	if r.shouldReport() {
+		l.WithFields(reportFields(r)).Info(r.Error())
+		return true
+	}
 
-func (r defaultReply) Report(l Logger, t Translator) {
-	l.WithFields(reportFields(r)).Info(r.Error())
+	return false
 }
 
 func (r defaultReply) HTTPStatus() int {
@@ -204,13 +199,13 @@ func (e defaultError) Error() string {
 	return e.internalMsg
 }
 
-func (e defaultError) Report(l Logger, t Translator) {
-	l.WithFields(reportFields(e)).Error(e.Error())
-}
+func (e defaultError) ReportIfNeeded(l Logger, t Translator) bool {
+	if e.shouldReport() {
+		l.WithFields(reportFields(e)).Error(e.Error())
+		return true
+	}
 
-func (e defaultError) SetShouldReport(a bool) Reply {
-	e.shouldReport = a
-	return e
+	return false
 }
 
 func (e defaultError) SetHTTPStatus(status int) Reply {
@@ -242,15 +237,14 @@ func (e defaultError) SetReportData(data ReplyReportData) Reply {
 // NewReply returns new instance the Reply interface implemented by defaultReply.
 func NewReply(shouldReport bool, httpStatus int, code string, key string, iMsg string) Reply {
 	return defaultReply{
-		replyType:    ReplyTypeDefault("__reply_default__"),
-		shouldReport: shouldReport,
-		httpStatus:   httpStatus,
-		code:         code,
-		key:          key,
-		internalMsg:  iMsg,
-		params:       make(ReplyParams),
-		data:         make(ReplyData),
-		reportData:   make(ReplyReportData),
+		replyType:   ReplyTypeDefault("__reply_default__"),
+		httpStatus:  httpStatus,
+		code:        code,
+		key:         key,
+		internalMsg: iMsg,
+		params:      make(ReplyParams),
+		data:        make(ReplyData),
+		reportData:  make(ReplyReportData),
 	}
 }
 
@@ -258,15 +252,14 @@ func NewReply(shouldReport bool, httpStatus int, code string, key string, iMsg s
 func NewError(shouldReport bool, httpStatus int, code string, key string, err string) Error {
 	return defaultError{
 		defaultReply{
-			replyType:    ReplyTypeDefault("__reply_error__"),
-			shouldReport: shouldReport,
-			httpStatus:   httpStatus,
-			code:         code,
-			key:          key,
-			internalMsg:  err,
-			params:       make(ReplyParams),
-			data:         make(ReplyData),
-			reportData:   make(ReplyReportData),
+			replyType:   ReplyTypeDefault("__reply_error__"),
+			httpStatus:  httpStatus,
+			code:        code,
+			key:         key,
+			internalMsg: err,
+			params:      make(ReplyParams),
+			data:        make(ReplyData),
+			reportData:  make(ReplyReportData),
 		},
 	}
 }
