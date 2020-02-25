@@ -141,7 +141,7 @@ func (r defaultReply) shouldReport() bool {
 
 func (r defaultReply) ReportIfNeeded(l Logger, t Translator) bool {
 	if r.shouldReport() {
-		l.WithFields(reportFields(r)).Info(r.Error())
+		l.WithFields(reportFields(r)...).Info(r.Error())
 		return true
 	}
 
@@ -200,7 +200,7 @@ func (e defaultError) Error() string {
 
 func (e defaultError) ReportIfNeeded(l Logger, t Translator) bool {
 	if e.shouldReport() {
-		l.WithFields(reportFields(e)).Error(e.Error())
+		l.WithFields(reportFields(e)...).Error(e.Error())
 		return true
 	}
 
@@ -251,7 +251,7 @@ func NewReply(httpStatus int, code string, key string, iMsg string) Reply {
 func NewError(httpStatus int, code string, key string, err string) Error {
 	return defaultError{
 		defaultReply{
-			replyType:   ReplyTypeDefault("__reply_error__"),
+			replyType:   ReplyTypeError("__reply_error__"),
 			httpStatus:  httpStatus,
 			code:        code,
 			key:         key,
