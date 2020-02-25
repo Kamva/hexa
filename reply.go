@@ -13,11 +13,14 @@ type (
 	// ReplyTypeError is reply type of the Error Reply.
 	ReplyTypeError string
 
+	// ReplyParams is parameters of the reply to use in translation,...
+	ReplyParams map[string]interface{}
+
 	// ReplyData is extra data of the reply to show to the user.
 	ReplyData map[string]interface{}
 
-	// ReplyParams is parameters of the reply to use in translation,...
-	ReplyParams map[string]interface{}
+	// ReplyReportData is the report data that use on reporting reply to somewhere (e.g log aggregator).
+	ReplyReportData map[string]interface{}
 
 	// Reply is reply to actions in microservices.
 	// Important : dont forget to implement setter functions
@@ -76,11 +79,16 @@ type (
 		// SetParams set the reply parameters to use in reply translation,...
 		SetParams(params ReplyParams) Reply
 
-		// Data returns the extra data of the reply.
+		// Data returns the extra data of the reply (e.g show this data to user).
 		Data() ReplyData
 
 		// SetData set the reply data as extra data of the reply to show to the user.
 		SetData(data ReplyData) Reply
+
+		// ReportData returns the data that should use on reporting reply to somewhere (e.g log aggregator)
+		ReportData() ReplyReportData
+
+		SetReportData(data ReplyReportData) Reply
 	}
 
 	// Alias Reply as Error
@@ -96,6 +104,7 @@ type (
 		internalMsg  string
 		params       ReplyParams
 		data         ReplyData
+		reportData   ReplyReportData
 	}
 
 	defaultError struct {
@@ -105,88 +114,89 @@ type (
 
 const (
 	// ErrorKeyInternalError is the internal error key in reply
-	//messages over all of packages. use this to have just one
+	// messages over all of packages. use this to have just one
 	// internal_error translation key in your translation system.
-	ErrorKeyInternalError = "internal_error"
+	ReplyErrKeyInternalError = "internal_error"
 )
 
-func (e defaultReply) Type() interface{} {
-	return e.replyType
+func (r defaultReply) Type() interface{} {
+	return r.replyType
 }
 
 // Error implements to just satisfy the Reply interface.
-func (e defaultReply) Error() string {
+func (r defaultReply) Error() string {
 	return "__default_reply__"
 }
 
-func (e defaultReply) InternalMessage() string {
-	return e.internalMsg
+func (r defaultReply) InternalMessage() string {
+	return r.internalMsg
 }
 
-func (e defaultReply) SetInternalMessage(msg string) Reply {
-	e.internalMsg = msg
-	return e
+func (r defaultReply) SetInternalMessage(msg string) Reply {
+	r.internalMsg = msg
+	return r
 }
 
-func (e defaultReply) SetInternalMsg() string {
-	return e.internalMsg
+func (r defaultReply) SetInternalMsg() string {
+	return r.internalMsg
 }
 
-func (e defaultReply) ShouldReport() bool {
-	return e.shouldReport
+func (r defaultReply) ShouldReport() bool {
+	return r.shouldReport
 }
 
-func (e defaultReply) SetShouldReport(a bool) Reply {
-	e.shouldReport = a
-	return e
+func (r defaultReply) SetShouldReport(a bool) Reply {
+	r.shouldReport = a
+	return r
 }
 
-func (e defaultReply) Report(l Logger, t Translator) {
-	data := map[string]interface{}{
-		"__type__":        e.replyType,
-		"__code__":        e.Code(),
-		"__http_status__": e.HTTPStatus(),
-	}
-
-	fields := append(gutil.MapToKeyValue(data), gutil.MapToKeyValue(e.Data())...)
-
-	l.WithFields(fields...).Info(e.Error())
+func (r defaultReply) Report(l Logger, t Translator) {
+	l.WithFields(reportFields(r)).Info(r.Error())
 }
 
-func (e defaultReply) HTTPStatus() int {
-	return e.httpStatus
+func (r defaultReply) HTTPStatus() int {
+	return r.httpStatus
 }
 
-func (e defaultReply) SetHTTPStatus(status int) Reply {
-	e.httpStatus = status
+func (r defaultReply) SetHTTPStatus(status int) Reply {
+	r.httpStatus = status
 
-	return e
+	return r
 }
 
-func (e defaultReply) Code() string {
-	return e.code
+func (r defaultReply) Code() string {
+	return r.code
 }
 
-func (e defaultReply) Key() string {
-	return e.key
+func (r defaultReply) Key() string {
+	return r.key
 }
 
-func (e defaultReply) Params() ReplyParams {
-	return e.params
+func (r defaultReply) Params() ReplyParams {
+	return r.params
 }
 
-func (e defaultReply) SetParams(params ReplyParams) Reply {
-	e.params = params
-	return e
+func (r defaultReply) SetParams(params ReplyParams) Reply {
+	r.params = params
+	return r
 }
 
-func (e defaultReply) Data() ReplyData {
-	return e.data
+func (r defaultReply) Data() ReplyData {
+	return r.data
 }
 
-func (e defaultReply) SetData(data ReplyData) Reply {
-	e.data = data
-	return e
+func (r defaultReply) SetData(data ReplyData) Reply {
+	r.data = data
+	return r
+}
+
+func (r defaultReply) ReportData() ReplyReportData {
+	return r.reportData
+}
+
+func (r defaultReply) SetReportData(data ReplyReportData) Reply {
+	r.reportData = data
+	return r
 }
 
 // Error method returns the error message.
@@ -195,15 +205,7 @@ func (e defaultError) Error() string {
 }
 
 func (e defaultError) Report(l Logger, t Translator) {
-	data := map[string]interface{}{
-		"__type__":        e.replyType,
-		"__code__":        e.Code(),
-		"__http_status__": e.HTTPStatus(),
-	}
-
-	fields := append(gutil.MapToKeyValue(data), gutil.MapToKeyValue(e.Data())...)
-
-	l.WithFields(fields...).Error(e.Error())
+	l.WithFields(reportFields(e)).Error(e.Error())
 }
 
 func (e defaultError) SetShouldReport(a bool) Reply {
@@ -232,6 +234,11 @@ func (e defaultError) SetData(data ReplyData) Reply {
 	return e
 }
 
+func (e defaultError) SetReportData(data ReplyReportData) Reply {
+	e.reportData = data
+	return e
+}
+
 // NewReply returns new instance the Reply interface implemented by defaultReply.
 func NewReply(shouldReport bool, httpStatus int, code string, key string, iMsg string) Reply {
 	return defaultReply{
@@ -243,6 +250,7 @@ func NewReply(shouldReport bool, httpStatus int, code string, key string, iMsg s
 		internalMsg:  iMsg,
 		params:       make(ReplyParams),
 		data:         make(ReplyData),
+		reportData:   make(ReplyReportData),
 	}
 }
 
@@ -258,6 +266,7 @@ func NewError(shouldReport bool, httpStatus int, code string, key string, err st
 			internalMsg:  err,
 			params:       make(ReplyParams),
 			data:         make(ReplyData),
+			reportData:   make(ReplyReportData),
 		},
 	}
 }
@@ -270,6 +279,20 @@ func NewReplyDataFromStruct(input interface{}) ReplyData {
 	_ = json.Unmarshal(encodedJson, &rd)
 
 	return rd
+}
+
+// reportFields return fields that need to include in reply report.
+func reportFields(r Reply) []interface{} {
+	data := map[string]interface{}{
+		"__type__":        r.Type(),
+		"__code__":        r.Code(),
+		"__http_status__": r.HTTPStatus(),
+		"__data__":        r.Data(),
+	}
+
+	fields := append(gutil.MapToKeyValue(data), gutil.MapToKeyValue(r.ReportData())...)
+
+	return fields
 }
 
 // Assert defaultReply implements the Error interface.
