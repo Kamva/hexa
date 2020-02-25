@@ -234,7 +234,7 @@ func (e defaultError) SetReportData(data ReplyReportData) Reply {
 }
 
 // NewReply returns new instance the Reply interface implemented by defaultReply.
-func NewReply(shouldReport bool, httpStatus int, code string, key string, iMsg string) Reply {
+func NewReply(httpStatus int, code string, key string, iMsg string) Reply {
 	return defaultReply{
 		replyType:   ReplyTypeDefault("__reply_default__"),
 		httpStatus:  httpStatus,
@@ -248,7 +248,7 @@ func NewReply(shouldReport bool, httpStatus int, code string, key string, iMsg s
 }
 
 // NewReply returns new instance the Reply interface implemented by defaultReply.
-func NewError(shouldReport bool, httpStatus int, code string, key string, err string) Error {
+func NewError(httpStatus int, code string, key string, err string) Error {
 	return defaultError{
 		defaultReply{
 			replyType:   ReplyTypeDefault("__reply_error__"),
