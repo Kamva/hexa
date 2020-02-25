@@ -19,6 +19,14 @@ type (
 	// ReplyParams is parameters of the reply to use in translation,...
 	ReplyParams map[string]interface{}
 
+	// Reply is reply to actions in microservices.
+	// Important : dont forget to implement setter functions
+	// in all of Reply implmentaions, not just base defaultReply
+	// struct, because on return Reply instace from setter methods
+	// defaultReply struct return instance of itself, so you sould
+	// implement yourself setter functions for your struct to prevent
+	// converting from your struct instance to defaultReply instance in
+	// setter methods that implemented by defaultReply.
 	Reply interface {
 		// specifically this interface contains the error interface
 		// also, to able pass as return value in some frameworks that
@@ -43,6 +51,9 @@ type (
 
 		// HTTPStatus returns the http status code for the reply.
 		HTTPStatus() int
+
+		// HTTPStatus returns the http status code for the reply.
+		SetHTTPStatus(status int) Reply
 
 		// InternalMessage returns the internal message.
 		InternalMessage() string
@@ -138,6 +149,12 @@ func (e defaultReply) HTTPStatus() int {
 	return e.httpStatus
 }
 
+func (e defaultReply) SetHTTPStatus(status int) Reply {
+	e.httpStatus = status
+
+	return e
+}
+
 func (e defaultReply) Code() string {
 	return e.code
 }
@@ -179,6 +196,12 @@ func (e defaultError) Report(l Logger, t Translator) {
 	fields := append(gutil.MapToKeyValue(data), gutil.MapToKeyValue(e.Data())...)
 
 	l.WithFields(fields...).Error(e.Error())
+}
+
+func (e defaultError) SetHTTPStatus(status int) Reply {
+	e.httpStatus = status
+
+	return e
 }
 
 func (e defaultError) SetInternalMessage(msg string) Reply {
