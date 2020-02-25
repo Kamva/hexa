@@ -46,6 +46,9 @@ type (
 		// ShouldReport method specify that whether reply should report to the log system or no.
 		ShouldReport() bool
 
+		// SetShouldReport set flag that specify this error should report or no.
+		SetShouldReport(bool) Reply
+
 		// Report function report the reply to the log system.
 		Report(Logger, Translator)
 
@@ -133,6 +136,11 @@ func (e defaultReply) ShouldReport() bool {
 	return e.shouldReport
 }
 
+func (e defaultReply) SetShouldReport(a bool) Reply {
+	e.shouldReport = a
+	return e
+}
+
 func (e defaultReply) Report(l Logger, t Translator) {
 	data := map[string]interface{}{
 		"__type__":        e.replyType,
@@ -196,6 +204,11 @@ func (e defaultError) Report(l Logger, t Translator) {
 	fields := append(gutil.MapToKeyValue(data), gutil.MapToKeyValue(e.Data())...)
 
 	l.WithFields(fields...).Error(e.Error())
+}
+
+func (e defaultError) SetShouldReport(a bool) Reply {
+	e.shouldReport = a
+	return e
 }
 
 func (e defaultError) SetHTTPStatus(status int) Reply {
