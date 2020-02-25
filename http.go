@@ -2,7 +2,6 @@ package kitty
 
 import (
 	"encoding/json"
-	"github.com/Kamva/gutil"
 )
 
 // Data is the response body data.
@@ -20,7 +19,11 @@ type HttpRespBody struct {
 
 // MarshalJSON marshall the body to json value.
 func (b HttpRespBody) MarshalJSON() ([]byte, error) {
-	m := gutil.StructToMap(b)
+	m := map[string]interface{}{
+		"code":    b.Code,
+		"message": b.Message,
+		"data":    b.Data,
+	}
 
 	if b.debug {
 		m["__debug__"] = b.debugData
