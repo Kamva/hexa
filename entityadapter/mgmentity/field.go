@@ -1,6 +1,7 @@
 package mgmentity
 
 import (
+	"github.com/Kamva/kitty"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
@@ -19,9 +20,12 @@ type DateFields struct {
 
 // PrepareID method prepare id value to using it as id in filtering,...
 // e.g convert hex-string id value to bson.ObjectId
-func (f *IDField) PrepareID(id interface{}) (interface{}, error) {
+func (f *IDField) PrepareID(id interface{}) (objID interface{}, err error) {
 	if idStr, ok := id.(string); ok {
-		return primitive.ObjectIDFromHex(idStr)
+		objID, err = primitive.ObjectIDFromHex(idStr)
+		if err != nil {
+			return nil,kitty.ErrInvalidID
+		}
 	}
 
 	// Otherwise id must be ObjectId
@@ -55,6 +59,3 @@ func (f *DateFields) Saving() error {
 	f.UpdatedAt = time.Now().UTC()
 	return nil
 }
-
-
-
