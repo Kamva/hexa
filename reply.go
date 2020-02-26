@@ -263,8 +263,8 @@ func NewError(httpStatus int, code string, key string, err string) Error {
 	}
 }
 
-// NewReplyDataFromStruct convert struct to reply data
-func NewReplyDataFromStruct(input interface{}) ReplyData {
+// StructToReplyData convert struct to reply data
+func StructToReplyData(input interface{}) ReplyData {
 	return gutil.StructToMap(input)
 }
 
