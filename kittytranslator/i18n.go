@@ -12,27 +12,37 @@ type i18nTranslator struct {
 	localizer     *i18n.Localizer
 }
 
-func (i i18nTranslator) Localize(langs ...string) kitty.Translator {
-	langs = append(langs, i.fallbackLangs...)
+func (t i18nTranslator) Localize(langs ...string) kitty.Translator {
+	langs = append(langs, t.fallbackLangs...)
 
-	return NewI18nDriver(i.bundle, i18n.NewLocalizer(i.bundle, langs...), i.fallbackLangs)
+	return NewI18nDriver(t.bundle, i18n.NewLocalizer(t.bundle, langs...), t.fallbackLangs)
 }
 
-func (i i18nTranslator) Translate(key string, keyParams ...interface{}) (string, error) {
+func (t i18nTranslator) isEmptyMessageKey(key string) bool {
+	return key == kitty.TranslateKeyEmptyMessage
+}
+
+func (t i18nTranslator) Translate(key string, keyParams ...interface{}) (string, error) {
+
+	if t.isEmptyMessageKey(key) {
+		return "", nil
+	}
+
 	params, err := gutil.KeyValuesToMap(keyParams...)
 
 	if err != nil {
 		return "", err
 	}
 
-	return i.localizer.Localize(&i18n.LocalizeConfig{
+	return t.localizer.Localize(&i18n.LocalizeConfig{
 		MessageID:    key,
 		TemplateData: params,
 	})
 }
 
-func (i i18nTranslator) MustTranslate(key string, keyParams ...interface{}) string {
-	msg, err := i.Translate(key, keyParams...)
+func (t i18nTranslator) MustTranslate(key string, keyParams ...interface{}) string {
+
+	msg, err := t.Translate(key, keyParams...)
 
 	if err != nil {
 		panic(err)
@@ -41,14 +51,18 @@ func (i i18nTranslator) MustTranslate(key string, keyParams ...interface{}) stri
 	return msg
 }
 
-func (i i18nTranslator) TranslateDefault(key string, fallback string, keyParams ...interface{}) (string, error) {
+func (t i18nTranslator) TranslateDefault(key string, fallback string, keyParams ...interface{}) (string, error) {
+	if t.isEmptyMessageKey(key) {
+		return "", nil
+	}
+
 	params, err := gutil.KeyValuesToMap(keyParams...)
 
 	if err != nil {
 		return "", err
 	}
 
-	return i.localizer.Localize(&i18n.LocalizeConfig{
+	return t.localizer.Localize(&i18n.LocalizeConfig{
 		DefaultMessage: &i18n.Message{
 			ID:    key,
 			Zero:  fallback,
@@ -62,8 +76,8 @@ func (i i18nTranslator) TranslateDefault(key string, fallback string, keyParams 
 	})
 }
 
-func (i i18nTranslator) MustTranslateDefault(key string, fallback string, keyParams ...interface{}) string {
-	msg, err := i.TranslateDefault(key, fallback, keyParams...)
+func (t i18nTranslator) MustTranslateDefault(key string, fallback string, keyParams ...interface{}) string {
+	msg, err := t.TranslateDefault(key, fallback, keyParams...)
 
 	if err != nil {
 		panic(err)

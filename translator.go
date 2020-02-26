@@ -19,3 +19,6 @@ type (
 		MustTranslateDefault(key string, fallback string, keyParams ...interface{}) string
 	}
 )
+
+// TranslateKeyEmptyMessage is special key that translators return empty string for that.
+var TranslateKeyEmptyMessage = "__empty_message__"
