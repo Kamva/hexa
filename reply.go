@@ -263,8 +263,8 @@ func NewError(httpStatus int, code string, key string, err string) Error {
 	}
 }
 
-// IsEqualToReply return bool that specify provided error is that reply or no.
-func IsEqualToReply(err error, rErr Reply) bool {
+// ErrIsEqualToReply return bool that specify provided error is that reply or no.
+func ErrIsReply(err error, rErr Reply) bool {
 	_, ok := err.(Reply)
 	return ok && err == rErr
 }
