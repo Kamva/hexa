@@ -3,6 +3,7 @@ package kitty
 import (
 	"errors"
 	"github.com/Kamva/gutil"
+	"github.com/Kamva/tracer"
 )
 
 type (
@@ -118,7 +119,7 @@ const (
 )
 
 func (r defaultReply) Is(err error) bool {
-	e, ok := errors.Unwrap(err).(Reply)
+	e, ok := tracer.Cause(err).(Reply)
 	return ok && r.Code() == e.Code()
 }
 
