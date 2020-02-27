@@ -1,6 +1,7 @@
 package kitty
 
 import (
+	"errors"
 	"github.com/Kamva/gutil"
 )
 
@@ -39,6 +40,9 @@ type (
 		// in implementation of Reply we can return just empty string or
 		// special value (like "__reply__") as error message.
 		error
+
+		//Is function satisfy Is interface of errors package.
+		Is() bool
 
 		// Type returns the reply type, you can use type assertion
 		// to detect the reply type.
@@ -112,6 +116,11 @@ const (
 	// internal_error translation key in your translation system.
 	ReplyErrKeyInternalError = "internal_error"
 )
+
+func (r defaultReply) Is(err error) bool {
+	e, ok := errors.Unwrap(err).(Reply)
+	return ok && r.Code() == e.Code()
+}
 
 func (r defaultReply) Type() interface{} {
 	return r.replyType
@@ -265,7 +274,7 @@ func NewError(httpStatus int, code string, key string, err string) Error {
 
 // ErrIsEqualToReply return bool that specify provided error is that reply or no.
 func ErrIsReply(err error, replyErr Reply) bool {
-	e, ok := err.(Reply)
+	e, ok := errors.Unwrap(err).(Reply)
 	return ok && e.Code() == replyErr.Code()
 }
 
