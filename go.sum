@@ -6,6 +6,8 @@ github.com/Kamva/gutil v0.0.0-20200225211319-e2d1e50b2724 h1:QC3fML91vopN8Mc/GHW
 github.com/Kamva/gutil v0.0.0-20200225211319-e2d1e50b2724/go.mod h1:KvaAPqUTtjac/70L9pCuNEJX0FSH7+WrTo6sariE4FM=
 github.com/Kamva/tracer v0.0.0-20200227133325-b8bdd2b65f3d h1:/IcO4Z3ZMtzussYPNWOECvxE2gmux3JvYWK73E1TDpI=
 github.com/Kamva/tracer v0.0.0-20200227133325-b8bdd2b65f3d/go.mod h1:q7uOy720KXnYAgQMewzuxaeILdKRUNgy+P1v82vz5+0=
+github.com/Kamva/tracer v0.0.0-20200227162224-920933aaf959 h1:+6bGfrCfOsv0sHhgWpKXAWeqnDMs/mX1YXcox5cUS9o=
+github.com/Kamva/tracer v0.0.0-20200227162224-920933aaf959/go.mod h1:TZysvqISbPaePrjsUJpmJKhH1IJ+feQIZMHFoTenCuc=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=

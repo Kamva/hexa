@@ -1,6 +1,7 @@
 package kitty
 
 import (
+	"fmt"
 	"github.com/Kamva/gutil"
 	"github.com/Kamva/tracer"
 )
@@ -91,7 +92,12 @@ type (
 	}
 
 	// Alias Reply as Error
-	Error Reply
+	Error interface {
+		Reply
+
+		// Use SetError to set errors
+		SetError(error) Error
+	}
 
 	// defaultReply implements the Reply interface.
 	defaultReply struct {
@@ -106,6 +112,7 @@ type (
 	}
 
 	defaultError struct {
+		err error
 		defaultReply
 	}
 )
@@ -204,12 +211,23 @@ func (r defaultReply) SetReportData(data ReplyReportData) Reply {
 
 // Error method returns the error message.
 func (e defaultError) Error() string {
+	if e.err != nil {
+		return e.err.Error()
+	}
+
 	return e.internalMsg
 }
 
 func (e defaultError) ReportIfNeeded(l Logger, t Translator) bool {
 	if e.shouldReport() {
-		l.WithFields(reportFields(e)...).Error(e.Error())
+		fields := reportFields(e)
+
+		// If exists error and error is traced,print its stack.
+		if te, ok := e.err.(tracer.StackTracer); e.err != nil && ok {
+			fields = append(fields, "__trace__", fmt.Sprintf("%+v", te))
+		}
+
+		l.WithFields(fields...).Error(e.Error())
 		return true
 	}
 
@@ -224,6 +242,11 @@ func (e defaultError) SetHTTPStatus(status int) Reply {
 
 func (e defaultError) SetInternalMessage(msg string) Reply {
 	e.internalMsg = msg
+	return e
+}
+
+func (e defaultError) SetError(err error) Error {
+	e.err = err
 	return e
 }
 
@@ -259,7 +282,7 @@ func NewReply(httpStatus int, code string, key string, iMsg string) Reply {
 // NewReply returns new instance the Reply interface implemented by defaultReply.
 func NewError(httpStatus int, code string, key string, err string) Error {
 	return defaultError{
-		defaultReply{
+		defaultReply: defaultReply{
 			replyType:   ReplyTypeError("__reply_error__"),
 			httpStatus:  httpStatus,
 			code:        code,
