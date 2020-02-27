@@ -71,6 +71,14 @@ const (
 	ErrKeyInternalError = "internal_error"
 )
 
+func (e defaultError) Error() string {
+	if e.error != nil {
+		return e.error.Error()
+	}
+
+	return ""
+}
+
 func (e defaultError) SetError(err error) Error {
 	e.error = err
 	return e
@@ -125,7 +133,7 @@ func (e defaultError) SetReportData(data Map) Error {
 	return e
 }
 
-func (e defaultError) ReportIfNeeded(l Logger,t Translator) bool {
+func (e defaultError) ReportIfNeeded(l Logger, t Translator) bool {
 	if e.shouldReport() {
 		data := map[string]interface{}{
 			"__code__":        e.Code(),
