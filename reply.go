@@ -42,7 +42,7 @@ type (
 		error
 
 		//Is function satisfy Is interface of errors package.
-		Is() bool
+		Is(error) bool
 
 		// Type returns the reply type, you can use type assertion
 		// to detect the reply type.
