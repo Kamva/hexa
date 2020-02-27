@@ -1,7 +1,6 @@
 package kitty
 
 import (
-	"errors"
 	"github.com/Kamva/gutil"
 	"github.com/Kamva/tracer"
 )
@@ -271,12 +270,6 @@ func NewError(httpStatus int, code string, key string, err string) Error {
 			reportData:  make(ReplyReportData),
 		},
 	}
-}
-
-// ErrIsEqualToReply return bool that specify provided error is that reply or no.
-func ErrIsReply(err error, replyErr Reply) bool {
-	e, ok := errors.Unwrap(err).(Reply)
-	return ok && e.Code() == replyErr.Code()
 }
 
 // StructToReplyData convert struct to reply data
