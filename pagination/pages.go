@@ -84,13 +84,13 @@ func parseInt(value string, defaultValue int) int {
 }
 
 // Offset returns the OFFSET value that can be used in a SQL statement.
-func (p *Pages) Offset() int {
-	return (p.Page - 1) * p.PerPage
+func (p *Pages) Offset() int64 {
+	return (int64(p.Page) - 1) * int64(p.PerPage)
 }
 
 // Limit returns the LIMIT value that can be used in a SQL statement.
-func (p *Pages) Limit() int {
-	return p.PerPage
+func (p *Pages) Limit() int64 {
+	return int64(p.PerPage)
 }
 
 // BuildLinkHeader returns an HTTP header containing the links about the pagination.
