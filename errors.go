@@ -1,6 +1,9 @@
 package kitty
 
-import "net/http"
+import (
+	"errors"
+	"net/http"
+)
 
 //--------------------------------
 // Entity Adapter errors
@@ -13,5 +16,5 @@ import "net/http"
 // 0 = error number zero (id of code in that part and type)
 
 var (
-	ErrInvalidID = NewError(http.StatusBadRequest, "kttmpl.2.e.0", "invalid_id", "id value is invalid")
+	ErrInvalidID = NewError(http.StatusBadRequest, "kttmpl.2.e.0", "invalid_id", errors.New("id value is invalid"))
 )
