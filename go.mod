@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/Kamva/gutil v0.0.0-20200225211319-e2d1e50b2724
-	github.com/Kamva/tracer v0.0.0-20200227162224-920933aaf959 // indirect
+	github.com/Kamva/tracer v0.0.0-20200227202933-3d5974771f25 // indirect
 	github.com/nicksnyder/go-i18n/v2 v2.0.3
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/viper v1.6.2
