@@ -6,9 +6,10 @@ import (
 )
 
 var (
-	errNilConfig     = errors.New("config value is Nil")
-	errNilLogger     = errors.New("config value is Nil")
-	errNilTranslator = errors.New("config value is Nil")
+	errNilConfig     = errors.New("config is Nil in the pack")
+	errNilLogger     = errors.New("logger is Nil in the pack")
+	errNilTranslator = errors.New("translator is Nil in the pack")
+	errNilJobs       = errors.New("jobs is nil in the pack")
 )
 
 // Pack contains all of services in one place to manage our services.
@@ -21,6 +22,7 @@ type Pack struct {
 	config     Config
 	log        Logger
 	translator Translator
+	jobs       Jobs
 }
 
 // SetConfig sets the config service.
@@ -36,6 +38,11 @@ func (p *Pack) SetLogger(logger Logger) {
 // SetTranslator sets the translator service.
 func (p *Pack) SetTranslator(translator Translator) {
 	p.translator = translator
+}
+
+// SetJobs sets the Jobs service.
+func (p *Pack) SetJobs(jobs Jobs) {
+	p.jobs = jobs
 }
 
 // Config returns the config service.
@@ -57,6 +64,13 @@ func (p *Pack) Translator() Translator {
 	gutil.PanicNil(p.translator, errNilTranslator)
 
 	return p.translator
+}
+
+// Translator returns the translator service.
+func (p *Pack) Jobs() Jobs {
+	gutil.PanicNil(p.jobs, errNilJobs)
+
+	return p.jobs
 }
 
 // NewPack returns new instance of the pack.

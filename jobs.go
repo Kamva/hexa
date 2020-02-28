@@ -60,3 +60,5 @@ func NewJobWithQueue(name string, queue string, p Payload) *Job {
 		Retry:   4,
 	}
 }
+
+// TODO: set jobs as base service, get new instance i boot of template, organizae worker.
