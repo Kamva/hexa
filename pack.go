@@ -66,7 +66,7 @@ func (p *Pack) Translator() Translator {
 	return p.translator
 }
 
-// Translator returns the translator service.
+// Jobs returns the jobs service.
 func (p *Pack) Jobs() Jobs {
 	gutil.PanicNil(p.jobs, errNilJobs)
 
