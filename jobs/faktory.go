@@ -7,6 +7,7 @@ import (
 	"github.com/Kamva/tracer"
 	"github.com/contribsys/faktory/client"
 	worker "github.com/contribsys/faktory_worker_go"
+	"time"
 )
 
 type (
@@ -32,11 +33,12 @@ func (j *faktoryJobs) prepare(c kitty.Context, job *kitty.Job) *client.Job {
 
 	ctxMap := c.ToMap()
 	return &client.Job{
-		Queue: job.Queue,
-		Type:  job.Name,
-		Args:  []interface{}{ctxMap, gutil.StructToMap(job.Payload)},
-		Retry: job.Retry,
-
+		Jid:       client.RandomJid(),
+		Type:      job.Name,
+		Queue:     job.Queue,
+		Args:      []interface{}{ctxMap, gutil.StructToMap(job.Payload)},
+		CreatedAt: time.Now().UTC().Format(time.RFC3339Nano),
+		Retry:     job.Retry,
 		// We don't using this custom data in any middleware, but just put it here :)
 		Custom: ctxMap,
 	}
