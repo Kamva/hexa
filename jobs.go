@@ -45,3 +45,18 @@ type (
 		Push(Context, *Job) error
 	}
 )
+
+// NewJob returns new job instance
+func NewJob(name string, p Payload) *Job {
+	return NewJobWithQueue(name, "default", p)
+}
+
+// NewJobWithQueue returns new job instance
+func NewJobWithQueue(name string, queue string, p Payload) *Job {
+	return &Job{
+		Payload: p,
+		Name:    name,
+		Queue:   queue,
+		Retry:   4,
+	}
+}

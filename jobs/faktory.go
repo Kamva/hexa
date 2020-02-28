@@ -86,6 +86,9 @@ func (w *faktoryWorker) Concurrency(c int) error {
 
 func (w *faktoryWorker) Process(queues ...string) error {
 	w.w.ProcessStrictPriorityQueues(queues...)
+	// Run method does not return.
+	w.w.Run()
+
 	return nil
 }
 
