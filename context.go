@@ -2,7 +2,12 @@ package kitty
 
 import (
 	"context"
+	"errors"
+	"github.com/Kamva/gutil"
+	"github.com/Kamva/tracer"
 )
+
+type UserFinder = func(id interface{}) (User, error)
 
 // Context is the kitty context to use in services.
 type Context interface {
@@ -22,15 +27,35 @@ type Context interface {
 
 	// Translator returns the translator localized relative to the users request.
 	Translator() Translator
+
+	// ToMap method convert context to map to export and import.
+	ToMap() Map
 }
 
 type defaultContext struct {
 	context.Context
+	locale        string
 	requestID     string
 	correlationID string
 	user          User
 	logger        Logger
 	translator    Translator
+}
+
+// exportedCtx use export and import Context.
+type exportedCtx struct {
+	Locale        string      `json:"locale"`
+	RequestID     string      `json:"request_id"`
+	CorrelationID string      `json:"correlation_id"`
+	UserId        interface{} `json:"user_id"`
+}
+
+func (e exportedCtx) validate() error {
+	if e.RequestID == "" || e.CorrelationID == "" || e.UserId == "" {
+		return tracer.Trace(errors.New("exported data is invalid"))
+	}
+
+	return nil
 }
 
 func (c defaultContext) RequestID() string {
@@ -53,16 +78,71 @@ func (c defaultContext) Translator() Translator {
 	return c.translator
 }
 
+func (c defaultContext) ToMap() Map {
+	return gutil.StructToMap(exportedCtx{
+		Locale:        c.locale,
+		RequestID:     c.RequestID(),
+		CorrelationID: c.CorrelationID(),
+		UserId:        c.User().GetID(),
+	})
+}
+
 // NewCtx returns new kitty Context.
-func NewCtx(requestID, correlationID string, user User, logger Logger, translator Translator) Context {
+// locale syntax is just same as HTTP Accept-Language header.
+func NewCtx(requestID, correlationID string, locale string, user User, logger Logger, translator Translator) Context {
+	logger = tuneCtxLogger(requestID, correlationID, user, logger)
+	translator = tuneCtxTranslator(locale, translator)
+
 	return &defaultContext{
 		Context:       context.Background(),
+		locale:        locale,
 		requestID:     requestID,
 		correlationID: correlationID,
 		user:          user,
 		logger:        logger,
 		translator:    translator,
 	}
+}
+
+func CtxFromMap(m Map, uf UserFinder, l Logger, t Translator) (Context, error) {
+	e := exportedCtx{}
+	err := gutil.MapToStruct(m, &e)
+	if err != nil {
+		return nil, tracer.Trace(err)
+	}
+	if err := e.validate(); err != nil {
+		return nil, tracer.Trace(err)
+	}
+
+	u, err := uf(e.UserId)
+	if err != nil {
+		return nil, tracer.Trace(err)
+	}
+
+	return NewCtx(e.RequestID, e.CorrelationID, e.Locale, u, l, t), nil
+}
+
+// tuneLogger function tune the logger for each context.
+func tuneCtxLogger(requestID string, correlationID string, u User, logger Logger) Logger {
+
+	logger = logger.WithFields(
+		"__guest__", u.IsGuest(),
+		"__user_id__", u.GetID(),
+		"__username__", u.GetUsername(),
+		"__request_id__", requestID,
+		"__correlation_id__", correlationID,
+	)
+
+	return logger
+}
+
+// tuneCtxTranslator localize translator for each context.
+func tuneCtxTranslator(locale string, t Translator) Translator {
+	if locale != "" {
+		return t.Localize(locale)
+	}
+
+	return t.Localize()
 }
 
 // Assert defaultContext implements the kitty Context.
