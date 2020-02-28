@@ -1,6 +1,7 @@
 package jobs
 
 import (
+	"errors"
 	"github.com/Kamva/gutil"
 	"github.com/Kamva/kitty"
 	"github.com/Kamva/tracer"
@@ -28,6 +29,7 @@ func (j *faktoryJobs) prepare(c kitty.Context, job *kitty.Job) *client.Job {
 	if job.Queue == "" {
 		job.Queue = "default"
 	}
+
 	ctxMap := c.ToMap()
 	return &client.Job{
 		Queue: job.Queue,
@@ -41,6 +43,10 @@ func (j *faktoryJobs) prepare(c kitty.Context, job *kitty.Job) *client.Job {
 }
 
 func (j *faktoryJobs) Push(ctx kitty.Context, job *kitty.Job) error {
+	if job == nil || job.Name == "" {
+		return tracer.Trace(errors.New("job is not valid (enter job name please)"))
+	}
+
 	return j.p.With(func(conn *client.Client) error {
 		return conn.Push(j.prepare(ctx, job))
 	})

@@ -17,12 +17,15 @@ type User interface {
 type guestUser struct {
 }
 
+// guestUserID is the guest user's id
+var guestUserID = "__guest_id__"
+
 func (g guestUser) IsGuest() bool {
 	return true
 }
 
 func (g guestUser) GetID() interface{} {
-	return "__guest_id__"
+	return guestUserID
 }
 
 func (g guestUser) GetName() string {

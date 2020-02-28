@@ -14,7 +14,7 @@ type (
 	// Job is the new to push to the queue by Jobs interface
 	Job struct {
 		Payload
-		Name  string
+		Name  string // required
 		Queue string
 		// Retry specify retry counts of the job.
 		// 0: means that throw job away (and dont push to dead queue) on first fail.

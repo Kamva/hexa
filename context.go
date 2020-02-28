@@ -114,9 +114,13 @@ func CtxFromMap(m Map, uf UserFinder, l Logger, t Translator) (Context, error) {
 		return nil, tracer.Trace(err)
 	}
 
-	u, err := uf(e.UserId)
-	if err != nil {
-		return nil, tracer.Trace(err)
+	u := NewGuestUser()
+
+	if e.UserId != guestUserID {
+		u, err = uf(e.UserId)
+		if err != nil {
+			return nil, tracer.Trace(err)
+		}
 	}
 
 	return NewCtx(e.RequestID, e.CorrelationID, e.Locale, u, l, t), nil
