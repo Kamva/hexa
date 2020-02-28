@@ -1,5 +1,7 @@
 package mgmentity
 
+import "github.com/Kamva/tracer"
+
 // Entity struct contain model's default fields.
 type Entity struct {
 	IDField    `bson:",inline"`
@@ -8,10 +10,10 @@ type Entity struct {
 
 // Creating function call to it's inner fields defined hooks
 func (model *Entity) Creating() error {
-	return model.DateFields.Creating()
+	return tracer.Trace(model.DateFields.Creating())
 }
 
 // Saving function call to it's inner fields defined hooks
 func (model *Entity) Saving() error {
-	return model.DateFields.Saving()
+	return tracer.Trace(model.DateFields.Saving())
 }

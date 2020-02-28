@@ -3,6 +3,7 @@ package kittytranslator
 import (
 	"github.com/Kamva/gutil"
 	"github.com/Kamva/kitty"
+	"github.com/Kamva/tracer"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 )
 
@@ -31,7 +32,7 @@ func (t i18nTranslator) Translate(key string, keyParams ...interface{}) (string,
 	params, err := gutil.KeyValuesToMap(keyParams...)
 
 	if err != nil {
-		return "", err
+		return "", tracer.Trace(err)
 	}
 
 	return t.localizer.Localize(&i18n.LocalizeConfig{
@@ -59,7 +60,7 @@ func (t i18nTranslator) TranslateDefault(key string, fallback string, keyParams 
 	params, err := gutil.KeyValuesToMap(keyParams...)
 
 	if err != nil {
-		return "", err
+		return "", tracer.Trace(err)
 	}
 
 	return t.localizer.Localize(&i18n.LocalizeConfig{

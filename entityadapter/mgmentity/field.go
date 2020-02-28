@@ -2,6 +2,7 @@ package mgmentity
 
 import (
 	"github.com/Kamva/kitty"
+	"github.com/Kamva/tracer"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
@@ -25,10 +26,10 @@ func (f *IDField) PrepareID(id interface{}) (objID interface{}, err error) {
 		objID, err = primitive.ObjectIDFromHex(idStr)
 
 		if err != nil {
-			err = kitty.ErrInvalidID
+			err = kitty.ErrInvalidID.SetError(tracer.Trace(err))
 		}
 
-		return objID, err
+		return objID, tracer.Trace(err)
 	}
 
 	// Otherwise id must be ObjectId

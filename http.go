@@ -4,17 +4,14 @@ import (
 	"encoding/json"
 )
 
-// Data is the response body data.
-type Data map[string]interface{}
-
 // HttpRespBody is the http response body format
 type HttpRespBody struct {
 	debug     bool
-	debugData Data
+	debugData Map
 
 	Code    string `json:"code" mapstructure:"code"`
 	Message string `json:"message" mapstructure:"message"`
-	Data    Data   `json:"data" mapstructure:"data"`
+	Data    Map   `json:"data" mapstructure:"data"`
 }
 
 // MarshalJSON marshall the body to json value.
@@ -33,7 +30,7 @@ func (b HttpRespBody) MarshalJSON() ([]byte, error) {
 }
 
 // Debug set debug flag and debug data.
-func (b HttpRespBody) Debug(debug bool, debugData Data) HttpRespBody {
+func (b HttpRespBody) Debug(debug bool, debugData Map) HttpRespBody {
 	b.debug = debug
 	b.debugData = debugData
 
@@ -41,7 +38,7 @@ func (b HttpRespBody) Debug(debug bool, debugData Data) HttpRespBody {
 }
 
 // NewBody return new instance of the HttpRespBody
-func NewBody(code string, msg string, data Data) HttpRespBody {
+func NewBody(code string, msg string, data Map) HttpRespBody {
 	return HttpRespBody{
 		Code:    code,
 		Message: msg,

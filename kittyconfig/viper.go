@@ -2,6 +2,7 @@ package kittyconfig
 
 import (
 	"github.com/Kamva/kitty"
+	"github.com/Kamva/tracer"
 	"github.com/spf13/viper"
 )
 
@@ -10,7 +11,7 @@ type viperConfig struct {
 }
 
 func (v *viperConfig) Unmarshal(instance interface{}) error {
-	return v.Viper.Unmarshal(instance)
+	return tracer.Trace(v.Viper.Unmarshal(instance))
 }
 
 func (v *viperConfig) GetList(key string) []string {
