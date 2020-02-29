@@ -8,10 +8,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type adapter struct {
+type Repository struct {
 }
 
-func (a adapter) ValidateID(id interface{}) error {
+func (a Repository) ValidateID(id interface{}) error {
 	if _, ok := id.(primitive.ObjectID); ok {
 		return nil
 	}
@@ -25,7 +25,7 @@ func (a adapter) ValidateID(id interface{}) error {
 	return tracer.Trace(errors.New("error value is invalid"))
 }
 
-func (a adapter) PrepareID(val interface{}) (ID interface{}, err error) {
+func (a Repository) PrepareID(val interface{}) (ID interface{}, err error) {
 	if err := a.ValidateID(val); err != nil {
 		return nil, err
 	}
@@ -38,10 +38,10 @@ func (a adapter) PrepareID(val interface{}) (ID interface{}, err error) {
 	return val, nil
 }
 
-func (a adapter) MustPrepareID(val interface{}) (ID interface{}) {
+func (a Repository) MustPrepareID(val interface{}) (ID interface{}) {
 	ID, err := a.PrepareID(val)
 	gutil.PanicErr(err)
 	return ID
 }
 
-var _ kitty.Repository = &adapter{}
+var _ kitty.Repository = &Repository{}
