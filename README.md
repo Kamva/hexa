@@ -29,7 +29,6 @@ config := kittyconfig.NewViperDriver(v)
 
 #### Todo:
 - [ ] Collection presenter
-- [ ] Pagination
 - [ ] Write Tests
 - [ ] Add more services like log,...
 - [ ] Add badges to readme.
