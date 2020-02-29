@@ -23,6 +23,10 @@ config := kittyconfig.NewViperDriver(v)
 // Use config service in app.
 ```
 
+#### today todo: 
+- [ ] On worker and jobs implementations get queue prefix 
+(in both jobs and worker, to distinct microservices queues).
+
 #### Todo:
 - [ ] Collection presenter
 - [ ] Pagination
