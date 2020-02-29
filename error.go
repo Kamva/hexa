@@ -68,7 +68,7 @@ const (
 	// ErrorKeyInternalError is the internal error key in Error
 	// messages over all of packages. use this to have just one
 	// internal_error translation key in your translation system.
-	ErrKeyInternalError = "internal_error"
+	ErrKeyInternalError = "err_internal_error"
 )
 
 func (e defaultError) Error() string {
