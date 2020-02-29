@@ -6,6 +6,7 @@ import (
 	"github.com/Kamva/kitty"
 	"github.com/Kamva/tracer"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Repository struct {
@@ -36,6 +37,14 @@ func (a Repository) PrepareID(val interface{}) (ID interface{}, err error) {
 
 	// Otherwise id must be ObjectId
 	return val, nil
+}
+
+func (a Repository) ReplaceErr(err error, notfoundErr error) error {
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		return notfoundErr
+	}
+
+	return tracer.Trace(err)
 }
 
 func (a Repository) MustPrepareID(val interface{}) (ID interface{}) {

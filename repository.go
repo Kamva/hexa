@@ -6,3 +6,4 @@ type Repository interface {
 	PrepareID(val interface{}) (ID interface{}, err error)
 	MustPrepareID(val interface{}) (ID interface{})
 }
+
