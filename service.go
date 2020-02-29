@@ -8,9 +8,10 @@ type LayeredService interface {
 }
 
 // SetServiceChain set services chain in order of provided services.
-func SetServiceChain(services ...LayeredService) {
+// finally returns the root of services.
+func SetServiceChain(services ...LayeredService) interface{} {
 	if len(services) == 0 {
-		return
+		return nil
 	}
 	root := services[0]
 
@@ -25,4 +26,5 @@ func SetServiceChain(services ...LayeredService) {
 		prev = current
 	}
 
+	return root
 }
