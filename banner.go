@@ -9,7 +9,7 @@ func PrintBanner(banner, product, version, website string) {
 		return
 	}
 	c := color.New()
-	c.Printf(banner, c.Red("v"+Version), c.Blue(website))
+	c.Printf(banner, c.Yellow(product), c.Red("v"+version), c.Blue(website))
 }
 
 func printKittyBanner() {
