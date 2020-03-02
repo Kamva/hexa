@@ -24,6 +24,14 @@ type (
 // guestUserID is the guest user's id
 var guestUserID = "__guest_id__"
 
+func (g guestID) IsValid(id interface{}) bool {
+	if idStr, ok := id.(string); ok {
+		return idStr == guestUserID
+	}
+
+	return false
+}
+
 func (g guestID) String() string {
 	return string(g)
 }
