@@ -6,7 +6,7 @@ type (
 		IsGuest() bool
 
 		// Return users identifier (if guestUser return just empty string or something like this.)
-		ID() ID
+		UserID() ID
 
 		// Return the user name.
 		GetName() string
