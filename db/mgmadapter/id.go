@@ -16,7 +16,18 @@ func (i *kittyID) String() string {
 	return i.id.Hex()
 }
 
+func (i *kittyID) IsValid(id interface{}) bool {
+	kid := &kittyID{}
+	err := kid.From(id)
+
+	return err == nil
+}
+
 func (i *kittyID) From(val interface{}) error {
+	if val == nil {
+		return tracer.Trace(errors.New("id value is nil"))
+	}
+
 	if oid, ok := val.(primitive.ObjectID); ok {
 		i.id = oid
 		return nil
@@ -46,9 +57,15 @@ func (i *kittyID) Val() interface{} {
 }
 
 // IDD function get an id and returns IDD
-func KittyID(id interface{}) kitty.ID {
+func ID(id interface{}) kitty.ID {
 	i := &kittyID{}
 	i.MustFrom(id)
+	return i
+}
+
+// EmptyID returns empty instance of the id.
+func EmptyID(id interface{}) kitty.ID {
+	i := &kittyID{}
 	return i
 }
 
