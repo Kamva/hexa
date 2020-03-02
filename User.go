@@ -6,7 +6,7 @@ type (
 		IsGuest() bool
 
 		// Return users identifier (if guestUser return just empty string or something like this.)
-		UserID() ID
+		Identifier() ID
 
 		// Return the user name.
 		GetName() string
@@ -56,7 +56,7 @@ func (g guestUser) IsGuest() bool {
 	return true
 }
 
-func (g guestUser) ID() ID {
+func (g guestUser) Identifier() ID {
 	return guestID(guestUserID)
 }
 
