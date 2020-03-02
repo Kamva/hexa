@@ -64,7 +64,7 @@ func ID(id interface{}) kitty.ID {
 }
 
 // EmptyID returns empty instance of the id.
-func EmptyID(id interface{}) kitty.ID {
+func EmptyID() kitty.ID {
 	i := &kittyID{}
 	return i
 }
