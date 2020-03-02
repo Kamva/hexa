@@ -1,4 +1,4 @@
-package mgmentity
+package mgmadapter
 
 import "github.com/Kamva/tracer"
 

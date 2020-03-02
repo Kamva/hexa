@@ -1,31 +1,55 @@
 package kitty
 
-type User interface {
-	// Specify that user is guestUser or no.
-	IsGuest() bool
+type (
+	User interface {
+		// Specify that user is guestUser or no.
+		IsGuest() bool
 
-	// Return users identifier (if guestUser return just empty string or something like this.)
-	GetID() interface{}
+		// Return users identifier (if guestUser return just empty string or something like this.)
+		GetID() ID
 
-	// Return the user name.
-	GetName() string
+		// Return the user name.
+		GetName() string
 
-	// Username can be unique username,email,phone number or everything else that can use as username.
-	GetUsername() string
-}
+		// Username can be unique username,email,phone number or everything else that can use as username.
+		GetUsername() string
+	}
+	guestUser struct {
+	}
 
-type guestUser struct {
-}
+	// guestID is implementation of specific ID
+	guestID string
+)
 
 // guestUserID is the guest user's id
 var guestUserID = "__guest_id__"
+
+func (g guestID) String() string {
+	return string(g)
+}
+
+// From function does not do anything for guest ID type,
+// implement to just satisfy the interface.
+func (g guestID) From(id interface{}) error {
+	return nil
+}
+
+// MustFrom function does not do anything for guest ID type,
+// implement to just satisfy the interface.
+func (g guestID) MustFrom(id interface{}) {
+	// empty
+}
+
+func (g guestID) Val() interface{} {
+	return string(g)
+}
 
 func (g guestUser) IsGuest() bool {
 	return true
 }
 
-func (g guestUser) GetID() interface{} {
-	return guestUserID
+func (g guestUser) GetID() ID {
+	return guestID(guestUserID)
 }
 
 func (g guestUser) GetName() string {
@@ -41,4 +65,5 @@ func NewGuestUser() User {
 }
 
 // Assert guestUser implements the User interface.
+var _ ID = guestID("")
 var _ User = &guestUser{}
