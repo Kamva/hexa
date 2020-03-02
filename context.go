@@ -83,7 +83,7 @@ func (c defaultContext) ToMap() Map {
 		Locale:        c.locale,
 		RequestID:     c.RequestID(),
 		CorrelationID: c.CorrelationID(),
-		UserId:        c.User().GetUserID(),
+		UserId:        c.User().ID(),
 	})
 }
 
@@ -131,7 +131,7 @@ func tuneCtxLogger(requestID string, correlationID string, u User, logger Logger
 
 	logger = logger.WithFields(
 		"__guest__", u.IsGuest(),
-		"__user_id__", u.GetUserID().String(),
+		"__user_id__", u.ID().String(),
 		"__username__", u.GetUsername(),
 		"__request_id__", requestID,
 		"__correlation_id__", correlationID,
