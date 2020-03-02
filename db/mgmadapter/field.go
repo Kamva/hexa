@@ -37,8 +37,8 @@ func (f *IDField) PrepareID(id interface{}) (objID interface{}, err error) {
 }
 
 // GetID method return model's id
-func (f *IDField) GetID() kitty.ID {
-	return KittyID(f.ID)
+func (f *IDField) GetID() interface{} {
+	return f.ID
 }
 
 // SetID set id value of model's id field.
