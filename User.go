@@ -1,5 +1,7 @@
 package kitty
 
+import "errors"
+
 type (
 	User interface {
 		// Specify that user is guestUser or no.
@@ -24,12 +26,12 @@ type (
 // guestUserID is the guest user's id
 var guestUserID = "__guest_id__"
 
-func (g guestID) IsValid(id interface{}) bool {
-	if idStr, ok := id.(string); ok {
-		return idStr == guestUserID
+func (g guestID) Validate(id interface{}) error {
+	if idStr, ok := id.(string); ok && idStr == guestUserID {
+		return nil
 	}
 
-	return false
+	return errors.New("guest user id is not valid")
 }
 
 func (g guestID) String() string {

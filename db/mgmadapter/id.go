@@ -16,11 +16,9 @@ func (i *kittyID) String() string {
 	return i.id.Hex()
 }
 
-func (i *kittyID) IsValid(id interface{}) bool {
+func (i *kittyID) Validate(id interface{}) error {
 	kid := &kittyID{}
-	err := kid.From(id)
-
-	return err == nil
+	return kid.From(id)
 }
 
 func (i *kittyID) From(val interface{}) error {

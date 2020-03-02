@@ -8,8 +8,8 @@ import "fmt"
 type ID interface {
 	fmt.Stringer
 
-	// IsValid say that id value is valid or not.
-	IsValid(id interface{}) bool
+	// Validate say that id value is valid or not.
+	Validate(id interface{}) error
 
 	// From convert provided value to its id.
 	// From will returns error if provided value
