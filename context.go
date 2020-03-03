@@ -83,7 +83,7 @@ func (c defaultContext) ToMap() Map {
 		Locale:        c.locale,
 		RequestID:     c.RequestID(),
 		CorrelationID: c.CorrelationID(),
-		UserId:        c.User().Identifier(),
+		UserId:        c.User().Identifier().Val(),
 	})
 }
 
@@ -104,6 +104,8 @@ func NewCtx(requestID, correlationID string, locale string, user User, logger Lo
 	}
 }
 
+// CtxFromMap generate new context form the exported map by
+// another context (by using ToMap function on the context).
 func CtxFromMap(m Map, uf UserFinder, l Logger, t Translator) (Context, error) {
 	e := exportedCtx{}
 	err := gutil.MapToStruct(m, &e)

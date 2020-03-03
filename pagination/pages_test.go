@@ -15,9 +15,10 @@ import (
 
 func TestNew(t *testing.T) {
 	tests := []struct {
-		tag                                                                    string
-		page, perPage, total                                                   int
-		expectedPage, expectedPerPage, expectedTotal, pageCount, offset, limit int
+		tag                                                     string
+		page, perPage, total                                    int
+		expectedPage, expectedPerPage, expectedTotal, pageCount int
+		offset, limit                                           int64
 	}{
 		// varying page
 		{"t1", 1, 20, 50, 1, 20, 50, 3, 0, 20},
@@ -27,10 +28,10 @@ func TestNew(t *testing.T) {
 		{"t5", 0, 20, 50, 1, 20, 50, 3, 0, 20},
 
 		// varying perPage
-		{"t6", 1, 0, 50, 1, 100, 50, 1, 0, 100},
-		{"t7", 1, -1, 50, 1, 100, 50, 1, 0, 100},
+		{"t6", 1, 0, 50, 1, 30, 50, 2, 0, 30},
+		{"t7", 1, -1, 50, 1, 30, 50, 2, 0, 30},
 		{"t8", 1, 100, 50, 1, 100, 50, 1, 0, 100},
-		{"t9", 1, 1001, 50, 1, 1000, 50, 1, 0, 1000},
+		{"t9", 1, 1001, 50, 1, 100, 50, 1, 0, 100},
 
 		// varying total
 		{"t10", 1, 20, 0, 1, 20, 0, 0, 0, 20},
