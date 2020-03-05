@@ -61,4 +61,4 @@ func NewJobWithQueue(name string, queue string, p Payload) *Job {
 	}
 }
 
-// TODO: set jobs as base service, get new instance i boot of template, organizae worker.
+// TODO: set jobs as base service, get new instance in boot of template, organizae worker.
