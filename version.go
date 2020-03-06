@@ -15,8 +15,8 @@ const (
 %s
 The Kamva Microservices core
 %s
-____________________________________O/_______
-                                    O\
+
+
 `
 )
 
