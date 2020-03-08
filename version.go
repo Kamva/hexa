@@ -1,18 +1,18 @@
 package hexa
 
-// Version is hexa current version.
+// Version is Hexa current version.
 const (
-	//todo: change to banner to hexa banner.
+	//todo: change to banner to Hexa banner.
 	Version = "1.1.0"
 	banner=`
- _       ___________________________         
-| \    /\\__   __/\__   __/\__   __/|\     /|
-|  \  / /   ) (      ) (      ) (   ( \   / )
-|  (_/ /    | |      | |      | |    \ (_) / 
-|   _ (     | |      | |      | |     \   /  
-|  ( \ \    | |      | |      | |      ) (   
-|  /  \ \___) (___   | |      | |      | |   
-|_/    \/\_______/   )_(      )_(      \_/ %s
+          _______           _______ 
+|\     /|(  ____ \|\     /|(  ___  )
+| )   ( || (    \/( \   / )| (   ) |
+| (___) || (__     \ (_) / | (___) |
+|  ___  ||  __)     ) _ (  |  ___  |
+| (   ) || (       / ( ) \ | (   ) |
+| )   ( || (____/\( /   \ )| )   ( |
+|/     \|(_______/|/     \||/     \| %s
 %s
 The Kamva Microservices core
 %s
