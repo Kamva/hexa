@@ -1,4 +1,4 @@
-module github.com/Kamva/kitty
+module github.com/Kamva/hexa
 
 go 1.13
 

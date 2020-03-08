@@ -1,7 +1,8 @@
-package kitty
+package hexa
 
-// Version is kitty current version.
+// Version is hexa current version.
 const (
+	//todo: change to banner to hexa banner.
 	Version = "1.1.0"
 	banner=`
  _       ___________________________         
@@ -15,8 +16,8 @@ const (
 %s
 The Kamva Microservices core
 %s
-
-
+____________________________________O/_______
+                                    O\
 `
 )
 

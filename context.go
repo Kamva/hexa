@@ -1,4 +1,4 @@
-package kitty
+package hexa
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 
 type UserFinder = func(id interface{}) (User, error)
 
-// Context is the kitty context to use in services.
+// Context is the hexa context to use in services.
 type Context interface {
 	context.Context
 
@@ -22,7 +22,7 @@ type Context interface {
 	// User returns the user
 	User() User
 
-	// Logger returns the kitty logger customized for specific request.
+	// Logger returns the hexa logger customized for specific request.
 	Logger() Logger
 
 	// Translator returns the translator localized relative to the users request.
@@ -87,7 +87,7 @@ func (c defaultContext) ToMap() Map {
 	})
 }
 
-// NewCtx returns new kitty Context.
+// NewCtx returns new hexa Context.
 // locale syntax is just same as HTTP Accept-Language header.
 func NewCtx(requestID, correlationID string, locale string, user User, logger Logger, translator Translator) Context {
 	logger = tuneCtxLogger(requestID, correlationID, user, logger)
@@ -151,5 +151,5 @@ func tuneCtxTranslator(locale string, t Translator) Translator {
 	return t.Localize()
 }
 
-// Assert defaultContext implements the kitty Context.
+// Assert defaultContext implements the hexa Context.
 var _ Context = &defaultContext{}

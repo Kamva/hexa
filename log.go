@@ -1,4 +1,4 @@
-package kitty
+package hexa
 
 type Logger interface {
 

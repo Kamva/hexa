@@ -1,9 +1,9 @@
-package kitty
+package hexa
 
 import "fmt"
 
-// ID is the id of entities across the kitty packages.
-// This is because kitty does not want to be dependent
+// ID is the id of entities across the hexa packages.
+// This is because hexa does not want to be dependent
 // to specific type of id. (e.g mongo ObjectID, mysql integer,...)
 type ID interface {
 	fmt.Stringer

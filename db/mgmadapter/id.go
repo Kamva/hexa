@@ -2,26 +2,26 @@ package mgmadapter
 
 import (
 	"errors"
-	"github.com/Kamva/kitty"
+	 "github.com/Kamva/hexa"
 	"github.com/Kamva/tracer"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// kittyID is the implementation of kitty ID interface for the mgm package.
-type kittyID struct {
+// hexaID is the implementation of hexa ID interface for the mgm package.
+type hexaID struct {
 	id primitive.ObjectID
 }
 
-func (i *kittyID) String() string {
+func (i *hexaID) String() string {
 	return i.id.Hex()
 }
 
-func (i *kittyID) Validate(id interface{}) error {
-	kid := &kittyID{}
+func (i *hexaID) Validate(id interface{}) error {
+	kid := &hexaID{}
 	return kid.From(id)
 }
 
-func (i *kittyID) From(val interface{}) error {
+func (i *hexaID) From(val interface{}) error {
 	if val == nil {
 		return tracer.Trace(errors.New("id value is nil"))
 	}
@@ -44,27 +44,27 @@ func (i *kittyID) From(val interface{}) error {
 	return tracer.Trace(errors.New("id type is invalid and can not convert it to primitive.ObjectID"))
 }
 
-func (i *kittyID) MustFrom(id interface{}) {
+func (i *hexaID) MustFrom(id interface{}) {
 	if err := i.From(id); err != nil {
 		panic(err)
 	}
 }
 
-func (i *kittyID) Val() interface{} {
+func (i *hexaID) Val() interface{} {
 	return i.id
 }
 
 // IDD function get an id and returns IDD
-func ID(id interface{}) kitty.ID {
-	i := &kittyID{}
+func ID(id interface{}) hexa.ID {
+	i := &hexaID{}
 	i.MustFrom(id)
 	return i
 }
 
 // EmptyID returns empty instance of the id.
-func EmptyID() kitty.ID {
-	i := &kittyID{}
+func EmptyID() hexa.ID {
+	i := &hexaID{}
 	return i
 }
 
-var _ kitty.ID = &kittyID{}
+var _ hexa.ID = &hexaID{}

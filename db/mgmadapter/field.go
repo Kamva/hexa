@@ -1,7 +1,7 @@
 package mgmadapter
 
 import (
-	"github.com/Kamva/kitty"
+	"github.com/Kamva/hexa"
 	"github.com/Kamva/tracer"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
@@ -26,7 +26,7 @@ func (f *IDField) PrepareID(id interface{}) (objID interface{}, err error) {
 		objID, err = primitive.ObjectIDFromHex(idStr)
 
 		if err != nil {
-			err = kitty.ErrInvalidID.SetError(tracer.Trace(err))
+			err = hexa.ErrInvalidID.SetError(tracer.Trace(err))
 		}
 
 		return objID, tracer.Trace(err)

@@ -1,4 +1,4 @@
-package kitty
+package hexa
 
 // Config is viperDriver interface that should embed in each Config object.
 type Config interface {

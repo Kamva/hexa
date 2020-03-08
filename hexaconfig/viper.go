@@ -1,7 +1,7 @@
-package kittyconfig
+package hexaconfig
 
 import (
-	"github.com/Kamva/kitty"
+	"github.com/Kamva/hexa"
 	"github.com/Kamva/tracer"
 	"github.com/spf13/viper"
 )
@@ -19,9 +19,9 @@ func (v *viperConfig) GetList(key string) []string {
 }
 
 // NewViperDriver returns new instance of viper driver.
-func NewViperDriver(viper *viper.Viper) kitty.Config {
+func NewViperDriver(viper *viper.Viper) hexa.Config {
 	return &viperConfig{Viper: viper}
 }
 
-// Assert viperConfig is type of kitty Config
-var _ kitty.Config = &viperConfig{}
+// Assert viperConfig is type of hexa Config
+var _ hexa.Config = &viperConfig{}

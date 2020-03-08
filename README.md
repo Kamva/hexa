@@ -1,8 +1,8 @@
-#### kitty contain services kit.
+#### Hexa contain services kit.
 
 #### Install
 ```
-go get github.com/Kamva/kitty
+go get github.com/Kamva/hexa
 ```
 
 #### Available Services:
@@ -18,7 +18,7 @@ v := viper.New()
 
 // tune your viper.
 
-config := kittyconfig.NewViperDriver(v)
+config := hexaconfig.NewViperDriver(v)
 
 // Use config service in app.
 ```
