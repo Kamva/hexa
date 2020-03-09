@@ -1,6 +1,8 @@
 package hexa
 
-import "errors"
+import (
+	"errors"
+)
 
 type (
 	User interface {
@@ -48,6 +50,16 @@ func (g guestID) From(id interface{}) error {
 // implement to just satisfy the interface.
 func (g guestID) MustFrom(id interface{}) {
 	// empty
+}
+
+func (g guestID) Equal(hexaID ID) bool {
+	if hexaID == nil {
+		return false
+	}
+
+	_, ok := hexaID.Val().(guestID)
+
+	return ok
 }
 
 func (g guestID) Val() interface{} {

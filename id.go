@@ -21,4 +21,7 @@ type ID interface {
 
 	// Val returns the native id value (e.g ObjectID in mongo, ...).
 	Val() interface{}
+
+	// Equal say that two hexa id are equal or not.
+	Equal(ID) bool
 }

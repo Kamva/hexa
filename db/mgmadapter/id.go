@@ -2,7 +2,7 @@ package mgmadapter
 
 import (
 	"errors"
-	 "github.com/Kamva/hexa"
+	"github.com/Kamva/hexa"
 	"github.com/Kamva/tracer"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -52,6 +52,16 @@ func (i *hexaID) MustFrom(id interface{}) {
 
 func (i *hexaID) Val() interface{} {
 	return i.id
+}
+
+func (i *hexaID) Equal(hexaID hexa.ID) bool {
+	if hexaID == nil {
+		return false
+	}
+	if id, ok := hexaID.Val().(primitive.ObjectID); ok {
+		return i.id == id
+	}
+	return false
 }
 
 // IDD function get an id and returns IDD
