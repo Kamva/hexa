@@ -12,14 +12,19 @@ func (l *stackedLogger) Core() interface{} {
 	return l.stack
 }
 
-func (l *stackedLogger) With(args ...interface{}) hexa.Logger {
-	if len(args) == 0 {
-		return l
-	}
-
+func (l *stackedLogger) With(ctx hexa.Context, args ...interface{}) hexa.Logger {
 	stack := make([]hexa.Logger, len(l.stack))
 	for i, logger := range l.stack {
-		stack[i] = logger.With(args...)
+		stack[i] = logger.With(ctx,args...)
+	}
+
+	return NewStackLoggerDriver(stack...)
+}
+
+func (l *stackedLogger) WithFields(args ...interface{}) hexa.Logger {
+	stack := make([]hexa.Logger, len(l.stack))
+	for i, logger := range l.stack {
+		stack[i] = logger.WithFields(args...)
 	}
 
 	return NewStackLoggerDriver(stack...)

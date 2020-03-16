@@ -7,9 +7,14 @@ type Logger interface {
 	// interface to another and need to logger code.
 	Core() interface{}
 
-	// With method set key,values and return new logger
+	// With get the hexa context and some keyValues
+	// and return new logger contains key values as
+	// log fields.
+	With(ctx Context, keyValues ...interface{}) Logger
+
+	// WithFields method set key,values and return new logger
 	// contains this key values as log fields.
-	With(keyValues ...interface{}) Logger
+	WithFields(keyValues ...interface{}) Logger
 
 	// Debug log debug message.
 	Debug(i ...interface{})

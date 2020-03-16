@@ -14,7 +14,11 @@ func (l *logrusLogger) Core() interface{} {
 	return l.entry
 }
 
-func (l *logrusLogger) With(keyValues ...interface{}) hexa.Logger {
+func (l *logrusLogger) With(ctx hexa.Context, keyValues ...interface{}) hexa.Logger {
+	return l.WithFields(keyValues...)
+}
+
+func (l *logrusLogger) WithFields(keyValues ...interface{}) hexa.Logger {
 	// if key values is not odd, add another item to make it odd.
 	if len(keyValues)%2 != 0 {
 		keyValues = append(keyValues, errMissingValue)

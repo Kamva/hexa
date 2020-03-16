@@ -148,7 +148,7 @@ func (e defaultError) ReportIfNeeded(l Logger, t Translator) bool {
 		}
 
 		fields := append(gutil.MapToKeyValue(data), gutil.MapToKeyValue(e.ReportData())...)
-		l.With(fields...).Error(e.Error())
+		l.WithFields(fields...).Error(e.Error())
 		return true
 	}
 	return false

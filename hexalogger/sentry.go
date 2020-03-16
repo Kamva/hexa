@@ -25,17 +25,11 @@ func (l *sentryLogger) argsToMap(args ...interface{}) map[string]interface{} {
 	return fields
 }
 
-// With get some fields and set check if field's key start and end
-// with single '_' character, then insert it as tag, otherwise
-// insert it as extra data.
-func (l *sentryLogger) With(args ...interface{}) hexa.Logger {
-	hub := l.hub.Clone()
+func (l *sentryLogger) addArgsToScope(scope *sentry.Scope, args []interface{}) {
 	if len(args) == 0 {
-		return NewSentryDriverWith(hub)
+		return
 	}
 	fields := l.argsToMap(args...)
-	scope := hub.Scope()
-
 	for key, val := range fields {
 		// Just keys that begin and end with "_", set as tags.
 		if len(key) >= 2 && key[0] == '_' && key[len(key)-1] == '_' {
@@ -44,7 +38,23 @@ func (l *sentryLogger) With(args ...interface{}) hexa.Logger {
 			scope.SetExtra(key, val)
 		}
 	}
+}
 
+func (l *sentryLogger) With(ctx hexa.Context, args ...interface{}) hexa.Logger {
+	hub := l.hub.Clone()
+
+	// TODO: Set user and other things for the scope here.
+
+	l.addArgsToScope(hub.Scope(), args)
+	return NewSentryDriverWith(hub)
+}
+
+// WithFields get some fields and set check if field's key start and end
+// with single '_' character, then insert it as tag, otherwise
+// insert it as extra data.
+func (l *sentryLogger) WithFields(args ...interface{}) hexa.Logger {
+	hub := l.hub.Clone()
+	l.addArgsToScope(hub.Scope(), args)
 	return NewSentryDriverWith(hub)
 }
 
