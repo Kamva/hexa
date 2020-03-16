@@ -9,7 +9,7 @@ type Logger interface {
 
 	// With method set key,values and return new logger
 	// contains this key values as log fields.
-	WithFields(keyValues ...interface{}) Logger
+	With(keyValues ...interface{}) Logger
 
 	// Debug log debug message.
 	Debug(i ...interface{})
@@ -17,15 +17,13 @@ type Logger interface {
 	// Info log info message.
 	Info(i ...interface{})
 
-	// Warn log warn message.
-	Warn(i ...interface{})
+	// Message log the value as a message.
+	// Use this to send message to some loggers that just want to get messages.
+	// all loggers see message as info and just add simple __message__ tag to it.
+	// but some other loggers just log messages (like our sentry logger).
+	// severity of Message it just like info.
+	Message(i ...interface{})
 
 	// Error log error message
 	Error(i ...interface{})
-
-	// Fatal log fatal message.
-	Fatal(i ...interface{})
-
-	// Panic log message as fatal and the panic.
-	Panic(i ...interface{})
 }

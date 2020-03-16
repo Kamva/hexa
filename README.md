@@ -1,5 +1,8 @@
 #### Hexa contain services kit.
 
+#### Requirements:
+go : minimum version `1.13`
+
 #### Install
 ```
 go get github.com/Kamva/hexa
@@ -33,3 +36,6 @@ config := hexaconfig.NewViperDriver(v)
 - [ ] Add more services like log,...
 - [ ] Add badges to readme.
 - [ ] CI 
+
+#### Client conventions:
+- [ ] on occure error and want to say to user that "some error occured",  give the requestID to the user, then user can give it back to the support team, and support team can see logs relative to that request id.

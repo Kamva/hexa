@@ -131,7 +131,7 @@ func CtxFromMap(m Map, uf UserFinder, l Logger, t Translator) (Context, error) {
 // tuneLogger function tune the logger for each context.
 func tuneCtxLogger(requestID string, correlationID string, u User, logger Logger) Logger {
 
-	logger = logger.WithFields(
+	logger = logger.With(
 		"__guest__", u.IsGuest(),
 		"__user_id__", u.Identifier().String(),
 		"__username__", u.GetUsername(),

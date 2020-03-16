@@ -14,7 +14,7 @@ func (l *logrusLogger) Core() interface{} {
 	return l.entry
 }
 
-func (l *logrusLogger) WithFields(keyValues ...interface{}) hexa.Logger {
+func (l *logrusLogger) With(keyValues ...interface{}) hexa.Logger {
 	// if key values is not odd, add another item to make it odd.
 	if len(keyValues)%2 != 0 {
 		keyValues = append(keyValues, errMissingValue)
@@ -33,8 +33,8 @@ func (l *logrusLogger) Info(i ...interface{}) {
 	l.entry.Info(i...)
 }
 
-func (l *logrusLogger) Warn(i ...interface{}) {
-	l.entry.Warn(i...)
+func (l *logrusLogger) Message(i ...interface{}) {
+	l.entry.Info(i...)
 }
 
 func (l *logrusLogger) Error(i ...interface{}) {
@@ -49,7 +49,7 @@ func (l *logrusLogger) Panic(i ...interface{}) {
 	l.entry.Panic(i...)
 }
 
-// NewLogrusDriver return new instance of logrus that implements hexa entry.
+// NewLogrusDriver return new instance of logrus that implements hexa logger.
 func NewLogrusDriver(logger *logrus.Entry) hexa.Logger {
 	return &logrusLogger{
 		entry: logger.WithFields(nil),
