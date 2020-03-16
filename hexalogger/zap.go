@@ -37,7 +37,7 @@ func (l *zapLogger) Error(i ...interface{}) {
 }
 
 // NewZapDriver return new instance of hexa logger with zap driver.
-// TODO: get log options.
+// TODO: get log options by provided config please.
 func NewZapDriver(config hexa.Config) hexa.Logger {
 	l, _ := zap.NewProduction()
 	return NewZapDriverWith(l.Sugar())
