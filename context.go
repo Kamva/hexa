@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/Kamva/gutil"
 	"github.com/Kamva/tracer"
+	"net"
 	"net/http"
 )
 
@@ -151,9 +152,9 @@ func tuneCtxLogger(r *http.Request, correlationID string, u User, logger Logger)
 			tags["__request_id__"] = rid
 		}
 
-		ip := gutil.IP(r)
-		if ip != "" {
+		if ip, port, err := net.SplitHostPort(gutil.IP(r)); err == nil {
 			tags["__ip__"] = ip
+			tags["__port__"] = port
 		}
 	}
 
