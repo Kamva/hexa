@@ -92,7 +92,7 @@ func NewCtx(request *http.Request, correlationID string, locale string, user Use
 	logger = tuneCtxLogger(request, correlationID, user, logger)
 	translator = tuneCtxTranslator(locale, translator)
 
-	return &defaultContext{
+	ctx := &defaultContext{
 		Context:       context.Background(),
 		locale:        locale,
 		correlationID: correlationID,
@@ -100,6 +100,10 @@ func NewCtx(request *http.Request, correlationID string, locale string, user Use
 		logger:        logger,
 		translator:    translator,
 	}
+
+	// Bind context to the context's logger.
+	ctx.logger = logger.With(ctx)
+	return ctx
 }
 
 // CtxFromMap generate new context form the exported map by
