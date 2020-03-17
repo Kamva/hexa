@@ -94,6 +94,7 @@ func NewCtx(request *http.Request, correlationID string, locale string, user Use
 
 	ctx := &defaultContext{
 		Context:       context.Background(),
+		request:       request,
 		locale:        locale,
 		correlationID: correlationID,
 		user:          user,
