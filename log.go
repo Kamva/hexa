@@ -29,6 +29,9 @@ type Logger interface {
 	// severity of Message it just like info.
 	Message(i ...interface{})
 
+	// Warn log warning message.
+	Warn(i ...interface{})
+
 	// Error log error message
 	Error(i ...interface{})
 }

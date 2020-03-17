@@ -54,6 +54,12 @@ func (l *stackedLogger) Message(i ...interface{}) {
 	}
 }
 
+func (l *stackedLogger) Warn(i ...interface{}) {
+	for _, logger := range l.stack {
+		logger.Warn(i...)
+	}
+}
+
 func (l *stackedLogger) Error(i ...interface{}) {
 	for _, logger := range l.stack {
 		logger.Error(i...)

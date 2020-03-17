@@ -36,6 +36,10 @@ func (l *zapLogger) Message(i ...interface{}) {
 	l.logger.Info(i...)
 }
 
+func (l *zapLogger) Warn(i ...interface{}) {
+	l.logger.Warn(i...)
+}
+
 func (l *zapLogger) Error(i ...interface{}) {
 	l.logger.Error(i...)
 }

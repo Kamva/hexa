@@ -114,6 +114,10 @@ func (l *sentryLogger) Message(i ...interface{}) {
 	l.hub.CaptureMessage(fmt.Sprint(i...))
 }
 
+func (l *sentryLogger) Warn(i ...interface{}) {
+	// For now we do not capture message in warn.
+}
+
 func (l *sentryLogger) Error(i ...interface{}) {
 	l.hub.CaptureException(errors.New(fmt.Sprint(i...)))
 }

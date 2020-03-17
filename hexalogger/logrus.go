@@ -41,17 +41,14 @@ func (l *logrusLogger) Message(i ...interface{}) {
 	l.entry.Info(i...)
 }
 
+func (l *logrusLogger) Warn(i ...interface{}) {
+	l.entry.Warn(i...)
+}
+
 func (l *logrusLogger) Error(i ...interface{}) {
 	l.entry.Error(i...)
 }
 
-func (l *logrusLogger) Fatal(i ...interface{}) {
-	l.entry.Fatalln(i...)
-}
-
-func (l *logrusLogger) Panic(i ...interface{}) {
-	l.entry.Panic(i...)
-}
 
 // NewLogrusDriver return new instance of logrus that implements hexa logger.
 func NewLogrusDriver(logger *logrus.Entry) hexa.Logger {
