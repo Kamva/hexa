@@ -6,6 +6,8 @@ import (
 	"github.com/Kamva/gutil"
 	"github.com/Kamva/hexa"
 	"github.com/getsentry/sentry-go"
+	"net"
+	"net/http"
 )
 
 type sentryLogger struct {
@@ -40,19 +42,47 @@ func (l *sentryLogger) addArgsToScope(scope *sentry.Scope, args []interface{}) {
 	}
 }
 
+func (l *sentryLogger) setUser(scope *sentry.Scope, user hexa.User, r *http.Request) {
+	scope.SetUser(sentry.User{
+		IPAddress: gutil.IP(r),
+		Email:     user.GetEmail(),
+		ID:        user.Identifier().String(),
+		Username:  user.GetUsername(),
+	})
+}
+
+func (l *sentryLogger) setRequest(scope *sentry.Scope, r *http.Request) {
+
+	headers := make(map[string]string)
+	for k, v := range r.Header {
+		headers[k] = fmt.Sprintf("%v", v)
+	}
+	var env map[string]string
+	if addr, port, err := net.SplitHostPort(r.RemoteAddr); err == nil {
+		env = map[string]string{"REMOTE_ADDR": addr, "REMOTE_PORT": port}
+	}
+
+	scope.SetRequest(sentry.Request{
+		URL:         r.URL.String(),
+		Method:      r.Method,
+		Data:        "",
+		QueryString: r.URL.RawQuery,
+		Cookies:     "",
+		Headers:     headers,
+		Env:         env,
+	})
+}
+
 func (l *sentryLogger) With(ctx hexa.Context, args ...interface{}) hexa.Logger {
 	hub := l.hub.Clone()
 	scope := hub.Scope()
 
-	user := ctx.User()
+	r := ctx.Request()
+	if r != nil {
+		l.setRequest(scope, r)
+	}
 
-	// Set the user:
-	scope.SetUser(sentry.User{
-		Email:     "",
-		ID:        user.Identifier().String(),
-		IPAddress: "",
-		Username:  user.GetUsername(),
-	})
+	l.setUser(scope, ctx.User(), r)
 
 	l.addArgsToScope(scope, args)
 	return NewSentryDriverWith(hub)

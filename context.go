@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/Kamva/gutil"
 	"github.com/Kamva/tracer"
+	"net/http"
 )
 
 type UserFinder = func(id interface{}) (User, error)
@@ -13,8 +14,8 @@ type UserFinder = func(id interface{}) (User, error)
 type Context interface {
 	context.Context
 
-	// RequestID returns the request id.
-	RequestID() string
+	// Request returns the current request and can be nil for not http requests.
+	Request() *http.Request
 
 	// Correlation returns the request correlation id.
 	CorrelationID() string
@@ -35,7 +36,7 @@ type Context interface {
 type defaultContext struct {
 	context.Context
 	locale        string
-	requestID     string
+	request       *http.Request
 	correlationID string
 	user          User
 	logger        Logger
@@ -45,21 +46,20 @@ type defaultContext struct {
 // exportedCtx use export and import Context.
 type exportedCtx struct {
 	Locale        string      `json:"locale"`
-	RequestID     string      `json:"request_id"`
 	CorrelationID string      `json:"correlation_id"`
 	UserId        interface{} `json:"user_id"`
 }
 
 func (e exportedCtx) validate() error {
-	if e.RequestID == "" || e.CorrelationID == "" || e.UserId == "" {
+	if e.CorrelationID == "" || e.UserId == "" {
 		return tracer.Trace(errors.New("exported data is invalid"))
 	}
 
 	return nil
 }
 
-func (c defaultContext) RequestID() string {
-	return c.requestID
+func (c defaultContext) Request() *http.Request {
+	return c.request
 }
 
 func (c defaultContext) CorrelationID() string {
@@ -81,7 +81,6 @@ func (c defaultContext) Translator() Translator {
 func (c defaultContext) ToMap() Map {
 	return gutil.StructToMap(exportedCtx{
 		Locale:        c.locale,
-		RequestID:     c.RequestID(),
 		CorrelationID: c.CorrelationID(),
 		UserId:        c.User().Identifier().Val(),
 	})
@@ -89,14 +88,13 @@ func (c defaultContext) ToMap() Map {
 
 // NewCtx returns new hexa Context.
 // locale syntax is just same as HTTP Accept-Language header.
-func NewCtx(requestID, correlationID string, locale string, user User, logger Logger, translator Translator) Context {
-	logger = tuneCtxLogger(requestID, correlationID, user, logger)
+func NewCtx(request *http.Request, correlationID string, locale string, user User, logger Logger, translator Translator) Context {
+	logger = tuneCtxLogger(request, correlationID, user, logger)
 	translator = tuneCtxTranslator(locale, translator)
 
 	return &defaultContext{
 		Context:       context.Background(),
 		locale:        locale,
-		requestID:     requestID,
 		correlationID: correlationID,
 		user:          user,
 		logger:        logger,
@@ -125,19 +123,33 @@ func CtxFromMap(m Map, uf UserFinder, l Logger, t Translator) (Context, error) {
 		}
 	}
 
-	return NewCtx(e.RequestID, e.CorrelationID, e.Locale, u, l, t), nil
+	return NewCtx(nil, e.CorrelationID, e.Locale, u, l, t), nil
 }
 
 // tuneLogger function tune the logger for each context.
-func tuneCtxLogger(requestID string, correlationID string, u User, logger Logger) Logger {
+func tuneCtxLogger(r *http.Request, correlationID string, u User, logger Logger) Logger {
+	tags := map[string]interface{}{
+		"__guest__":          u.IsGuest(),
+		"__user_id__":        u.Identifier().String(),
+		"__email__":          u.GetEmail(),
+		"__phone__":          u.GetPhone(),
+		"__username__":       u.GetUsername(),
+		"__correlation_id__": correlationID,
+	}
 
-	logger = logger.WithFields(
-		"__guest__", u.IsGuest(),
-		"__user_id__", u.Identifier().String(),
-		"__username__", u.GetUsername(),
-		"__request_id__", requestID,
-		"__correlation_id__", correlationID,
-	)
+	if r != nil {
+		rid := r.Header.Get("X-Request-ID")
+		if rid != "" {
+			tags["__request_id__"] = rid
+		}
+
+		ip := gutil.IP(r)
+		if ip != "" {
+			tags["__ip__"] = ip
+		}
+	}
+
+	logger = logger.WithFields(gutil.MapToKeyValue(tags)...)
 
 	return logger
 }

@@ -12,6 +12,14 @@ type (
 		// Return users identifier (if guestUser return just empty string or something like this.)
 		Identifier() ID
 
+		// GetEmail returns the user's email.
+		// This value can be empty.
+		GetEmail() string
+
+		// GetPhone returns the user's phone number.
+		// This value can be empty.
+		GetPhone() string
+
 		// Return the user name.
 		GetName() string
 
@@ -72,6 +80,14 @@ func (g guestUser) IsGuest() bool {
 
 func (g guestUser) Identifier() ID {
 	return guestID(guestUserID)
+}
+
+func (g guestUser) GetEmail() string {
+	return ""
+}
+
+func (g guestUser) GetPhone() string {
+	return ""
 }
 
 func (g guestUser) GetName() string {
