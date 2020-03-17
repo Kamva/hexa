@@ -42,10 +42,19 @@ func (l *sentryLogger) addArgsToScope(scope *sentry.Scope, args []interface{}) {
 
 func (l *sentryLogger) With(ctx hexa.Context, args ...interface{}) hexa.Logger {
 	hub := l.hub.Clone()
+	scope := hub.Scope()
 
-	// TODO: Set user and other things for the scope here.
+	user := ctx.User()
 
-	l.addArgsToScope(hub.Scope(), args)
+	// Set the user:
+	scope.SetUser(sentry.User{
+		Email:     "",
+		ID:        user.Identifier().String(),
+		IPAddress: "",
+		Username:  user.GetUsername(),
+	})
+
+	l.addArgsToScope(scope, args)
 	return NewSentryDriverWith(hub)
 }
 
@@ -75,9 +84,6 @@ func (l *sentryLogger) Error(i ...interface{}) {
 }
 
 // NewSentryDriver return new instance of hexa logger with sentry driver.
-// TODO: get log options by provided config please.
-// TODO: Get log level from config and check if need log
-// 	in the Debug and Info methods of sentryLogger.
 func NewSentryDriver(config hexa.Config) (hexa.Logger, error) {
 	client, err := sentry.NewClient(sentry.ClientOptions{
 		Dsn:         config.GetString("SENTRY_DSN"),
