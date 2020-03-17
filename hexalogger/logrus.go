@@ -51,6 +51,7 @@ func (l *logrusLogger) Error(i ...interface{}) {
 
 
 // NewLogrusDriver return new instance of logrus that implements hexa logger.
+// Deprecated
 func NewLogrusDriver(logger *logrus.Entry) hexa.Logger {
 	return &logrusLogger{
 		entry: logger.WithFields(nil),
