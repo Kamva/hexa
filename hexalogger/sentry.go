@@ -14,6 +14,11 @@ type sentryLogger struct {
 	hub *sentry.Hub
 }
 
+var (
+	LogConfigKeySentryDSN          = "log.sentry.dsn"
+	LogConfigKeySentryEnvirontment = "log.sentry.environment"
+)
+
 func (l *sentryLogger) Core() interface{} {
 	return l.hub
 }
@@ -116,9 +121,9 @@ func (l *sentryLogger) Error(i ...interface{}) {
 // NewSentryDriver return new instance of hexa logger with sentry driver.
 func NewSentryDriver(config hexa.Config) (hexa.Logger, error) {
 	client, err := sentry.NewClient(sentry.ClientOptions{
-		Dsn:         config.GetString("SENTRY_DSN"),
+		Dsn:         config.GetString(LogConfigKeySentryDSN),
 		Debug:       config.GetBool("DEBUG"),
-		Environment: config.GetString("SENTRY_ENVIRONMENT"),
+		Environment: config.GetString(LogConfigKeySentryEnvirontment),
 	})
 	if err != nil {
 		return nil, err
