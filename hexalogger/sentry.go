@@ -48,12 +48,18 @@ func (l *sentryLogger) addArgsToScope(scope *sentry.Scope, args []interface{}) {
 }
 
 func (l *sentryLogger) setUser(scope *sentry.Scope, user hexa.User, r *http.Request) {
-	scope.SetUser(sentry.User{
+	u := sentry.User{
 		IPAddress: gutil.IP(r),
 		Email:     user.GetEmail(),
 		ID:        user.Identifier().String(),
 		Username:  user.GetUsername(),
-	})
+	}
+
+	if ip, _, err := net.SplitHostPort(r.RemoteAddr); err == nil {
+		u.IPAddress = ip
+	}
+
+	scope.SetUser(u)
 }
 
 func (l *sentryLogger) setRequest(scope *sentry.Scope, r *http.Request) {
