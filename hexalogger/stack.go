@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Kamva/hexa"
 	"github.com/Kamva/tracer"
+	"strings"
 )
 
 type stackedLogger struct {
@@ -76,7 +77,7 @@ func NewStackLoggerDriver(cfg hexa.Config) (hexa.Logger, error) {
 		var logger hexa.Logger
 		var err error
 
-		switch loggerName {
+		switch strings.ToLower(loggerName) {
 		case "zap":
 			logger = NewZapDriver(cfg)
 		case "sentry":
