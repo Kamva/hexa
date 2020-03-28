@@ -20,7 +20,6 @@ example:
 v := viper.New()
 
 // tune your viper.
-
 config := hexaconfig.NewViperDriver(v)
 
 // Use config service in app.
