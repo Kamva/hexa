@@ -5,6 +5,9 @@ import (
 )
 
 type (
+	// Note: although getter function in Go Don't need to start with "Get" word, but because
+	// most user models use this fields (Email,Phone,Name,...) as their database fields, we
+	// add "Get" prefix to each getter method on this interface.
 	User interface {
 		// Specify that user is guestUser or no.
 		IsGuest() bool
@@ -23,8 +26,13 @@ type (
 		// Return the user name.
 		GetName() string
 
-		// Username can be unique username,email,phone number or everything else that can use as username.
+		// Username can be unique username,email,phone number or
+		// everything else that can use as username.
 		GetUsername() string
+
+		// PermissionsList returns the use permissions list to
+		//use in RBAC access control services (like Gate).
+		GetPermissionsList() []string
 	}
 	guestUser struct {
 	}
@@ -96,6 +104,10 @@ func (g guestUser) GetName() string {
 
 func (g guestUser) GetUsername() string {
 	return "__guest__username__"
+}
+
+func (g guestUser) GetPermissionsList() []string {
+	return nil
 }
 
 func NewGuestUser() User {
