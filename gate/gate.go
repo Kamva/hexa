@@ -28,6 +28,10 @@ func (g *gate) Allows(ctx hexa.Context, perm string, resource interface{}) (bool
 	})
 }
 
+func (g *gate) AllowsResource(ctx hexa.Context, resource interface{}) (bool, error) {
+	return g.Allows(ctx, "", resource)
+}
+
 func (g *gate) AllowsWithOptions(c hexa.Context, options hexa.GateAllowsOptions) (bool, error) {
 	user := c.User()
 	allowsManager := g.allowsManager(user, options.ManagerPermission)

@@ -49,6 +49,9 @@ type (
 		//   and permit by policy) call:  Allows("edit_post",post)
 		Allows(ctx Context, perm string, resource interface{}) (bool, error)
 
+		// AllowsResource just checks policy.
+		AllowsResource(ctx Context, resource interface{}) (bool, error)
+
 		// Check user Allows to do something. Get full options.
 		AllowsWithOptions(Context, GateAllowsOptions) (bool, error)
 	}
