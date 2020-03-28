@@ -74,7 +74,11 @@ func (g *gate) extractPerms(perm string) (managerPerm, userPerm string) {
 
 // New returns new instance of the Gate.
 func New() hexa.Gate {
-	return &gate{m: DefaultMiddleware(true, true, true), p: DefaultPolicy}
+	return &gate{m: DefaultMiddleware(DefaultMiddlewareOptions{
+		DenyGuest:           true,
+		DenyDeactivatedUser: true,
+		AllowRoot:           true,
+	}), p: DefaultPolicy}
 }
 
 // New returns new instance of the Gate.
