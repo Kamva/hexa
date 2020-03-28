@@ -37,12 +37,50 @@ type (
 	guestUser struct {
 	}
 
+	// user is default implementation of hexa User for real users.
+	user struct {
+		id       ID
+		email    string
+		phone    string
+		name     string
+		username string
+		perms    []string
+	}
+
 	// guestID is implementation of specific ID
 	guestID string
 )
 
 // guestUserID is the guest user's id
 var guestUserID = "__guest_id__"
+
+func (u *user) IsGuest() bool {
+	return false
+}
+
+func (u *user) Identifier() ID {
+	return u.id
+}
+
+func (u *user) GetEmail() string {
+	return u.email
+}
+
+func (u *user) GetPhone() string {
+	return u.phone
+}
+
+func (u *user) GetName() string {
+	return u.name
+}
+
+func (u *user) GetUsername() string {
+	return u.email
+}
+
+func (u *user) GetPermissionsList() []string {
+	return u.perms
+}
 
 func (g guestID) Validate(id interface{}) error {
 	if idStr, ok := id.(string); ok && idStr == guestUserID {
@@ -110,6 +148,18 @@ func (g guestUser) GetPermissionsList() []string {
 	return nil
 }
 
+// NewUser returns new hexa user instance.
+func NewUser(id ID, email, phone, name, username string, perms []string) User {
+	return &user{
+		id:       id,
+		email:    email,
+		phone:    phone,
+		name:     name,
+		username: username,
+		perms:    perms,
+	}
+}
+
 func NewGuestUser() User {
 	return guestUser{}
 }
@@ -117,3 +167,4 @@ func NewGuestUser() User {
 // Assert guestUser implements the User interface.
 var _ ID = guestID("")
 var _ User = &guestUser{}
+var _ User = &user{}
