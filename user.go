@@ -55,7 +55,7 @@ type (
 	guestID string
 
 	// UserExporter export a user to json and then import it.
-	ExportedUser struct {
+	exportedUser struct {
 		ID       interface{} `json:"id"`
 		IsGuest  bool        `json:"is_guest"`
 		Email    string      `json:"email"`
@@ -145,7 +145,7 @@ func (u *user) GetPermissionsList() []string {
 
 // Export method export a user to map.
 func (e UserExporter) Export(user User) map[string]interface{} {
-	return gutil.StructToMap(ExportedUser{
+	return gutil.StructToMap(exportedUser{
 		ID:       user.Identifier().Val(),
 		IsGuest:  user.IsGuest(),
 		Email:    user.GetEmail(),
@@ -159,7 +159,7 @@ func (e UserExporter) Export(user User) map[string]interface{} {
 
 // Import method a user from map.
 func (e UserExporter) Import(id ID, exportedMap map[string]interface{}) (User, error) {
-	eu := ExportedUser{}
+	eu := exportedUser{}
 	err := gutil.MapToStruct(exportedMap, &eu)
 	if err != nil {
 		return nil, err
