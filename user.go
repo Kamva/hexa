@@ -201,6 +201,11 @@ func NewGuestUser() User {
 	return NewUser(guestID(guestUserID), email, phone, name, username, false, []string{})
 }
 
+// NewUserExporter returns new instance of user exporter.
+func NewUserExporter() *UserExporter {
+	return &UserExporter{}
+}
+
 // Assert guestUser implements the User interface.
 var _ ID = guestID("")
 var _ User = &user{}
