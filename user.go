@@ -2,6 +2,7 @@ package hexa
 
 import (
 	"errors"
+	"github.com/Kamva/gutil"
 )
 
 type (
@@ -37,12 +38,11 @@ type (
 		//use in RBAC access control services (like Gate).
 		GetPermissionsList() []string
 	}
-	guestUser struct {
-	}
 
 	// user is default implementation of hexa User for real users.
 	user struct {
 		id       ID
+		isGuest  bool
 		email    string
 		phone    string
 		name     string
@@ -53,42 +53,25 @@ type (
 
 	// guestID is implementation of specific ID
 	guestID string
+
+	// UserExporter export a user to json and then import it.
+	ExportedUser struct {
+		ID       interface{} `json:"id"`
+		IsGuest  bool        `json:"is_guest"`
+		Email    string      `json:"email"`
+		Phone    string      `json:"phone"`
+		Name     string      `json:"name"`
+		Username string      `json:"username"`
+		IsActive bool        `json:"is_active"`
+		Perms    []string    `json:"perms"`
+	}
+
+	// UserExporter export a user to json and then import it.
+	UserExporter struct{}
 )
 
 // guestUserID is the guest user's id
 var guestUserID = "__guest_id__"
-
-func (u *user) IsGuest() bool {
-	return false
-}
-
-func (u *user) Identifier() ID {
-	return u.id
-}
-
-func (u *user) GetEmail() string {
-	return u.email
-}
-
-func (u *user) GetPhone() string {
-	return u.phone
-}
-
-func (u *user) GetName() string {
-	return u.name
-}
-
-func (u *user) GetUsername() string {
-	return u.email
-}
-
-func (u *user) IsActive() bool {
-	return u.isActive
-}
-
-func (u *user) GetPermissionsList() []string {
-	return u.perms
-}
 
 func (g guestID) Validate(id interface{}) error {
 	if idStr, ok := id.(string); ok && idStr == guestUserID {
@@ -128,56 +111,96 @@ func (g guestID) Val() interface{} {
 	return string(g)
 }
 
-func (g guestUser) IsGuest() bool {
-	return true
-}
-
-func (g guestUser) Identifier() ID {
-	return guestID(guestUserID)
-}
-
-func (g guestUser) GetEmail() string {
-	return ""
-}
-
-func (g guestUser) GetPhone() string {
-	return ""
-}
-
-func (g guestUser) GetName() string {
-	return "__guest__"
-}
-
-func (g guestUser) GetUsername() string {
-	return "__guest__username__"
-}
-
-func (g guestUser) IsActive() bool {
+func (u *user) IsGuest() bool {
 	return false
 }
 
-func (g guestUser) GetPermissionsList() []string {
-	return nil
+func (u *user) Identifier() ID {
+	return u.id
+}
+
+func (u *user) GetEmail() string {
+	return u.email
+}
+
+func (u *user) GetPhone() string {
+	return u.phone
+}
+
+func (u *user) GetName() string {
+	return u.name
+}
+
+func (u *user) GetUsername() string {
+	return u.email
+}
+
+func (u *user) IsActive() bool {
+	return u.isActive
+}
+
+func (u *user) GetPermissionsList() []string {
+	return u.perms
+}
+
+// Export method export a user to map.
+func (e UserExporter) Export(user User) map[string]interface{} {
+	return gutil.StructToMap(ExportedUser{
+		ID:       user.Identifier().Val(),
+		IsGuest:  user.IsGuest(),
+		Email:    user.GetEmail(),
+		Phone:    user.GetPhone(),
+		Name:     user.GetName(),
+		Username: user.GetUsername(),
+		IsActive: user.IsActive(),
+		Perms:    user.GetPermissionsList(),
+	})
+}
+
+// Import method a user from map.
+func (e UserExporter) Import(id ID, exportedMap map[string]interface{}) (User, error) {
+	eu := ExportedUser{}
+	err := gutil.MapToStruct(exportedMap, &eu)
+	if err != nil {
+		return nil, err
+	}
+
+	if eu.IsGuest {
+		id = guestID(guestUserID)
+	} else {
+		if err := id.From(eu.ID); err != nil {
+			return nil, err
+		}
+	}
+
+	user := NewUser(id, eu.Email, eu.Phone, eu.Name, eu.Username, eu.IsActive, eu.Perms)
+
+	return user, nil
 }
 
 // NewUser returns new hexa user instance.
 func NewUser(id ID, email, phone, name, username string, isActive bool, perms []string) User {
 	return &user{
 		id:       id,
+		isGuest:  id.Equal(guestID(guestUserID)),
 		email:    email,
 		phone:    phone,
 		name:     name,
 		username: username,
-		perms:    perms,
 		isActive: isActive,
+		perms:    perms,
 	}
 }
 
+// NewGuestUser returns new instance of the guest user.
 func NewGuestUser() User {
-	return guestUser{}
+	email := ""
+	phone := ""
+	name := "__guest__"
+	username := "__guest__username__"
+	return NewUser(guestID(guestUserID), email, phone, name, username, false, []string{})
 }
 
 // Assert guestUser implements the User interface.
 var _ ID = guestID("")
-var _ User = &guestUser{}
 var _ User = &user{}
