@@ -64,7 +64,7 @@ func (i *hexaID) Equal(hexaID hexa.ID) bool {
 	return false
 }
 
-// IDD function get an id and returns IDD
+// ID function get an id and returns IDD
 func ID(id interface{}) hexa.ID {
 	i := &hexaID{}
 	i.MustFrom(id)
