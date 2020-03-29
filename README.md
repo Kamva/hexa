@@ -32,7 +32,6 @@ config := hexaconfig.NewViperDriver(v)
 #### Todo:
 - [ ] Collection presenter
 - [ ] Write Tests
-- [ ] Add more services like log,...
 - [ ] Add badges to readme.
 - [ ] CI 
 

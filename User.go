@@ -30,6 +30,9 @@ type (
 		// everything else that can use as username.
 		GetUsername() string
 
+		// IsActive specify that user is active or no.
+		IsActive() bool
+
 		// PermissionsList returns the use permissions list to
 		//use in RBAC access control services (like Gate).
 		GetPermissionsList() []string
@@ -44,6 +47,7 @@ type (
 		phone    string
 		name     string
 		username string
+		isActive bool
 		perms    []string
 	}
 
@@ -76,6 +80,10 @@ func (u *user) GetName() string {
 
 func (u *user) GetUsername() string {
 	return u.email
+}
+
+func (u *user) IsActive() bool {
+	return u.isActive
 }
 
 func (u *user) GetPermissionsList() []string {
@@ -144,12 +152,16 @@ func (g guestUser) GetUsername() string {
 	return "__guest__username__"
 }
 
+func (g guestUser) IsActive() bool {
+	return false
+}
+
 func (g guestUser) GetPermissionsList() []string {
 	return nil
 }
 
 // NewUser returns new hexa user instance.
-func NewUser(id ID, email, phone, name, username string, perms []string) User {
+func NewUser(id ID, email, phone, name, username string, isActive bool, perms []string) User {
 	return &user{
 		id:       id,
 		email:    email,
@@ -157,6 +169,7 @@ func NewUser(id ID, email, phone, name, username string, perms []string) User {
 		name:     name,
 		username: username,
 		perms:    perms,
+		isActive: isActive,
 	}
 }
 

@@ -11,12 +11,13 @@ type DefaultMiddlewareOptions struct {
 	DenyDeactivatedUser bool
 	AllowRoot           bool
 
-	RootPermName             string
-	ActivatedAccountPermName string
+	RootPermName string
 }
 
 func DefaultMiddleware(o DefaultMiddlewareOptions) hexa.GateMiddleware {
-	o = prepareOptions(o)
+	if o.RootPermName == "" {
+		o.RootPermName = "root"
+	}
 	return func(policy hexa.GatePolicy) hexa.GatePolicy {
 		return func(ctx hexa.Context, user hexa.User, resource interface{}) (b bool, err error) {
 			permList := user.GetPermissionsList()
@@ -25,7 +26,7 @@ func DefaultMiddleware(o DefaultMiddlewareOptions) hexa.GateMiddleware {
 				return false, nil
 			}
 			// Check user activation
-			if o.DenyDeactivatedUser && !gutil.Contains(permList, o.ActivatedAccountPermName) { // TODO: How we should share same values?
+			if o.DenyDeactivatedUser && !user.IsActive() { // TODO: How we should share same values?
 
 				return false, nil
 			}
@@ -36,18 +37,6 @@ func DefaultMiddleware(o DefaultMiddlewareOptions) hexa.GateMiddleware {
 			return policy(ctx, user, resource)
 		}
 	}
-}
-
-func prepareOptions(o DefaultMiddlewareOptions) DefaultMiddlewareOptions {
-	if o.RootPermName == "" {
-		o.RootPermName = "root"
-	}
-
-	if o.ActivatedAccountPermName == "" {
-		o.ActivatedAccountPermName = "activated_account"
-	}
-
-	return o
 }
 
 // Assertion
