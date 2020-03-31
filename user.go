@@ -100,9 +100,7 @@ func (g guestID) Equal(hexaID ID) bool {
 	if hexaID == nil {
 		return false
 	}
-
-	_, ok := hexaID.Val().(guestID)
-
+	_, ok := hexaID.(guestID)
 	return ok
 }
 
