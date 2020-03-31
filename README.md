@@ -30,6 +30,7 @@ config := hexaconfig.NewViperDriver(v)
 (in both jobs and worker, to distinct microservices queues).
 
 #### Todo:
+- [ ] Do we need to the `dao` in hexa? 
 - [ ] Collection presenter
 - [ ] Write Tests
 - [ ] Add badges to readme.

@@ -42,7 +42,6 @@ type (
 	// user is default implementation of hexa User for real users.
 	user struct {
 		id       ID
-		isGuest  bool
 		email    string
 		phone    string
 		name     string
@@ -112,7 +111,7 @@ func (g guestID) Val() interface{} {
 }
 
 func (u *user) IsGuest() bool {
-	return false
+	return u.id.Equal(guestID(guestUserID))
 }
 
 func (u *user) Identifier() ID {
@@ -182,7 +181,6 @@ func (e UserExporter) Import(id ID, exportedMap map[string]interface{}) (User, e
 func NewUser(id ID, email, phone, name, username string, isActive bool, perms []string) User {
 	return &user{
 		id:       id,
-		isGuest:  id.Equal(guestID(guestUserID)),
 		email:    email,
 		phone:    phone,
 		name:     name,
