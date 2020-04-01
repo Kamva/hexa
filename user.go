@@ -57,7 +57,7 @@ type (
 	// guestID is implementation of specific ID
 	guestID string
 
-	// UserExporter export a user to json and then import it.
+	// UserExporterImporter export a user to json and then import it.
 	exportedUser struct {
 		ID       interface{} `json:"id"`
 		IsGuest  bool        `json:"is_guest"`
@@ -69,14 +69,26 @@ type (
 		Perms    []string    `json:"perms"`
 	}
 
-	// UserExporter export a user to json and then import it.
-	UserExporter interface {
+	// UserExporterImporter export a user to json and then import it.
+	UserExporterImporter interface {
 		Export(user User) (Map, error)
 		Import(exportedMap Map) (User, error)
 	}
-	// userExporter implements the UserExporter interface.
-	userExporter struct {
+	// userExporterImporter implements the UserExporterImporter interface.
+	userExporterImporter struct {
 		idGenerator IDGenerator
+	}
+
+	// UserSDK is the user's kit to import,export generate guest.
+	UserSDK interface {
+		UserExporterImporter
+		// GenerateGuest returns new Guest User.
+		NewGuest() User
+	}
+
+	// userSDK implements the UserSDK.
+	userSDK struct {
+		UserExporterImporter
 	}
 )
 
@@ -152,7 +164,7 @@ func (u *user) GetPermissionsList() []string {
 }
 
 // Export method export a user to map.
-func (e *userExporter) Export(user User) (Map, error) {
+func (e *userExporterImporter) Export(user User) (Map, error) {
 	if user == nil {
 		return nil, tracer.Trace(errors.New("user can not be nil"))
 	}
@@ -169,7 +181,7 @@ func (e *userExporter) Export(user User) (Map, error) {
 }
 
 // Import method a user from map.
-func (e *userExporter) Import(exportedMap Map) (User, error) {
+func (e *userExporterImporter) Import(exportedMap Map) (User, error) {
 	eu := exportedUser{}
 	err := gutil.MapToStruct(exportedMap, &eu)
 	if err != nil {
@@ -190,6 +202,15 @@ func (e *userExporter) Import(exportedMap Map) (User, error) {
 	return user, nil
 }
 
+func (u *userSDK) NewGuest() User {
+	// NewGuestUser returns new instance of the guest user.
+	email := ""
+	phone := ""
+	name := "__guest__"
+	username := "__guest__username__"
+	return NewUser(guestID(guestUserID), email, phone, name, username, false, []string{})
+}
+
 // NewUser returns new hexa user instance.
 func NewUser(id ID, email, phone, name, username string, isActive bool, perms []string) User {
 	return &user{
@@ -203,20 +224,18 @@ func NewUser(id ID, email, phone, name, username string, isActive bool, perms []
 	}
 }
 
-// NewGuestUser returns new instance of the guest user.
-func NewGuestUser() User {
-	email := ""
-	phone := ""
-	name := "__guest__"
-	username := "__guest__username__"
-	return NewUser(guestID(guestUserID), email, phone, name, username, false, []string{})
+// NewUserExporter returns new instance of user exporter.
+func NewUserExporter(idGenerator IDGenerator) UserExporterImporter {
+	return &userExporterImporter{idGenerator}
 }
 
-// NewUserExporter returns new instance of user exporter.
-func NewUserExporter(idGenerator IDGenerator) UserExporter {
-	return &userExporter{idGenerator}
+// NewUserSDK returns new instance of the user SDK.
+func NewUserSDK(ei UserExporterImporter) UserSDK {
+	return &userSDK{ei}
 }
 
 // Assert guestUser implements the User interface.
 var _ ID = guestID("")
 var _ User = &user{}
+var _ UserExporterImporter = &userExporterImporter{}
+var _ UserSDK = &userSDK{}

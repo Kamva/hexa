@@ -30,7 +30,7 @@ type (
 		Translator() Translator
 
 		// ToMap method convert context to map to export and import.
-		ToMap(UserExporter) (Map, error)
+		ToMap(UserExporterImporter) (Map, error)
 	}
 
 	defaultContext struct {
@@ -58,7 +58,7 @@ type (
 
 	// contextExporter export & import the context.
 	contextExporter struct {
-		ue UserExporter
+		ue UserExporterImporter
 		l  Logger
 		t  Translator
 	}
@@ -92,7 +92,7 @@ func (c defaultContext) Translator() Translator {
 	return c.translator
 }
 
-func (c defaultContext) ToMap(ue UserExporter) (Map, error) {
+func (c defaultContext) ToMap(ue UserExporterImporter) (Map, error) {
 	if ue == nil {
 		return nil, tracer.Trace(errors.New("user exporter can not be nil"))
 	}
@@ -153,7 +153,7 @@ func NewCtx(request *http.Request, correlationID string, locale string, user Use
 }
 
 // NewCtxExporter returns new instance of the ContextExporter to export and import context.
-func NewCtxExporter(ue UserExporter, l Logger, t Translator) ContextExporter {
+func NewCtxExporter(ue UserExporterImporter, l Logger, t Translator) ContextExporter {
 	return &contextExporter{
 		ue: ue,
 		l:  l,
