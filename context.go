@@ -50,14 +50,14 @@ type (
 		User          Map    `json:"user"`
 	}
 
-	// ContextExporter export and import the context
-	ContextExporter interface {
+	// ContextExporterImporter export and import the context
+	ContextExporterImporter interface {
 		Export(Context) (Map, error)
 		Import(Map) (Context, error)
 	}
 
-	// contextExporter export & import the context.
-	contextExporter struct {
+	// contextExporterImporter export & import the context.
+	contextExporterImporter struct {
 		ue UserExporterImporter
 		l  Logger
 		t  Translator
@@ -109,11 +109,11 @@ func (c defaultContext) ToMap(ue UserExporterImporter) (Map, error) {
 	}), nil
 }
 
-func (ce *contextExporter) Export(ctx Context) (Map, error) {
+func (ce *contextExporterImporter) Export(ctx Context) (Map, error) {
 	return ctx.ToMap(ce.ue)
 }
 
-func (ce *contextExporter) Import(m Map) (Context, error) {
+func (ce *contextExporterImporter) Import(m Map) (Context, error) {
 	e := exportedCtx{}
 	err := gutil.MapToStruct(m, &e)
 	if err != nil {
@@ -152,9 +152,9 @@ func NewCtx(request *http.Request, correlationID string, locale string, user Use
 	return ctx
 }
 
-// NewCtxExporter returns new instance of the ContextExporter to export and import context.
-func NewCtxExporter(ue UserExporterImporter, l Logger, t Translator) ContextExporter {
-	return &contextExporter{
+// NewCtxExporterImporter returns new instance of the ContextExporterImporter to export and import context.
+func NewCtxExporterImporter(ue UserExporterImporter, l Logger, t Translator) ContextExporterImporter {
+	return &contextExporterImporter{
 		ue: ue,
 		l:  l,
 		t:  t,
@@ -203,4 +203,4 @@ func tuneCtxTranslator(locale string, t Translator) Translator {
 
 // Assert defaultContext implements the hexa Context.
 var _ Context = &defaultContext{}
-var _ ContextExporter = &contextExporter{}
+var _ ContextExporterImporter = &contextExporterImporter{}
