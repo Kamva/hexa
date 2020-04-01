@@ -219,8 +219,8 @@ func NewUser(id ID, email, phone, name, username string, isActive bool, perms []
 	}
 }
 
-// NewUserExporter returns new instance of user exporter.
-func NewUserExporter(idGenerator IDGenerator) UserExporterImporter {
+// NewUserExporterImporter returns new instance of user exporter.
+func NewUserExporterImporter(idGenerator IDGenerator) UserExporterImporter {
 	return &userExporterImporter{idGenerator}
 }
 
