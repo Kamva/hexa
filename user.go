@@ -203,12 +203,7 @@ func (e *userExporterImporter) Import(exportedMap Map) (User, error) {
 }
 
 func (u *userSDK) NewGuest() User {
-	// NewGuestUser returns new instance of the guest user.
-	email := ""
-	phone := ""
-	name := "__guest__"
-	username := "__guest__username__"
-	return NewUser(guestID(guestUserID), email, phone, name, username, false, []string{})
+	return NewGuest()
 }
 
 // NewUser returns new hexa user instance.
@@ -232,6 +227,16 @@ func NewUserExporter(idGenerator IDGenerator) UserExporterImporter {
 // NewUserSDK returns new instance of the user SDK.
 func NewUserSDK(ei UserExporterImporter) UserSDK {
 	return &userSDK{ei}
+}
+
+// NewGuest generate new guest user.
+func NewGuest() User {
+	// NewGuestUser returns new instance of the guest user.
+	email := ""
+	phone := ""
+	name := "__guest__"
+	username := "__guest__username__"
+	return NewUser(guestID(guestUserID), email, phone, name, username, false, []string{})
 }
 
 // Assert guestUser implements the User interface.
