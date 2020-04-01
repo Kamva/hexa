@@ -9,50 +9,63 @@ import (
 	"net/http"
 )
 
-type UserFinder = func(id interface{}) (User, error)
-
 // Context is the hexa context to use in services.
-type Context interface {
-	context.Context
+type (
+	Context interface {
+		context.Context
 
-	// Request returns the current request and can be nil for not http requests.
-	Request() *http.Request
+		// Request returns the current request and can be nil for not http requests.
+		Request() *http.Request
 
-	// Correlation returns the request correlation id.
-	CorrelationID() string
+		// Correlation returns the request correlation id.
+		CorrelationID() string
 
-	// User returns the user
-	User() User
+		// User returns the user
+		User() User
 
-	// Logger returns the hexa logger customized for specific request.
-	Logger() Logger
+		// Logger returns the hexa logger customized for specific request.
+		Logger() Logger
 
-	// Translator returns the translator localized relative to the users request.
-	Translator() Translator
+		// Translator returns the translator localized relative to the users request.
+		Translator() Translator
 
-	// ToMap method convert context to map to export and import.
-	ToMap() Map
-}
+		// ToMap method convert context to map to export and import.
+		ToMap(UserExporter) (Map, error)
+	}
 
-type defaultContext struct {
-	context.Context
-	locale        string
-	request       *http.Request
-	correlationID string
-	user          User
-	logger        Logger
-	translator    Translator
-}
+	defaultContext struct {
+		context.Context
+		locale        string
+		request       *http.Request
+		correlationID string
+		user          User
+		logger        Logger
+		translator    Translator
+	}
 
-// exportedCtx use export and import Context.
-type exportedCtx struct {
-	Locale        string      `json:"locale"`
-	CorrelationID string      `json:"correlation_id"`
-	UserId        interface{} `json:"user_id"`
-}
+	// exportedCtx use export and import Context.
+	exportedCtx struct {
+		Locale        string `json:"locale"`
+		CorrelationID string `json:"correlation_id"`
+		User          Map    `json:"user"`
+	}
+
+	// ContextExporter export and import the context
+	ContextExporter interface {
+		Export(Context) (Map, error)
+		Import(Map) (Context, error)
+	}
+
+	// contextExporter export & import the context.
+	contextExporter struct {
+		ue UserExporter
+		l  Logger
+		t  Translator
+	}
+)
 
 func (e exportedCtx) validate() error {
-	if e.CorrelationID == "" || e.UserId == "" {
+	if e.CorrelationID == "" || e.User == nil {
 		return tracer.Trace(errors.New("exported data is invalid"))
 	}
 
@@ -79,12 +92,43 @@ func (c defaultContext) Translator() Translator {
 	return c.translator
 }
 
-func (c defaultContext) ToMap() Map {
+func (c defaultContext) ToMap(ue UserExporter) (Map, error) {
+	if ue == nil {
+		return nil, tracer.Trace(errors.New("user exporter can not be nil"))
+	}
+
+	exportedUser, err := ue.Export(c.User())
+	if err != nil {
+		return nil, tracer.Trace(err)
+	}
+
 	return gutil.StructToMap(exportedCtx{
 		Locale:        c.locale,
 		CorrelationID: c.CorrelationID(),
-		UserId:        c.User().Identifier().Val(),
-	})
+		User:          exportedUser,
+	}), nil
+}
+
+func (ce *contextExporter) Export(ctx Context) (Map, error) {
+	return ctx.ToMap(ce.ue)
+}
+
+func (ce *contextExporter) Import(m Map) (Context, error) {
+	e := exportedCtx{}
+	err := gutil.MapToStruct(m, &e)
+	if err != nil {
+		return nil, tracer.Trace(err)
+	}
+	if err := e.validate(); err != nil {
+		return nil, tracer.Trace(err)
+	}
+
+	u, err := ce.ue.Import(e.User)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewCtx(nil, e.CorrelationID, e.Locale, u, ce.l, ce.t), nil
 }
 
 // NewCtx returns new hexa Context.
@@ -108,28 +152,13 @@ func NewCtx(request *http.Request, correlationID string, locale string, user Use
 	return ctx
 }
 
-// CtxFromMap generate new context form the exported map by
-// another context (by using ToMap function on the context).
-func CtxFromMap(m Map, uf UserFinder, l Logger, t Translator) (Context, error) {
-	e := exportedCtx{}
-	err := gutil.MapToStruct(m, &e)
-	if err != nil {
-		return nil, tracer.Trace(err)
+// NewCtxExporter returns new instance of the ContextExporter to export and import context.
+func NewCtxExporter(ue UserExporter, l Logger, t Translator) ContextExporter {
+	return &contextExporter{
+		ue: ue,
+		l:  l,
+		t:  t,
 	}
-	if err := e.validate(); err != nil {
-		return nil, tracer.Trace(err)
-	}
-
-	u := NewGuestUser()
-
-	if e.UserId != guestUserID {
-		u, err = uf(e.UserId)
-		if err != nil {
-			return nil, tracer.Trace(err)
-		}
-	}
-
-	return NewCtx(nil, e.CorrelationID, e.Locale, u, l, t), nil
 }
 
 // tuneLogger function tune the logger for each context.
@@ -174,3 +203,4 @@ func tuneCtxTranslator(locale string, t Translator) Translator {
 
 // Assert defaultContext implements the hexa Context.
 var _ Context = &defaultContext{}
+var _ ContextExporter = &contextExporter{}

@@ -3,9 +3,13 @@ package hexa
 import (
 	"errors"
 	"github.com/Kamva/gutil"
+	"github.com/Kamva/tracer"
 )
 
 type (
+	// IDGenerator can generate fresh ID.
+	IDGenerator func() ID
+
 	// Note: although getter function in Go Don't need to start with "Get" word, but because
 	// most user models use this fields (Email,Phone,Name,...) as their database fields, we
 	// add "Get" prefix to each getter method on this interface.
@@ -66,7 +70,14 @@ type (
 	}
 
 	// UserExporter export a user to json and then import it.
-	UserExporter struct{}
+	UserExporter interface {
+		Export(user User) (Map, error)
+		Import(exportedMap Map) (User, error)
+	}
+	// userExporter implements the UserExporter interface.
+	userExporter struct {
+		idGenerator IDGenerator
+	}
 )
 
 // guestUserID is the guest user's id
@@ -141,7 +152,10 @@ func (u *user) GetPermissionsList() []string {
 }
 
 // Export method export a user to map.
-func (e UserExporter) Export(user User) map[string]interface{} {
+func (e *userExporter) Export(user User) (Map, error) {
+	if user == nil {
+		return nil, tracer.Trace(errors.New("user can not be nil"))
+	}
 	return gutil.StructToMap(exportedUser{
 		ID:       user.Identifier().Val(),
 		IsGuest:  user.IsGuest(),
@@ -151,17 +165,18 @@ func (e UserExporter) Export(user User) map[string]interface{} {
 		Username: user.GetUsername(),
 		IsActive: user.IsActive(),
 		Perms:    user.GetPermissionsList(),
-	})
+	}), nil
 }
 
 // Import method a user from map.
-func (e UserExporter) Import(id ID, exportedMap map[string]interface{}) (User, error) {
+func (e *userExporter) Import(exportedMap Map) (User, error) {
 	eu := exportedUser{}
 	err := gutil.MapToStruct(exportedMap, &eu)
 	if err != nil {
 		return nil, err
 	}
 
+	id := e.idGenerator()
 	if eu.IsGuest {
 		id = guestID(guestUserID)
 	} else {
@@ -198,8 +213,8 @@ func NewGuestUser() User {
 }
 
 // NewUserExporter returns new instance of user exporter.
-func NewUserExporter() *UserExporter {
-	return &UserExporter{}
+func NewUserExporter(idGenerator IDGenerator) UserExporter {
+	return &userExporter{idGenerator}
 }
 
 // Assert guestUser implements the User interface.
