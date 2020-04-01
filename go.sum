@@ -19,6 +19,8 @@ github.com/Kamva/gutil v0.0.0-20200317165435-549980514a84 h1:DzH+sK4nCsHe6B6usls
 github.com/Kamva/gutil v0.0.0-20200317165435-549980514a84/go.mod h1:KvaAPqUTtjac/70L9pCuNEJX0FSH7+WrTo6sariE4FM=
 github.com/Kamva/gutil v0.0.0-20200324095634-85a18fb4a696 h1:2PWo5uCMKsb1K5TebIxmrFfrBGQoQvwA51RC6U7UIWE=
 github.com/Kamva/gutil v0.0.0-20200324095634-85a18fb4a696/go.mod h1:KvaAPqUTtjac/70L9pCuNEJX0FSH7+WrTo6sariE4FM=
+github.com/Kamva/gutil v0.0.0-20200329114904-c3f6b07357cc h1:LzTgV6OtOK/a8GtDG0IueeCAsRfJjMxQq9jnD0yvFCY=
+github.com/Kamva/gutil v0.0.0-20200329114904-c3f6b07357cc/go.mod h1:KvaAPqUTtjac/70L9pCuNEJX0FSH7+WrTo6sariE4FM=
 github.com/Kamva/mgm-relation v0.0.0-20200324113035-730a602d7654 h1:J+5dRTzhIwrXBsZbIbLBRTh/okLSwQJcTGsL5llWqw4=
 github.com/Kamva/mgm-relation v0.0.0-20200324113035-730a602d7654/go.mod h1:0gVcrgpfQe4vkz05+96xB3BdJYZaOuXXB06eL+d08W8=
 github.com/Kamva/mgm/v3 v3.0.0-alpha.1 h1:IKNr4RU9RF+SFUWooyeYrMS5rskTBAZkNXr18aU96Qg=
