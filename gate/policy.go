@@ -12,8 +12,8 @@ type ResourceWithOwner interface {
 	OwnerID() hexa.ID
 }
 
-// UserOwnResourcePolicy policy returns true if the user own provided resource.
-func UserOwnResourcePolicy(c hexa.Context, u hexa.User, r interface{}) (bool, error) {
+// UserOwnsResourcePolicy policy returns true if the user own provided resource.
+func UserOwnsResourcePolicy(c hexa.Context, u hexa.User, r interface{}) (bool, error) {
 	if gutil.IsNil(r) {
 		return false, nil
 	}
@@ -25,7 +25,7 @@ func UserOwnResourcePolicy(c hexa.Context, u hexa.User, r interface{}) (bool, er
 }
 
 // DefaultPolicy is default policy for gates.
-var DefaultPolicy = UserOwnResourcePolicy
+var DefaultPolicy = UserOwnsResourcePolicy
 
 // Assertion
-var _ hexa.GatePolicy = UserOwnResourcePolicy
+var _ hexa.GatePolicy = UserOwnsResourcePolicy
