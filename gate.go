@@ -4,7 +4,8 @@ type (
 	// GatePolicy is the ABAC policy
 	GatePolicy func(ctx Context, user User, resource interface{}) (bool, error)
 
-	// GateMiddleware is the Gate middleware.
+	// GateMiddleware is the Gate middleware (this middleware will check some conditions before run policy).
+	// e.g: if user has root permission, so it returns true and dont call to the ABAC policy.
 	GateMiddleware func(GatePolicy) GatePolicy
 
 	GateAllowsOptions struct {
@@ -21,15 +22,15 @@ type (
 		// FromPolicy returns new instance of gate with provided policy.
 		FromPolicy(p GatePolicy) Gate
 
-		// Allows returns true either when one of this situations is true:
+		// Allows returns true when either one of these situations is true:
 		// - user has "mgr:{permission}" permission
-		// - user has permission {perm} and policy fn returns true.
+		// - user has permission {perm} and policy function returns true.
 		//
-		// Match expression: (has_permission "mgr:{perm}" || has_perm {perm} && policy(resource))
+		// Describe as expression: (has_permission "mgr:{perm}" || has_perm {perm} && policy(resource))
 		//
 		// Notes:
 		// - If user is guest, returns false(default).
-		// - If user is not active(dont have "active_user" permission), returns false(default)
+		// - If user is not active(user's "IsActive" method returns false), returns false(default)
 		// - If user is root, returns true (default).
 		//
 		//
@@ -40,16 +41,21 @@ type (
 		//
 		// Some tricks:
 		// - To permit to just the manager, do call like this:
-		//   Allows("mgr:review_all_payments") // return true if manager has mgr:review_all_payments permission.
+		//   Allows("mgr:review_all_payments",nil) // return true if manager has mgr:review_all_payments permission.
 		//
 		// - To permit to just manager with permission "mgr:edit_post" or user with permission "edit_post" call:
-		// 	 gate.FromPolicy(DisabledPolicy).Allows("edit_post")
+		// 	 gate.FromPolicy(DisabledPolicy).Allows("edit_post",nil)
 		//
 		// - To permit to just manager with permission "mgr:edit_post" or (user with permission "edit_post"
-		//   and permit by policy) call:  Allows("edit_post",post)
+		//   and permit by policy) call:  gate.FromPolicy(YourPolicy).Allows("edit_post",post)
+		//
+		// - To permit user with specific resource(e.g product) without checking any permission (just checking by policy function)
+		//  call: gate.fromPolicy(YourPolicy).Allows("",product)
+		//  or call: gate.fromPolicy(YourPolicy).AllowsResource(product)
 		Allows(ctx Context, perm string, resource interface{}) (bool, error)
 
 		// AllowsResource just checks policy.
+		// This is alias for call to `gate.Allows("",resource)`
 		AllowsResource(ctx Context, resource interface{}) (bool, error)
 
 		// Check user Allows to do something. Get full options.
