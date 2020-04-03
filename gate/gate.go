@@ -17,6 +17,16 @@ func (g *gate) FromPolicy(p hexa.GatePolicy) hexa.Gate {
 	return NewWithOptions(g.m, p)
 }
 
+func (g *gate) AllowsRoot(ctx hexa.Context) (bool, error) {
+	return g.AllowsWithOptions(ctx, hexa.GateAllowsOptions{
+		GateMiddleware:    g.m,
+		GatePolicy:        g.p,
+		UserPermission:    "",
+		ManagerPermission: "",
+		Resource:          nil,
+	})
+}
+
 func (g *gate) Allows(ctx hexa.Context, perm string, resource interface{}) (bool, error) {
 	managerPerm, userPerm := g.extractPerms(perm)
 	return g.AllowsWithOptions(ctx, hexa.GateAllowsOptions{

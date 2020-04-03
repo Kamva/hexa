@@ -22,6 +22,11 @@ type (
 		// FromPolicy returns new instance of gate with provided policy.
 		FromPolicy(p GatePolicy) Gate
 
+		// AllowsRoot returns true just when user has the "root" permission.
+		// This function's behavior is relative to your Gate middleware, because
+		// gate middleware should take care of the root permission.
+		AllowsRoot(Context) (bool, error)
+
 		// Allows returns true when either one of these situations is true:
 		// - user has "mgr:{permission}" permission
 		// - user has permission {perm} and policy function returns true.
