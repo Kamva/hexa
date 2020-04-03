@@ -2,6 +2,7 @@ package gate
 
 import (
 	"errors"
+	"github.com/Kamva/gutil"
 	"github.com/Kamva/hexa"
 )
 
@@ -13,6 +14,10 @@ type ResourceWithOwner interface {
 
 // UserOwnResourcePolicy policy returns true if the user own provided resource.
 func UserOwnResourcePolicy(c hexa.Context, u hexa.User, r interface{}) (bool, error) {
+	if gutil.IsNil(r) {
+		return false, nil
+	}
+
 	if m, ok := r.(ResourceWithOwner); ok {
 		return u.Identifier().Equal(m.OwnerID()), nil
 	}
