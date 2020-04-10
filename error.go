@@ -85,7 +85,7 @@ func (e defaultError) SetError(err error) Error {
 }
 
 func (e defaultError) Is(err error) bool {
-	ee, ok := tracer.Cause(err).(Error)
+	ee, ok := gutil.CauseErr(err).(Error)
 	return ok && e.Code() == ee.Code()
 }
 

@@ -1,7 +1,7 @@
 package hexa
 
 import (
-	"github.com/Kamva/tracer"
+	"github.com/Kamva/gutil"
 )
 
 type (
@@ -56,7 +56,7 @@ type (
 )
 
 func (r defaultReply) Is(err error) bool {
-	e, ok := tracer.Cause(err).(Reply)
+	e, ok := gutil.CauseErr(err).(Reply)
 	return ok && r.Code() == e.Code()
 }
 
