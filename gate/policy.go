@@ -24,6 +24,11 @@ func UserOwnsResourcePolicy(c hexa.Context, u hexa.User, r interface{}) (bool, e
 	return false, errors.New("provided resource is invalid")
 }
 
+// TruePolicy always returns true
+func TruePolicy(c hexa.Context, u hexa.User, r interface{}) (bool, error) {
+	return true, nil
+}
+
 // DefaultPolicy is default policy for gates.
 var DefaultPolicy = UserOwnsResourcePolicy
 

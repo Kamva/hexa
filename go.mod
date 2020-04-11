@@ -16,4 +16,5 @@ require (
 	go.mongodb.org/mongo-driver v1.3.0
 	go.uber.org/zap v1.14.1
 	golang.org/x/sys v0.0.0-20191228213918-04cbcbbfeed8 // indirect
+	google.golang.org/grpc v1.21.0
 )

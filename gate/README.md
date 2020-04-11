@@ -2,7 +2,7 @@
 
 Default permission check contains:
 - Deny guest.
-- Deny every user with without `activated_account` permission.
+- Deny every user without `activated_account` permission.
 - Allows every user with `root` permission to do anything.
 - check user has permission by following expression:
 ```

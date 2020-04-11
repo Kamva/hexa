@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Kamva/gutil"
 	"github.com/Kamva/tracer"
+	"google.golang.org/grpc/status"
 )
 
 type (
@@ -13,6 +14,9 @@ type (
 
 		// SetError set the internal error.
 		SetError(error) Error
+
+		// GRPCStatus converts the error to gRPC Status
+		GRPCStatus() *status.Status
 
 		//Is function satisfy Is interface of errors package.
 		Is(error) bool
@@ -35,6 +39,11 @@ type (
 		// SetParams set the Error translation parameters to use in reply translation,...
 		SetParams(params Map) Error
 
+		// Localize localize te message for you.
+		// you can store the gRPC localized error
+		// message and return it by this method.
+		Localize(t Translator) (string, error)
+
 		// Data returns the extra data of the Error (e.g show this data to user).
 		Data() Map
 
@@ -55,12 +64,13 @@ type (
 	defaultError struct {
 		error
 
-		httpStatus int
-		code       string
-		key        string
-		params     Map
-		data       Map
-		reportData Map
+		httpStatus       int
+		code             string
+		localizedMessage string
+		key              string
+		params           Map
+		data             Map
+		reportData       Map
 	}
 )
 
@@ -82,6 +92,11 @@ func (e defaultError) Error() string {
 func (e defaultError) SetError(err error) Error {
 	e.error = err
 	return e
+}
+
+func (e defaultError) GRPCStatus() *status.Status {
+	//return status.New(code.).WithDetails() // TODO: return the status
+	return nil
 }
 
 func (e defaultError) Is(err error) bool {
@@ -113,6 +128,13 @@ func (e defaultError) Params() Map {
 func (e defaultError) SetParams(params Map) Error {
 	e.params = params
 	return e
+}
+
+func (e defaultError) Localize(t Translator) (string, error) {
+	if e.localizedMessage != "" {
+		return e.localizedMessage, nil
+	}
+	return t.Translate(e.Key(), gutil.MapToKeyValue(e.Params())...)
 }
 
 func (e defaultError) Data() Map {

@@ -26,7 +26,7 @@ type (
 		// HTTPStatus returns the http status code for the reply.
 		SetHTTPStatus(status int) Reply
 
-		// Code return the reply identifier code
+		// Code return the error identifier code
 		Code() string
 
 		// Key returns unique key for each reply to use as translation key,...
