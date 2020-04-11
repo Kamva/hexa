@@ -49,7 +49,7 @@ type (
 		//   Allows("mgr:review_all_payments",nil) // return true if manager has mgr:review_all_payments permission.
 		//
 		// - To permit to just manager with permission "mgr:edit_post" or user with permission "edit_post" call:
-		// 	 gate.WithPolicy(DisabledPolicy).Allows("edit_post",nil)
+		// 	 gate.WithPolicy(TruePolicy).Allows("edit_post",nil)
 		//
 		// - To permit to just manager with permission "mgr:edit_post" or (user with permission "edit_post"
 		//   and permit by policy) call:  gate.WithPolicy(YourPolicy).Allows("edit_post",post)
