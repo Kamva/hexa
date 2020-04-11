@@ -9,7 +9,9 @@ import (
 // UserWithOwner define model that has owner.
 type ResourceWithOwner interface {
 	// Owner method returns id.
-	OwnerID() hexa.ID
+	// content of this method can be something like
+	// resourceHexaID.Equal(id)
+	OwnerIS(hexa.ID) bool
 }
 
 // UserOwnsResourcePolicy policy returns true if the user own provided resource.
@@ -19,7 +21,7 @@ func UserOwnsResourcePolicy(c hexa.Context, u hexa.User, r interface{}) (bool, e
 	}
 
 	if m, ok := r.(ResourceWithOwner); ok {
-		return u.Identifier().Equal(m.OwnerID()), nil
+		return m.OwnerIS(u.Identifier()), nil
 	}
 	return false, errors.New("provided resource is invalid")
 }
