@@ -19,8 +19,8 @@ type (
 
 	// Gate defines the gate interface.
 	Gate interface {
-		// FromPolicy returns new instance of gate with provided policy.
-		FromPolicy(p GatePolicy) Gate
+		// WithPolicy returns new instance of gate with provided policy.
+		WithPolicy(p GatePolicy) Gate
 
 		// AllowsRoot returns true just when user has the "root" permission.
 		// This function's behavior is relative to your Gate middleware, because
@@ -49,14 +49,14 @@ type (
 		//   Allows("mgr:review_all_payments",nil) // return true if manager has mgr:review_all_payments permission.
 		//
 		// - To permit to just manager with permission "mgr:edit_post" or user with permission "edit_post" call:
-		// 	 gate.FromPolicy(DisabledPolicy).Allows("edit_post",nil)
+		// 	 gate.WithPolicy(DisabledPolicy).Allows("edit_post",nil)
 		//
 		// - To permit to just manager with permission "mgr:edit_post" or (user with permission "edit_post"
-		//   and permit by policy) call:  gate.FromPolicy(YourPolicy).Allows("edit_post",post)
+		//   and permit by policy) call:  gate.WithPolicy(YourPolicy).Allows("edit_post",post)
 		//
 		// - To permit user with specific resource(e.g product) without checking any permission (just checking by policy function)
 		//  call: gate.fromPolicy(YourPolicy).Allows("",product)
-		//  or call: gate.fromPolicy(YourPolicy).AllowsResource(product)
+		//  or call: gate.WithPolicy(YourPolicy).AllowsResource(product)
 		Allows(ctx Context, perm string, resource interface{}) (bool, error)
 
 		// AllowsResource just checks policy.

@@ -13,7 +13,7 @@ type gate struct {
 	p hexa.GatePolicy
 }
 
-func (g *gate) FromPolicy(p hexa.GatePolicy) hexa.Gate {
+func (g *gate) WithPolicy(p hexa.GatePolicy) hexa.Gate {
 	return NewWithOptions(g.m, p)
 }
 
