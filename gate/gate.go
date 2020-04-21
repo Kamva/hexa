@@ -2,10 +2,8 @@
 package gate
 
 import (
-	"fmt"
 	"github.com/Kamva/gutil"
 	"github.com/Kamva/hexa"
-	"strings"
 )
 
 type gate struct {
@@ -76,10 +74,11 @@ func (g *gate) extractPerms(perm string) (managerPerm, userPerm string) {
 	if len(perm) == 0 {
 		return "", ""
 	}
-	if strings.HasPrefix(perm, "mgr:") {
+	mgrPerm := ManagerPerm(perm)
+	if mgrPerm == perm {
 		return perm, ""
 	}
-	return fmt.Sprintf("mgr:%s", perm), perm
+	return mgrPerm, perm
 }
 
 // New returns new instance of the Gate.
