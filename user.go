@@ -10,14 +10,20 @@ type (
 	// IDGenerator can generate fresh ID.
 	IDGenerator func() ID
 
+	// UserType is type of a user. possible values is :
+	// guest: Use for guest users.
+	// regular: Use for regular users of app (real registered users)
+	// service: Use for service users (microservices,...)
+	UserType string
+
 	// Note: although getter function in Go Don't need to start with "Get" word, but because
 	// most user models use this fields (Email,Phone,Name,...) as their database fields, we
 	// add "Get" prefix to each getter method on this interface.
 	User interface {
-		// Specify that user is guestUser or no.
-		IsGuest() bool
+		// Type specify user's type (guest,regular,...)
+		Type() UserType
 
-		// Return users identifier (if guestUser return just empty string or something like this.)
+		// Return users identifier
 		Identifier() ID
 
 		// GetEmail returns the user's email.
@@ -46,6 +52,7 @@ type (
 	// user is default implementation of hexa User for real users.
 	user struct {
 		id       ID
+		userType UserType
 		email    string
 		phone    string
 		name     string
@@ -54,13 +61,10 @@ type (
 		perms    []string
 	}
 
-	// guestID is implementation of specific ID
-	guestID string
-
 	// UserExporterImporter export a user to json and then import it.
 	exportedUser struct {
 		ID       interface{} `json:"id"`
-		IsGuest  bool        `json:"is_guest"`
+		Type     UserType    `json:"type"`
 		Email    string      `json:"email"`
 		Phone    string      `json:"phone"`
 		Name     string      `json:"name"`
@@ -92,47 +96,17 @@ type (
 	}
 )
 
+const (
+	UserTypeGuest   UserType = "__guest__"
+	UserTypeRegular UserType = "__regular__"
+	UserTypeService UserType = "__service__"
+)
+
 // guestUserID is the guest user's id
 var guestUserID = "__guest_id__"
 
-func (g guestID) Validate(id interface{}) error {
-	if idStr, ok := id.(string); ok && idStr == guestUserID {
-		return nil
-	}
-
-	return errors.New("guest user id is not valid")
-}
-
-func (g guestID) String() string {
-	return string(g)
-}
-
-// From function does not do anything for guest ID type,
-// implement to just satisfy the interface.
-func (g guestID) From(id interface{}) error {
-	return nil
-}
-
-// MustFrom function does not do anything for guest ID type,
-// implement to just satisfy the interface.
-func (g guestID) MustFrom(id interface{}) {
-	// empty
-}
-
-func (g guestID) Equal(hexaID ID) bool {
-	if hexaID == nil {
-		return false
-	}
-	_, ok := hexaID.(guestID)
-	return ok
-}
-
-func (g guestID) Val() interface{} {
-	return string(g)
-}
-
-func (u *user) IsGuest() bool {
-	return u.id.Equal(guestID(guestUserID))
+func (u *user) Type() UserType {
+	return u.userType
 }
 
 func (u *user) Identifier() ID {
@@ -170,7 +144,7 @@ func (e *userExporterImporter) Export(user User) (Map, error) {
 	}
 	return gutil.StructToMap(exportedUser{
 		ID:       user.Identifier().Val(),
-		IsGuest:  user.IsGuest(),
+		Type:     user.Type(),
 		Email:    user.GetEmail(),
 		Phone:    user.GetPhone(),
 		Name:     user.GetName(),
@@ -189,15 +163,15 @@ func (e *userExporterImporter) Import(exportedMap Map) (User, error) {
 	}
 
 	id := e.idGenerator()
-	if eu.IsGuest {
-		id = guestID(guestUserID)
+	if eu.Type == UserTypeGuest || eu.Type == UserTypeService {
+		id = NewStringID(eu.ID.(string))
 	} else {
 		if err := id.From(eu.ID); err != nil {
 			return nil, err
 		}
 	}
 
-	user := NewUser(id, eu.Email, eu.Phone, eu.Name, eu.Username, eu.IsActive, eu.Perms)
+	user := NewUser(id, eu.Type, eu.Email, eu.Phone, eu.Name, eu.Username, eu.IsActive, eu.Perms)
 
 	return user, nil
 }
@@ -207,9 +181,10 @@ func (u *userSDK) NewGuest() User {
 }
 
 // NewUser returns new hexa user instance.
-func NewUser(id ID, email, phone, name, username string, isActive bool, perms []string) User {
+func NewUser(id ID, utype UserType, email, phone, name, username string, isActive bool, perms []string) User {
 	return &user{
 		id:       id,
+		userType: utype,
 		email:    email,
 		phone:    phone,
 		name:     name,
@@ -217,6 +192,23 @@ func NewUser(id ID, email, phone, name, username string, isActive bool, perms []
 		isActive: isActive,
 		perms:    perms,
 	}
+}
+
+// NewGuest returns new instance of guest user.
+func NewGuest() User {
+	email := ""
+	phone := ""
+	name := "__guest__"
+	username := "__guest__username__"
+	return NewUser(NewStringID(guestUserID), UserTypeGuest, email, phone, name, username, false, []string{})
+}
+
+// NewServiceUser returns new instance of Service user.
+func NewServiceUser(id, name string, isActive bool, perms []string) User {
+	email := ""
+	phone := ""
+	username := "__service__username__"
+	return NewUser(NewStringID(id), UserTypeService, email, phone, name, username, isActive, perms)
 }
 
 // NewUserExporterImporter returns new instance of user exporter.
@@ -229,18 +221,7 @@ func NewUserSDK(ei UserExporterImporter) UserSDK {
 	return &userSDK{ei}
 }
 
-// NewGuest generate new guest user.
-func NewGuest() User {
-	// NewGuestUser returns new instance of the guest user.
-	email := ""
-	phone := ""
-	name := "__guest__"
-	username := "__guest__username__"
-	return NewUser(guestID(guestUserID), email, phone, name, username, false, []string{})
-}
-
 // Assertion
-var _ ID = guestID("")
 var _ User = &user{}
 var _ UserExporterImporter = &userExporterImporter{}
 var _ UserSDK = &userSDK{}

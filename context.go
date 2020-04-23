@@ -164,13 +164,13 @@ func NewCtxExporterImporter(ue UserExporterImporter, l Logger, t Translator) Con
 // tuneLogger function tune the logger for each context.
 func tuneCtxLogger(r *http.Request, correlationID string, u User, logger Logger) Logger {
 	tags := map[string]interface{}{
-		"__guest__":          u.IsGuest(),
+		"__user_type__":      u.Type(),
 		"__user_id__":        u.Identifier().String(),
 		"__username__":       u.GetUsername(),
 		"__correlation_id__": correlationID,
 	}
 
-	if !u.IsGuest() {
+	if u.Type() == UserTypeRegular {
 		tags["__email__"] = u.GetEmail()
 		tags["__phone__"] = u.GetPhone()
 	}
