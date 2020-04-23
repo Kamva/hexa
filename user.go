@@ -39,7 +39,7 @@ type (
 		IsActive() bool
 
 		// PermissionsList returns the use permissions list to
-		//use in RBAC access control services (like Gate).
+		// use in RBAC access control services (like Gate).
 		GetPermissionsList() []string
 	}
 
@@ -79,7 +79,7 @@ type (
 		idGenerator IDGenerator
 	}
 
-	// UserSDK is the user's kit to import,export generate guest.
+	// UserSDK is the user's kit to import, export and generate guest.
 	UserSDK interface {
 		UserExporterImporter
 		// GenerateGuest returns new Guest User.
@@ -239,7 +239,7 @@ func NewGuest() User {
 	return NewUser(guestID(guestUserID), email, phone, name, username, false, []string{})
 }
 
-// Assert guestUser implements the User interface.
+// Assertion
 var _ ID = guestID("")
 var _ User = &user{}
 var _ UserExporterImporter = &userExporterImporter{}
