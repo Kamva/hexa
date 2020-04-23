@@ -207,7 +207,7 @@ func NewGuest() User {
 func NewServiceUser(id, name string, isActive bool, perms []string) User {
 	email := ""
 	phone := ""
-	username := "__service__username__"
+	username := "__service_username__"
 	return NewUser(NewStringID(id), UserTypeService, email, phone, name, username, isActive, perms)
 }
 
