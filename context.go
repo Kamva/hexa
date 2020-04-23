@@ -166,13 +166,13 @@ func tuneCtxLogger(r *http.Request, correlationID string, u User, logger Logger)
 	tags := map[string]interface{}{
 		"__user_type__":      u.Type(),
 		"__user_id__":        u.Identifier().String(),
-		"__username__":       u.GetUsername(),
+		"__username__":       u.Username(),
 		"__correlation_id__": correlationID,
 	}
 
 	if u.Type() == UserTypeRegular {
-		tags["__email__"] = u.GetEmail()
-		tags["__phone__"] = u.GetPhone()
+		tags["__email__"] = u.Email()
+		tags["__phone__"] = u.Phone()
 	}
 
 	if r != nil {

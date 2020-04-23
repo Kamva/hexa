@@ -54,7 +54,7 @@ func (g *gate) allowsManager(user hexa.User, perm string) bool {
 	if perm == "" {
 		return false
 	}
-	return gutil.Contains(user.GetPermissionsList(), perm)
+	return gutil.Contains(user.PermissionsList(), perm)
 }
 
 // allowsUser check if user has specified permission.
@@ -62,7 +62,7 @@ func (g *gate) allowsUser(user hexa.User, perm string) bool {
 	if perm == "" {
 		return true
 	}
-	return gutil.Contains(user.GetPermissionsList(), perm)
+	return gutil.Contains(user.PermissionsList(), perm)
 }
 
 // extractPerms generate manager permission and user permission from provided

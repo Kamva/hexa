@@ -20,7 +20,7 @@ func DefaultMiddleware(o DefaultMiddlewareOptions) hexa.GateMiddleware {
 	}
 	return func(policy hexa.GatePolicy) hexa.GatePolicy {
 		return func(ctx hexa.Context, user hexa.User, resource interface{}) (b bool, err error) {
-			permList := user.GetPermissionsList()
+			permList := user.PermissionsList()
 			// Check guest user
 			if o.DenyGuest && user.Type() == hexa.UserTypeGuest {
 				return false, nil

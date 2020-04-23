@@ -16,37 +16,35 @@ type (
 	// service: Use for service users (microservices,...)
 	UserType string
 
-	// Note: although getter function in Go Don't need to start with "Get" word, but because
-	// most user models use this fields (Email,Phone,Name,...) as their database fields, we
-	// add "Get" prefix to each getter method on this interface.
+	// User who sends request to the app (can be guest,regular user,service user,...)
 	User interface {
-		// Type specify user's type (guest,regular,...)
+		// Type specifies user's type (guest,regular,...)
 		Type() UserType
 
-		// Return users identifier
+		// Identifier returns user's identifier
 		Identifier() ID
 
-		// GetEmail returns the user's email.
+		// Email returns the user's email.
 		// This value can be empty.
-		GetEmail() string
+		Email() string
 
-		// GetPhone returns the user's phone number.
+		// Phone returns the user's phone number.
 		// This value can be empty.
-		GetPhone() string
+		Phone() string
 
-		// Return the user name.
-		GetName() string
+		// Name returns the user name.
+		Name() string
 
 		// Username can be unique username,email,phone number or
-		// everything else that can use as username.
-		GetUsername() string
+		// everything else which can be used as username.
+		Username() string
 
 		// IsActive specify that user is active or no.
 		IsActive() bool
 
 		// PermissionsList returns the use permissions list to
 		// use in RBAC access control services (like Gate).
-		GetPermissionsList() []string
+		PermissionsList() []string
 	}
 
 	// user is default implementation of hexa User for real users.
@@ -113,19 +111,19 @@ func (u *user) Identifier() ID {
 	return u.id
 }
 
-func (u *user) GetEmail() string {
+func (u *user) Email() string {
 	return u.email
 }
 
-func (u *user) GetPhone() string {
+func (u *user) Phone() string {
 	return u.phone
 }
 
-func (u *user) GetName() string {
+func (u *user) Name() string {
 	return u.name
 }
 
-func (u *user) GetUsername() string {
+func (u *user) Username() string {
 	return u.email
 }
 
@@ -133,7 +131,7 @@ func (u *user) IsActive() bool {
 	return u.isActive
 }
 
-func (u *user) GetPermissionsList() []string {
+func (u *user) PermissionsList() []string {
 	return u.perms
 }
 
@@ -145,12 +143,12 @@ func (e *userExporterImporter) Export(user User) (Map, error) {
 	return gutil.StructToMap(exportedUser{
 		ID:       user.Identifier().Val(),
 		Type:     user.Type(),
-		Email:    user.GetEmail(),
-		Phone:    user.GetPhone(),
-		Name:     user.GetName(),
-		Username: user.GetUsername(),
+		Email:    user.Email(),
+		Phone:    user.Phone(),
+		Name:     user.Name(),
+		Username: user.Username(),
 		IsActive: user.IsActive(),
-		Perms:    user.GetPermissionsList(),
+		Perms:    user.PermissionsList(),
 	}), nil
 }
 
