@@ -54,7 +54,7 @@ func (i *hexaID) Val() interface{} {
 	return i.id
 }
 
-func (i *hexaID) Equal(hexaID hexa.ID) bool {
+func (i *hexaID) IsEqual(hexaID hexa.ID) bool {
 	if hexaID == nil {
 		return false
 	}

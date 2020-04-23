@@ -27,8 +27,8 @@ type (
 		// Val returns the native id value (e.g ObjectID in mongo, ...).
 		Val() interface{}
 
-		// Equal say that two hexa id are equal or not.
-		Equal(ID) bool
+		// IsEqual say that two hexa id are equal or not.
+		IsEqual(ID) bool
 	}
 
 	// stringID implements the ID with string type (use as "guest user's id" or "service user id").
@@ -68,7 +68,7 @@ func (s *stringID) Val() interface{} {
 	return string(*s)
 }
 
-func (s *stringID) Equal(id ID) bool {
+func (s *stringID) IsEqual(id ID) bool {
 	if id == nil || s == nil {
 		return false
 	}
@@ -85,4 +85,4 @@ func NewStringID(id string) ID {
 }
 
 // Assertion
-var _ ID = NewStringID("")
+var _ ID = new(stringID)

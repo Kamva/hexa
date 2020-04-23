@@ -10,7 +10,7 @@ import (
 type ResourceWithOwner interface {
 	// GateCheckOwnerIs method returns id.
 	// content of this method can be something like
-	// resourceHexaID.Equal(id)
+	// resourceHexaID.IsEqual(id)
 	GateCheckOwnerIS(hexa.ID) bool
 }
 
