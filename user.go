@@ -161,6 +161,11 @@ func (e *userExporterImporter) Import(exportedMap Map) (User, error) {
 	}
 
 	id := e.idGenerator()
+
+	// By convention guest and service users use stringID type,
+	// but for user we should generate, because each app can
+	// uses specific database with specific implemented userID
+	//type.
 	if eu.Type == UserTypeGuest || eu.Type == UserTypeService {
 		id = NewStringID(eu.ID.(string))
 	} else {

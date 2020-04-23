@@ -26,20 +26,19 @@ config := hexaconfig.NewViperDriver(v)
 ```
 
 #### Proposal
-- [ ] We can implement `WithUser` method to the context to change its user.  
+- [ ] We can implement `WithUser` method on the context to change its user.  
 e.g: in each cron job maybe we need to get a user, so after get the user, we can call to this
 method to set the user as context's user.
 
-- [ ] We can implement `WithPermission` method on `User` interface to add a permissino to user's 
+- [ ] We can implement `WithPermission` method on `User` interface to add a permission to the user's 
 permissions temporary.  
-e.g: in cron jobs we need to add something that needs to root permission, so we can add to our cron job's guest user
+e.g: In cron jobs we need to add something that needs to root permission, so we can add to our cron job's guest user
 root permission temporary (with specific middleware that skip guests check) to do that job. 
 
-- [ ] We should implement Distributed tracing by zipkin and open tracing and also use it in gRPC,... . but I think this
-should be in service mesh not in business logic.
+- [ ] We should implement Distributed tracing by using zipkin and open tracing and also use it in gRPC,... . but I think this
+should be in the service mesh not in the business logic.
 
 #### Todo
-- [ ] Collection presenter
 - [ ] Write Tests
 - [ ] Add badges to readme.
 - [ ] CI

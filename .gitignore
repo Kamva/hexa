@@ -10,3 +10,6 @@
 # Coverage output files
 coverage.txt
 coverage.html
+
+# Docs
+docs/private
