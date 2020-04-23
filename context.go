@@ -14,6 +14,9 @@ type (
 	Context interface {
 		context.Context
 
+		// WithUser returns new instance of context with provided user.
+		WithUser(User) Context
+
 		// Request returns the current request and can be nil for not http requests.
 		Request() *http.Request
 
@@ -35,12 +38,14 @@ type (
 
 	defaultContext struct {
 		context.Context
-		locale        string
-		request       *http.Request
-		correlationID string
-		user          User
-		logger        Logger
-		translator    Translator
+		baseLogger     Logger
+		baseTranslator Translator
+		locale         string
+		request        *http.Request
+		correlationID  string
+		user           User
+		logger         Logger
+		translator     Translator
 	}
 
 	// exportedCtx use export and import Context.
@@ -70,6 +75,10 @@ func (e exportedCtx) validate() error {
 	}
 
 	return nil
+}
+
+func (c defaultContext) WithUser(user User) Context {
+	return NewCtx(c.request, c.correlationID, c.locale, user, c.baseLogger, c.baseTranslator)
 }
 
 func (c defaultContext) Request() *http.Request {
@@ -134,21 +143,20 @@ func (ce *contextExporterImporter) Import(m Map) (Context, error) {
 // NewCtx returns new hexa Context.
 // locale syntax is just same as HTTP Accept-Language header.
 func NewCtx(request *http.Request, correlationID string, locale string, user User, logger Logger, translator Translator) Context {
-	logger = tuneCtxLogger(request, correlationID, user, logger)
-	translator = tuneCtxTranslator(locale, translator)
-
 	ctx := &defaultContext{
-		Context:       context.Background(),
-		request:       request,
-		locale:        locale,
-		correlationID: correlationID,
-		user:          user,
-		logger:        logger,
-		translator:    translator,
+		Context:        context.Background(),
+		baseLogger:     logger,
+		baseTranslator: translator,
+		request:        request,
+		locale:         locale,
+		correlationID:  correlationID,
+		user:           user,
+		logger:         logger,
+		translator:     tuneCtxTranslator(locale, translator),
 	}
 
 	// Bind context to the context's logger.
-	ctx.logger = logger.With(ctx)
+	ctx.logger =  tuneCtxLogger(request, correlationID, user, logger).With(ctx)
 	return ctx
 }
 
