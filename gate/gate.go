@@ -17,7 +17,6 @@ func (g *gate) WithPolicy(p hexa.GatePolicy) hexa.Gate {
 
 func (g *gate) AllowsRoot(ctx hexa.Context) (bool, error) {
 	return g.AllowsWithOptions(ctx, hexa.GateAllowsOptions{
-		GateMiddleware:    g.m,
 		GatePolicy:        g.p,
 		UserPermission:    "",
 		ManagerPermission: "",
@@ -28,7 +27,6 @@ func (g *gate) AllowsRoot(ctx hexa.Context) (bool, error) {
 func (g *gate) Allows(ctx hexa.Context, perm string, resource interface{}) (bool, error) {
 	managerPerm, userPerm := g.extractPerms(perm)
 	return g.AllowsWithOptions(ctx, hexa.GateAllowsOptions{
-		GateMiddleware:    g.m,
 		GatePolicy:        g.p,
 		UserPermission:    userPerm,
 		ManagerPermission: managerPerm,
@@ -41,10 +39,14 @@ func (g *gate) AllowsResource(ctx hexa.Context, resource interface{}) (bool, err
 }
 
 func (g *gate) AllowsWithOptions(c hexa.Context, options hexa.GateAllowsOptions) (bool, error) {
+	return g.m(g.handler)(c, options)
+}
+
+func (g *gate) handler(c hexa.Context, options hexa.GateAllowsOptions) (bool, error) {
 	user := c.User()
 	allowsManager := g.allowsManager(user, options.ManagerPermission)
 	allowsUser := g.allowsUser(user, options.UserPermission)
-	policyIsOk, err := options.GateMiddleware(options.GatePolicy)(c, user, options.Resource)
+	policyIsOk, err := options.GatePolicy(c, user, )
 
 	return allowsManager || (allowsUser && policyIsOk), err
 }
@@ -96,3 +98,4 @@ func NewWithOptions(m hexa.GateMiddleware, p hexa.GatePolicy) hexa.Gate {
 }
 
 var _ hexa.Gate = &gate{}
+var _ hexa.GateHandler = (&gate{}).handler

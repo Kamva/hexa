@@ -6,28 +6,26 @@ import (
 	"github.com/Kamva/hexa"
 )
 
-// UserWithOwner define model that has owner.
+// ResourceWithOwner specify user is owner of specific resource or not.
 type ResourceWithOwner interface {
-	// GateCheckOwnerIs method returns id.
-	// content of this method can be something like
-	// resourceHexaID.IsEqual(id)
+	// GateCheckOwnerIs specifies provided id is id of the resource owner or not.
 	GateCheckOwnerIS(hexa.ID) bool
 }
 
 // UserOwnsResourcePolicy policy returns true if the user own provided resource.
-func UserOwnsResourcePolicy(c hexa.Context, u hexa.User, r interface{}) (bool, error) {
-	if gutil.IsNil(r) {
+func UserOwnsResourcePolicy(c hexa.Context, resource interface{}) (bool, error) {
+	if gutil.IsNil(resource) {
 		return false, nil
 	}
-
-	if m, ok := r.(ResourceWithOwner); ok {
+	u := c.User()
+	if m, ok := resource.(ResourceWithOwner); ok {
 		return m.GateCheckOwnerIS(u.Identifier()), nil
 	}
 	return false, errors.New("provided resource is invalid")
 }
 
 // TruePolicy always returns true
-func TruePolicy(c hexa.Context, u hexa.User, r interface{}) (bool, error) {
+func TruePolicy(c hexa.Context, r interface{}) (bool, error) {
 	return true, nil
 }
 
@@ -36,3 +34,4 @@ var DefaultPolicy = UserOwnsResourcePolicy
 
 // Assertion
 var _ hexa.GatePolicy = UserOwnsResourcePolicy
+var _ hexa.GatePolicy = TruePolicy

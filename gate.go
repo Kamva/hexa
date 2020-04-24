@@ -2,14 +2,17 @@ package hexa
 
 type (
 	// GatePolicy is the ABAC policy
-	GatePolicy func(ctx Context, user User, resource interface{}) (bool, error)
+	GatePolicy func(ctx Context, resource interface{}) (bool, error)
+
+	// GateHandler handle gate authorization requests.
+	GateHandler func(Context, GateAllowsOptions) (bool, error)
 
 	// GateMiddleware is the Gate middleware (this middleware will check some conditions before run policy).
 	// e.g: if user has root permission, so it returns true and dont call to the ABAC policy.
-	GateMiddleware func(GatePolicy) GatePolicy
+	GateMiddleware func(GateHandler) GateHandler
 
+	// GateAllowsOptions contains options which provide to the gate on authorization
 	GateAllowsOptions struct {
-		GateMiddleware // Gate can has just one GateMiddleware middleware.
 		GatePolicy
 
 		UserPermission    string
@@ -44,9 +47,13 @@ type (
 		// check the "mgr:create_post" permission also and if user hvs mgr:create_post permission we return
 		// true, otherwise check user policy is true and user has create_post permission.
 		//
-		// Some tricks:
-		// - To permit to just the manager, do call like this:
+		// Examples:
+		// - To permit to the manager:
 		//   Allows("mgr:review_all_payments",nil) // return true if manager has mgr:review_all_payments permission.
+		//
+		// - To permit to just manager with permission "mgr:create_post" or (user with permission "create_post" and
+		//   also check provided user_id in the payload is the current user's id), call:
+		// 	 gate.Allows("edit_post",gate.NewEmptyResourceWithOwner(userID))
 		//
 		// - To permit to just manager with permission "mgr:edit_post" or user with permission "edit_post" call:
 		// 	 gate.WithPolicy(TruePolicy).Allows("edit_post",nil)
@@ -60,7 +67,7 @@ type (
 		Allows(ctx Context, perm string, resource interface{}) (bool, error)
 
 		// AllowsResource just checks policy.
-		// This is alias for call to `gate.Allows("",resource)`
+		// This is alias for call to `gate.Allows(ctx,"",resource)`
 		AllowsResource(ctx Context, resource interface{}) (bool, error)
 
 		// Check user Allows to do something. Get full options.

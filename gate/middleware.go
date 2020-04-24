@@ -18,26 +18,23 @@ func DefaultMiddleware(o DefaultMiddlewareOptions) hexa.GateMiddleware {
 	if o.RootPermName == "" {
 		o.RootPermName = "root"
 	}
-	return func(policy hexa.GatePolicy) hexa.GatePolicy {
-		return func(ctx hexa.Context, user hexa.User, resource interface{}) (b bool, err error) {
+	return func(h hexa.GateHandler) hexa.GateHandler {
+		return func(ctx hexa.Context, handlerOptions hexa.GateAllowsOptions) (b bool, err error) {
+			user := ctx.User()
 			permList := user.PermissionsList()
 			// Check guest user
 			if o.DenyGuest && user.Type() == hexa.UserTypeGuest {
 				return false, nil
 			}
 			// Check user activation
-			if o.DenyDeactivatedUser && !user.IsActive() { // TODO: How we should share same values?
-
+			if o.DenyDeactivatedUser && !user.IsActive() {
 				return false, nil
 			}
 			// check root
-			if o.AllowRoot && gutil.Contains(permList, "root") { // TODO: replace root word with shared defined variable.
+			if o.AllowRoot && gutil.Contains(permList, "root") {
 				return true, nil
 			}
-			return policy(ctx, user, resource)
+			return h(ctx, handlerOptions)
 		}
 	}
 }
-
-// Assertion
-var _ hexa.GateMiddleware = DefaultMiddleware(DefaultMiddlewareOptions{})

@@ -196,7 +196,6 @@ func tuneCtxLogger(r *http.Request, correlationID string, u User, logger Logger)
 	}
 
 	logger = logger.WithFields(gutil.MapToKeyValue(tags)...)
-
 	return logger
 }
 
