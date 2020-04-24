@@ -25,13 +25,19 @@ var (
 )
 
 // Pages represents a paginated list of data items.
-type Pages struct {
-	Page       int         `json:"page"`
-	PerPage    int         `json:"per_page"`
-	PageCount  int         `json:"page_count"`
-	TotalCount int         `json:"total_count"`
-	Items      interface{} `json:"items"`
-}
+type (
+	Pagination struct {
+		Page       int `json:"page"`
+		PerPage    int `json:"per_page"`
+		PageCount  int `json:"page_count"`
+		TotalCount int `json:"total_count"`
+	}
+
+	Pages struct {
+		Pagination `json:"pagination"`
+		Items      interface{} `json:"items"`
+	}
+)
 
 // New creates a new Pages instance.
 // The page parameter is 1-based and refers to the current page index/number.
@@ -57,10 +63,12 @@ func New(page, perPage, total int) *Pages {
 	}
 
 	return &Pages{
-		Page:       page,
-		PerPage:    perPage,
-		TotalCount: total,
-		PageCount:  pageCount,
+		Pagination: Pagination{
+			Page:       page,
+			PerPage:    perPage,
+			TotalCount: total,
+			PageCount:  pageCount,
+		},
 	}
 }
 
