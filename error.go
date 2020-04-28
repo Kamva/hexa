@@ -185,10 +185,12 @@ func NewError(httpStatus int, code string, key string, err error) Error {
 }
 
 // NewError returns new instance the Error interface.
-func NewLocalizedError(code string, key string, localizedMsg string) Error {
+func NewLocalizedError(status int, code string, localizedMsg string, err error) Error {
 	return defaultError{
+		error:            err,
+		httpStatus:       status,
 		code:             code,
-		key:              key,
+		key:              TranslateKeyEmptyMessage,
 		localizedMessage: localizedMsg,
 		params:           make(Map),
 		data:             make(Map),
