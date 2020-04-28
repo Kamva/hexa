@@ -21,4 +21,4 @@ type (
 )
 
 // TranslateKeyEmptyMessage is special key that translators return empty string for that.
-var TranslateKeyEmptyMessage = "__empty_message__"
+const TranslateKeyEmptyMessage = "__empty_message__"

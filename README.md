@@ -26,9 +26,7 @@ config := hexaconfig.NewViperDriver(v)
 ```
 
 #### Proposal
-- [ ] We can implement `WithUser` method on the context to change its user.  
-e.g: in each cron job maybe we need to get a user, so after get the user, we can call to this
-method to set the user as context's user.
+- [ ] Replace http status code with gRPC status code in our errors (also maybe in replies).
 
 - [ ] We can implement `WithPermission` method on `User` interface to add a permission to the user's 
 permissions temporary.  

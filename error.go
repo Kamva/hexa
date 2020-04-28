@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/Kamva/gutil"
 	"github.com/Kamva/tracer"
-	"google.golang.org/grpc/status"
 )
 
 type (
@@ -14,9 +13,6 @@ type (
 
 		// SetError set the internal error.
 		SetError(error) Error
-
-		// GRPCStatus converts the error to gRPC Status
-		GRPCStatus() *status.Status
 
 		//Is function satisfy Is interface of errors package.
 		Is(error) bool
@@ -92,11 +88,6 @@ func (e defaultError) Error() string {
 func (e defaultError) SetError(err error) Error {
 	e.error = err
 	return e
-}
-
-func (e defaultError) GRPCStatus() *status.Status {
-	//return status.New(code.).WithDetails() // TODO: return the status
-	return nil
 }
 
 func (e defaultError) Is(err error) bool {
@@ -190,6 +181,18 @@ func NewError(httpStatus int, code string, key string, err error) Error {
 		params:     make(Map),
 		data:       make(Map),
 		reportData: make(Map),
+	}
+}
+
+// NewError returns new instance the Error interface.
+func NewLocalizedError(code string, key string, localizedMsg string) Error {
+	return defaultError{
+		code:             code,
+		key:              key,
+		localizedMessage: localizedMsg,
+		params:           make(Map),
+		data:             make(Map),
+		reportData:       make(Map),
 	}
 }
 

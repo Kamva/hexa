@@ -2,7 +2,7 @@ package hexa
 
 // LogConfigLevel is the config key to say that level of log should use.
 // you can using it to detect the generic log level of the package.
-var LogConfigLevel = "log.level"
+const LogConfigLevel = "log.level"
 
 type Logger interface {
 
