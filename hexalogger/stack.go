@@ -80,6 +80,8 @@ func NewStackLoggerDriver(cfg hexa.Config) (hexa.Logger, error) {
 		switch strings.ToLower(loggerName) {
 		case "zap":
 			logger = NewZapDriver(cfg)
+		case "printer":
+			logger = NewPrinterDriver()
 		case "sentry":
 			logger, err = NewSentryDriver(cfg)
 			if err != nil {
