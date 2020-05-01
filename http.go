@@ -9,19 +9,22 @@ type HttpRespBody struct {
 	debug     bool
 	debugData Map
 
-	Code    string `json:"code,omitempty" mapstructure:"code"`
-	Message string `json:"message,omitempty" mapstructure:"message"`
-	Data    Map    `json:"data,omitempty" mapstructure:"data"`
+	Code    string `json:"code" mapstructure:"code"`
+	Message string `json:"message" mapstructure:"message"`
+	Data    Map    `json:"data" mapstructure:"data"`
 }
 
 // MarshalJSON marshall the body to json value.
 func (b HttpRespBody) MarshalJSON() ([]byte, error) {
 	m := map[string]interface{}{
-		"code":    b.Code,
-		"message": b.Message,
-		"data":    b.Data,
+		"code": b.Code,
 	}
-
+	if b.Message != "" {
+		m["message"] = b.Message
+	}
+	if b.Data != nil {
+		m["data"] = b.Data
+	}
 	if b.debug {
 		m["__debug__"] = b.debugData
 	}
