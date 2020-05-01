@@ -7,6 +7,7 @@ package pagination
 
 import (
 	"bytes"
+	"github.com/Kamva/gutil"
 	"net/http"
 	"testing"
 
@@ -91,7 +92,7 @@ func Test_parseInt(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := parseInt(tt.args.value, tt.args.defaultValue); got != tt.want {
+			if got := gutil.ParseInt(tt.args.value, tt.args.defaultValue); got != tt.want {
 				t.Errorf("parseInt() = %v, want %v", got, tt.want)
 			}
 		})

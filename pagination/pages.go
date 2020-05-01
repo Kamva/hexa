@@ -8,8 +8,8 @@ package pagination
 
 import (
 	"fmt"
+	"github.com/Kamva/gutil"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -75,20 +75,9 @@ func New(page, perPage, total int) *Pages {
 // NewFromRequest creates a Pages object using the query parameters found in the given HTTP request.
 // count stands for the total number of items. Use -1 if this is unknown.
 func NewFromRequest(req *http.Request, count int) *Pages {
-	page := parseInt(req.URL.Query().Get(PageVar), 1)
-	perPage := parseInt(req.URL.Query().Get(PageSizeVar), DefaultPageSize)
+	page := gutil.ParseInt(req.URL.Query().Get(PageVar), 1)
+	perPage := gutil.ParseInt(req.URL.Query().Get(PageSizeVar), DefaultPageSize)
 	return New(page, perPage, count)
-}
-
-// parseInt parses a string into an integer. If parsing is failed, defaultValue will be returned.
-func parseInt(value string, defaultValue int) int {
-	if value == "" {
-		return defaultValue
-	}
-	if result, err := strconv.Atoi(value); err == nil {
-		return result
-	}
-	return defaultValue
 }
 
 // Offset returns the OFFSET value that can be used in a SQL statement.
