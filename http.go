@@ -9,9 +9,9 @@ type HttpRespBody struct {
 	debug     bool
 	debugData Map
 
-	Code    string `json:"code" mapstructure:"code"`
-	Message string `json:"message" mapstructure:"message"`
-	Data    Map   `json:"data" mapstructure:"data"`
+	Code    string `json:"code,omitempty" mapstructure:"code"`
+	Message string `json:"message,omitempty" mapstructure:"message"`
+	Data    Map    `json:"data,omitempty" mapstructure:"data"`
 }
 
 // MarshalJSON marshall the body to json value.
