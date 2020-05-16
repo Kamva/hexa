@@ -1,5 +1,7 @@
 #### Hexa contain services kit.
 
+__Note : Hexa is in progress and does not have any stable release.__
+
 #### Requirements:
 go : minimum version `1.13`
 
