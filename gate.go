@@ -4,7 +4,7 @@ type (
 	// GatePolicy is the ABAC policy
 	GatePolicy func(ctx Context, resource interface{}) (bool, error)
 
-	// GateHandler handle gate authorization requests.
+	// GateHandler handles gate authorization requests.
 	GateHandler func(Context, GateAllowsOptions) (bool, error)
 
 	// GateMiddleware is the Gate middleware (this middleware will check some conditions before run policy).
