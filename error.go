@@ -82,7 +82,7 @@ func (e defaultError) Error() string {
 		return e.error.Error()
 	}
 
-	return ""
+	return fmt.Sprintf("Error with code: %s",e.Code())
 }
 
 func (e defaultError) SetError(err error) Error {
