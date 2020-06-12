@@ -51,8 +51,8 @@ func (m *FieldMask) String() string {
 	return strings.Join(m.paths, ",")
 }
 
-// MaskMakPaths mask all paths in the provided map with the provided depth.
-func MaskMakPaths(m hexa.Map, mask *FieldMask, depth int) {
+// MaskMapPaths mask all paths in the provided map with the provided depth.
+func MaskMapPaths(m hexa.Map, mask *FieldMask, depth int) {
 	mask.SetPaths(gutil.MapPathExtractor{Depth: depth, Separator: "."}.Extract(m))
 }
 
