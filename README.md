@@ -38,6 +38,8 @@ root permission temporary (with specific middleware that skip guests check) to d
 - [ ] We should implement Distributed tracing by using zipkin and open tracing and also use it in gRPC,... . but I think this
 should be in the service mesh not in the business logic.
 
+- [ ] Implement a service (e.g `Ping`) which should implement by all of the Hexa services to check health of that service [**Accepted**].
+
 #### Todo
 - [ ] Write Tests
 - [ ] Add badges to readme.
