@@ -7,16 +7,21 @@ import (
 	"github.com/Kamva/gutil"
 	"github.com/Kamva/hexa"
 	"github.com/Kamva/tracer"
+	"reflect"
 	"strings"
 )
 
-// FieldMask contains masked fields in input,output,...
-// use it to detect which fields provided by user for in PATCH request.
+// FieldMask mask keep list of masked paths of a struct|map|...
+// and then you can check whether a path|struct field is masked or not.
+// Use it to detect which fields provided by a user in a PATCH request.
+// Note: you can specify mask path of each field of a struct by set the
+// "mask" tag, otherwise it check the "json" tag.
 type FieldMask struct {
-	paths []string
+	paths        []string
+	maskedFields []interface{}
 }
 
-func (m *FieldMask) UnmarshalJSON(b []byte) error {
+func (fm *FieldMask) UnmarshalJSON(b []byte) error {
 	// Check null values
 	if string(b) == "null" {
 		return nil
@@ -27,28 +32,105 @@ func (m *FieldMask) UnmarshalJSON(b []byte) error {
 	}
 
 	val := string(b[1 : len(b)-1])
-	m.SetPaths([]string{})
+	fm.SetPaths([]string{})
 	if len(val) != 0 {
-		m.SetPaths(strings.Split(val, ","))
+		fm.SetPaths(strings.Split(val, ","))
 	}
 	return nil
 }
 
-func (m *FieldMask) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf(`"%s"`, strings.Join(m.paths, ","))), nil
+func (fm *FieldMask) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf(`"%s"`, strings.Join(fm.paths, ","))), nil
 }
 
-func (m *FieldMask) SetPaths(paths []string) {
-	m.paths = paths
+// SetPaths sets the masked paths
+func (fm *FieldMask) SetPaths(paths []string) {
+	fm.paths = paths
 }
 
-// IsMasked specifies whether the provided path is masked or not.
-func (m *FieldMask) IsMasked(path string) bool {
-	return gutil.Contains(m.paths, path)
+// PathIsMasked tel you whether the provided path is masked or not.
+func (fm *FieldMask) PathIsMasked(path string) bool {
+	return gutil.Contains(fm.paths, path)
 }
 
-func (m *FieldMask) String() string {
-	return strings.Join(m.paths, ",")
+// IsMasked gets a struct field and specifies whether that
+// field is masked or not. before call to this method you
+// must call to the Mask() method to mask a struct.
+// Note: provided value must be pointer to the value.
+// even if the field is a pointer, you must provide
+// pointer to that pointer field.
+func (fm *FieldMask) IsMasked(i interface{}) bool {
+	if reflect.TypeOf(i).Kind() != reflect.Ptr {
+		panic("value must be interface")
+	}
+	if fm.maskedFields == nil {
+		panic("you must mask a struct before invoking the \"IsMasked\" method")
+	}
+	for _, f := range fm.maskedFields {
+		if f == i {
+			return true
+		}
+	}
+	return false
+}
+
+// Mask masks a struct's fields and then you can check
+// to detect whether a field of that struct is masked or not.
+// Note: provided value must be pointer to a struct.
+func (fm *FieldMask) Mask(s interface{}) {
+	v := reflect.ValueOf(s)
+	if v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.Struct {
+		panic("provided value must be a pointer to a struct")
+	}
+
+	fm.maskedFields = fm.maskStruct("", v)
+}
+
+// maskStruct get a reflect Value of pointer to struct and
+// add all masked fields of the struct to the masked fields
+// list.
+// Note: provided value must be a pointer of a value otherwise
+// it panic.
+func (fm *FieldMask) maskStruct(pathPrefix string, v reflect.Value) []interface{} {
+	if v.IsNil() || v.Elem().Kind() != reflect.Struct {
+		return nil
+	}
+	iv := v.Elem()
+	it := iv.Type()
+	maskList := make([]interface{}, 0)
+	for i := 0; i < it.NumField(); i++ {
+		fieldValue := iv.Field(i)
+
+		path := fm.pathOf(it.Field(i).Tag)
+		// if mask value of a field is not specified, we must ignore it
+		if path == "" {
+			continue
+		}
+		if pathPrefix != "" {
+			path = fmt.Sprintf("%s.%s", pathPrefix, path)
+		}
+		if fm.PathIsMasked(path) {
+			maskList = append(maskList, fieldValue.Addr().Interface())
+		}
+
+		maskList = append(maskList, fm.maskStruct(path, fieldValue.Addr())...)
+	}
+
+	return maskList
+}
+
+// String returns joined paths which divided by "," rune.
+func (fm *FieldMask) String() string {
+	return strings.Join(fm.paths, ",")
+}
+
+// pathOf gets a StructTag and extracts the mask path
+// from the "mask" or "json" tag values.
+func (fm *FieldMask) pathOf(tag reflect.StructTag) string {
+	if v, ok := tag.Lookup("mask"); ok {
+		return v
+	}
+	return tag.Get("json")
 }
 
 // MaskMapPaths mask all paths in the provided map with the provided depth.
