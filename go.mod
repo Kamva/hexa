@@ -3,8 +3,8 @@ module github.com/Kamva/hexa
 go 1.13
 
 require (
-	github.com/Kamva/gutil v0.0.0-20200612221531-e622e23dfb37
-	github.com/Kamva/mgm-relation v0.0.0-20200324113035-730a602d7654
+	github.com/Kamva/gutil v0.0.0-20200613071917-167e96babaec
+	github.com/Kamva/mgm-relation v0.0.0-20200610073737-a878b1ea02f9
 	github.com/Kamva/mgm/v3 v3.0.0-alpha.2
 	github.com/Kamva/tracer v0.0.0-20200410105359-fd5aa0f880a8
 	github.com/getsentry/sentry-go v0.5.1
