@@ -62,35 +62,13 @@ func (l *sentryLogger) setUser(scope *sentry.Scope, user hexa.User, r *http.Requ
 	scope.SetUser(u)
 }
 
-func (l *sentryLogger) setRequest(scope *sentry.Scope, r *http.Request) {
-
-	headers := make(map[string]string)
-	for k, v := range r.Header {
-		headers[k] = fmt.Sprintf("%v", v)
-	}
-	var env map[string]string
-	if addr, port, err := net.SplitHostPort(r.RemoteAddr); err == nil {
-		env = map[string]string{"REMOTE_ADDR": addr, "REMOTE_PORT": port}
-	}
-
-	scope.SetRequest(sentry.Request{
-		URL:         r.URL.String(),
-		Method:      r.Method,
-		Data:        "",
-		QueryString: r.URL.RawQuery,
-		Cookies:     "",
-		Headers:     headers,
-		Env:         env,
-	})
-}
-
 func (l *sentryLogger) With(ctx hexa.Context, args ...interface{}) hexa.Logger {
 	hub := l.hub.Clone()
 	scope := hub.Scope()
 
 	r := ctx.Request()
 	if r != nil {
-		l.setRequest(scope, r)
+		scope.SetRequest(r)
 	}
 
 	l.setUser(scope, ctx.User(), r)
