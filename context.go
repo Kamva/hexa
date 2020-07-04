@@ -9,8 +9,9 @@ import (
 	"net/http"
 )
 
-// Context is the hexa context to use in services.
+
 type (
+	// Context is the hexa context to use in services.
 	Context interface {
 		context.Context
 
