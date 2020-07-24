@@ -42,9 +42,8 @@ type (
 		// IsActive specify that user is active or no.
 		IsActive() bool
 
-		// PermissionsList returns the use permissions list to
-		// use in RBAC access control services (like Gate).
-		PermissionsList() []string
+		// Roles returns user's roles.
+		Roles() []string
 	}
 
 	// user is default implementation of hexa User for real users.
@@ -56,7 +55,7 @@ type (
 		name     string
 		username string
 		isActive bool
-		perms    []string
+		roles    []string
 	}
 
 	// UserExporterImporter export a user to json and then import it.
@@ -68,7 +67,7 @@ type (
 		Name     string      `json:"name"`
 		Username string      `json:"username"`
 		IsActive bool        `json:"is_active"`
-		Perms    []string    `json:"perms"`
+		Roles    []string    `json:"roles"`
 	}
 
 	// UserExporterImporter export a user to json and then import it.
@@ -131,8 +130,8 @@ func (u *user) IsActive() bool {
 	return u.isActive
 }
 
-func (u *user) PermissionsList() []string {
-	return u.perms
+func (u *user) Roles() []string {
+	return u.roles
 }
 
 // Export method export a user to map.
@@ -148,7 +147,7 @@ func (e *userExporterImporter) Export(user User) (Map, error) {
 		Name:     user.Name(),
 		Username: user.Username(),
 		IsActive: user.IsActive(),
-		Perms:    user.PermissionsList(),
+		Roles:    user.Roles(),
 	}), nil
 }
 
@@ -174,7 +173,7 @@ func (e *userExporterImporter) Import(exportedMap Map) (User, error) {
 		}
 	}
 
-	user := NewUser(id, eu.Type, eu.Email, eu.Phone, eu.Name, eu.Username, eu.IsActive, eu.Perms)
+	user := NewUser(id, eu.Type, eu.Email, eu.Phone, eu.Name, eu.Username, eu.IsActive, eu.Roles)
 
 	return user, nil
 }
@@ -184,7 +183,7 @@ func (u *userSDK) NewGuest() User {
 }
 
 // NewUser returns new hexa user instance.
-func NewUser(id ID, utype UserType, email, phone, name, username string, isActive bool, perms []string) User {
+func NewUser(id ID, utype UserType, email, phone, name, username string, isActive bool, roles []string) User {
 	return &user{
 		id:       id,
 		userType: utype,
@@ -193,7 +192,7 @@ func NewUser(id ID, utype UserType, email, phone, name, username string, isActiv
 		name:     name,
 		username: username,
 		isActive: isActive,
-		perms:    perms,
+		roles:    roles,
 	}
 }
 
@@ -207,11 +206,11 @@ func NewGuest() User {
 }
 
 // NewServiceUser returns new instance of Service user.
-func NewServiceUser(id, name string, isActive bool, perms []string) User {
+func NewServiceUser(id, name string, isActive bool, roles []string) User {
 	email := ""
 	phone := ""
 	username := "__service_username__"
-	return NewUser(NewStringID(id), UserTypeService, email, phone, name, username, isActive, perms)
+	return NewUser(NewStringID(id), UserTypeService, email, phone, name, username, isActive, roles)
 }
 
 // NewUserExporterImporter returns new instance of user exporter.
