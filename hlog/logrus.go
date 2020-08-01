@@ -1,4 +1,4 @@
-package hexalogger
+package hlog
 
 import (
 	"github.com/Kamva/gutil"

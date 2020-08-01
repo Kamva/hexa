@@ -36,6 +36,7 @@ should be in the service mesh not in the business logic.
 - [ ] Implement a service (e.g `Ping`) which should implement by all of the Hexa services to check health of that service [**Accepted**].
 
 #### Todo
+- [ ] Where we are checking log level on logger initialization step?
 - [ ] Change all of kamva packages from uppercase to lowercase.
 - [ ] Write Tests
 - [ ] Add badges to readme.

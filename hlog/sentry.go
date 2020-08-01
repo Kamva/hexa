@@ -1,4 +1,4 @@
-package hexalogger
+package hlog
 
 import (
 	"errors"
@@ -14,7 +14,7 @@ type sentryLogger struct {
 	hub *sentry.Hub
 }
 
-var (
+const (
 	LogConfigKeySentryDSN          = "log.sentry.dsn"
 	LogConfigKeySentryEnvirontment = "log.sentry.environment"
 )

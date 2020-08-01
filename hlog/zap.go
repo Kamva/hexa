@@ -1,4 +1,4 @@
-package hexalogger
+package hlog
 
 import (
 	"github.com/Kamva/hexa"
@@ -10,7 +10,7 @@ type zapLogger struct {
 }
 
 func (l *zapLogger) Core() interface{} {
-	return l.logger
+	return l.logger.Fatal
 }
 
 func (l *zapLogger) With(ctx hexa.Context, keyValues ...interface{}) hexa.Logger {

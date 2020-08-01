@@ -1,4 +1,4 @@
-package hexalogger
+package hlog
 
 import (
 	"fmt"
@@ -7,7 +7,8 @@ import (
 )
 
 type printerLogger struct {
-	with map[string]interface{}
+	level Level
+	with  map[string]interface{}
 }
 
 func (l *printerLogger) Core() interface{} {
@@ -41,32 +42,42 @@ func (l *printerLogger) WithFields(args ...interface{}) hexa.Logger {
 	return l.With(nil, args...)
 }
 
+func (l *printerLogger) log(level Level, i ...interface{}) {
+	if l.level.CanLog(level) {
+		fmt.Println(fmt.Sprintf("%s: ", level), l.with, i)
+	}
+}
+
 func (l *printerLogger) Debug(i ...interface{}) {
-	fmt.Println("Debug: ", l.with, i)
+	l.log(DebugLevel, i...)
 }
 
 func (l *printerLogger) Info(i ...interface{}) {
-	fmt.Println("Info: ", l.with, i)
+	l.log(InfoLevel, i...)
 }
 
 func (l *printerLogger) Message(i ...interface{}) {
-	fmt.Println("Message: ", l.with, i)
+	l.log(MessageLevel, i...)
 }
 
 func (l *printerLogger) Warn(i ...interface{}) {
-	fmt.Println("Warn: ", l.with, i)
+	l.log(WarnLevel, i...)
 }
 
 func (l *printerLogger) Error(i ...interface{}) {
-	fmt.Println("Error: ", l.with, i)
+	l.log(ErrorLevel, i...)
 }
 
-// NewPrinterDriver return new instance of hexa logger
+// NewPrinterDriver returns new instance of hexa logger
 // with printer driver.
 // Note: printer logger driver is just for test purpose.
 // dont use it in production.
 func NewPrinterDriver() hexa.Logger {
-	return &printerLogger{with: map[string]interface{}{}}
+	return NewPrinterDriverWith(DebugLevel)
+}
+
+func NewPrinterDriverWith(l Level) hexa.Logger {
+	return &printerLogger{level: l, with: map[string]interface{}{}}
 }
 
 // Assert printerLogger implements hexa Logger.

@@ -7,8 +7,8 @@ const LogConfigLevel = "log.level"
 type Logger interface {
 
 	// Core function returns the logger core concrete struct.
-	// this is because in sometimes we need to convert one logger
-	// interface to another and need to logger code.
+	// this is because sometimes we need to convert one logger
+	// interface to another and need to the concrete logger.
 	Core() interface{}
 
 	// With get the hexa context and some keyValues

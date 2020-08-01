@@ -1,4 +1,4 @@
-package hexalogger
+package hlog
 
 import (
 	"fmt"
@@ -11,9 +11,7 @@ type stackedLogger struct {
 	stack []hexa.Logger
 }
 
-var (
-	LogConfigKeyStack = "log.stack"
-)
+const LogConfigKeyStack = "log.stack"
 
 func (l *stackedLogger) Core() interface{} {
 	return l.stack
