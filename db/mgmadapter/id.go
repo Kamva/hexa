@@ -2,8 +2,8 @@ package mgmadapter
 
 import (
 	"errors"
-	"github.com/Kamva/hexa"
-	"github.com/Kamva/tracer"
+	"github.com/kamva/hexa"
+	"github.com/kamva/tracer"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

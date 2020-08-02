@@ -2,8 +2,8 @@ package hlog
 
 import (
 	"fmt"
-	"github.com/Kamva/gutil"
-	"github.com/Kamva/hexa"
+	"github.com/kamva/gutil"
+	"github.com/kamva/hexa"
 )
 
 type printerLogger struct {

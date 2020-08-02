@@ -1,8 +1,8 @@
 package hlog
 
 import (
-	"github.com/Kamva/gutil"
-	"github.com/Kamva/hexa"
+	"github.com/kamva/gutil"
+	"github.com/kamva/hexa"
 	"github.com/sirupsen/logrus"
 )
 

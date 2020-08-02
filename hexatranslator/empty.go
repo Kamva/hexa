@@ -1,6 +1,6 @@
 package hexatranslator
 
-import "github.com/Kamva/hexa"
+import "github.com/kamva/hexa"
 
 // emptyDriver is just empty translator driver for test purpose.
 type emptyDriver struct{}

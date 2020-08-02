@@ -2,8 +2,8 @@ package hexa
 
 import (
 	"errors"
-	"github.com/Kamva/gutil"
-	"github.com/Kamva/tracer"
+	"github.com/kamva/gutil"
+	"github.com/kamva/tracer"
 )
 
 type (

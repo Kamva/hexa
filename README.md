@@ -7,7 +7,7 @@ go : minimum version `1.13`
 
 #### Install
 ```
-go get github.com/Kamva/hexa
+go get github.com/kamva/hexa
 ```
 
 #### Available Services:

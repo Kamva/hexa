@@ -1,6 +1,6 @@
 package hlog
 
-import "github.com/Kamva/hexa"
+import "github.com/kamva/hexa"
 
 // initialize global with a simple printerDriver as default
 // global logger until you change it in bootstrap stage of

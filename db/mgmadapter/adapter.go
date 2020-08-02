@@ -2,7 +2,7 @@ package mgmadapter
 
 import (
 	"errors"
-	"github.com/Kamva/tracer"
+	"github.com/kamva/tracer"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

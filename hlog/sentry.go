@@ -3,8 +3,8 @@ package hlog
 import (
 	"errors"
 	"fmt"
-	"github.com/Kamva/gutil"
-	"github.com/Kamva/hexa"
+	"github.com/kamva/gutil"
+	"github.com/kamva/hexa"
 	"github.com/getsentry/sentry-go"
 	"net"
 	"net/http"

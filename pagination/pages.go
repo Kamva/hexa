@@ -8,7 +8,7 @@ package pagination
 
 import (
 	"fmt"
-	"github.com/Kamva/gutil"
+	"github.com/kamva/gutil"
 	"net/http"
 	"strings"
 )

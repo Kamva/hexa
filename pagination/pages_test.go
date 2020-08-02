@@ -7,7 +7,7 @@ package pagination
 
 import (
 	"bytes"
-	"github.com/Kamva/gutil"
+	"github.com/kamva/gutil"
 	"net/http"
 	"testing"
 

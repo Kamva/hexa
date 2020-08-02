@@ -3,8 +3,8 @@ package hexa
 import (
 	"context"
 	"errors"
-	"github.com/Kamva/gutil"
-	"github.com/Kamva/tracer"
+	"github.com/kamva/gutil"
+	"github.com/kamva/tracer"
 	"net"
 	"net/http"
 )

@@ -1,9 +1,9 @@
 package hexatranslator
 
 import (
-	"github.com/Kamva/gutil"
-	"github.com/Kamva/hexa"
-	"github.com/Kamva/tracer"
+	"github.com/kamva/gutil"
+	"github.com/kamva/hexa"
+	"github.com/kamva/tracer"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 )
 

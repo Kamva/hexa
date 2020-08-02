@@ -3,7 +3,7 @@ package hexa
 import (
 	"errors"
 	"fmt"
-	"github.com/Kamva/tracer"
+	"github.com/kamva/tracer"
 )
 
 type (

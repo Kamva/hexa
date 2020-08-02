@@ -1,8 +1,8 @@
 package hexaconfig
 
 import (
-	"github.com/Kamva/hexa"
-	"github.com/Kamva/tracer"
+	"github.com/kamva/hexa"
+	"github.com/kamva/tracer"
 	"github.com/spf13/viper"
 )
 

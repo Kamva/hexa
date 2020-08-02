@@ -2,8 +2,8 @@ package hexa
 
 import (
 	"encoding/json"
-	"github.com/Kamva/gutil"
-	"github.com/Kamva/tracer"
+	"github.com/kamva/gutil"
+	"github.com/kamva/tracer"
 )
 
 //--------------------------------

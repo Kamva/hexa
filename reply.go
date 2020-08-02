@@ -1,7 +1,7 @@
 package hexa
 
 import (
-	"github.com/Kamva/gutil"
+	"github.com/kamva/gutil"
 )
 
 type (

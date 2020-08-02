@@ -1,7 +1,7 @@
 package hlog
 
 import (
-	"github.com/Kamva/hexa"
+	"github.com/kamva/hexa"
 	"go.uber.org/zap"
 )
 

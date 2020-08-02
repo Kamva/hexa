@@ -1,10 +1,10 @@
 package mgmadapter
 
 import (
-	"github.com/Kamva/hexa"
-	mgmrel "github.com/Kamva/mgm-relation"
+	"github.com/kamva/hexa"
+	mgmrel "github.com/kamva/mgm-relation"
 	"github.com/Kamva/mgm/v3"
-	"github.com/Kamva/tracer"
+	"github.com/kamva/tracer"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
