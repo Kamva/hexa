@@ -26,19 +26,11 @@ type (
 		// HTTPStatus returns the http status code for the reply.
 		SetHTTPStatus(status int) Reply
 
-		// Code return the error identifier code
-		Code() string
-
-		// Key returns unique key for each reply to use as translation key,...
-		Key() string
-
-		// Params returns params of the reply to use in translation,...
-		Params() Map
-
-		// SetParams set the reply parameters to use in reply translation,...
-		SetParams(params Map) Reply
+		// ID is reply identifier
+		ID() string
 
 		// Data returns the extra data of the reply (e.g show this data to user).
+		// Note: we use data as translation prams also.
 		Data() Map
 
 		// SetData set the reply data as extra data of the reply to show to the user.
@@ -48,16 +40,14 @@ type (
 	// defaultReply implements the Reply interface.
 	defaultReply struct {
 		httpStatus int
-		code       string
-		key        string
-		params     Map
+		id         string
 		data       Map
 	}
 )
 
 func (r defaultReply) Is(err error) bool {
 	e, ok := gutil.CauseErr(err).(Reply)
-	return ok && r.Code() == e.Code()
+	return ok && r.ID() == e.ID()
 }
 
 // Error implements to just satisfy the Reply and error interface.
@@ -75,21 +65,8 @@ func (r defaultReply) SetHTTPStatus(status int) Reply {
 	return r
 }
 
-func (r defaultReply) Code() string {
-	return r.code
-}
-
-func (r defaultReply) Key() string {
-	return r.key
-}
-
-func (r defaultReply) Params() Map {
-	return r.params
-}
-
-func (r defaultReply) SetParams(params Map) Reply {
-	r.params = params
-	return r
+func (r defaultReply) ID() string {
+	return r.id
 }
 
 func (r defaultReply) Data() Map {
@@ -102,16 +79,13 @@ func (r defaultReply) SetData(data Map) Reply {
 }
 
 // NewReply returns new instance the Reply interface implemented by defaultReply.
-func NewReply(httpStatus int, code string, key string) Reply {
+func NewReply(httpStatus int, id string) Reply {
 	return defaultReply{
 		httpStatus: httpStatus,
-		code:       code,
-		key:        key,
-		params:     make(Map),
+		id:         id,
 		data:       make(Map),
 	}
 }
-
 
 // Assert defaultReply implements the Error interface.
 var _ Reply = defaultReply{}
