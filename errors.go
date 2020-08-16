@@ -10,5 +10,5 @@ import (
 //--------------------------------
 
 var (
-	ErrInvalidID = NewError(http.StatusBadRequest, "entity.invalid_id", errors.New("id value is invalid"))
+	ErrInvalidID = NewError(http.StatusBadRequest, "lib.entity.invalid_id", errors.New("id value is invalid"))
 )

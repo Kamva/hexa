@@ -24,7 +24,8 @@ type (
 		SetHTTPStatus(status int) Error
 
 		// ID is error's identifier. its format should be
-		// something like "product.variant.not_found" or "hexa.jwt.not_found" .
+		// something like "product.variant.not_found" or "lib.jwt.not_found" .
+		// as a convention we prefix our base packages (all hexa packages) with "lib".
 		ID() string
 
 		// Localize localize te message for you.
@@ -66,7 +67,7 @@ const (
 	// messages over all of packages. use this to have just one
 	// internal_error translation key in your translation system.
 	// TODO: remove this key if we don't use it in our projects.
-	ErrKeyInternalError = "internal_error"
+	ErrKeyInternalError = "lib.internal_error"
 )
 
 func (e defaultError) Error() string {
