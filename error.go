@@ -23,17 +23,9 @@ type (
 		// HTTPStatus returns the http status code for the reply.
 		SetHTTPStatus(status int) Error
 
-		// Code return the Error identifier code
-		Code() string
-
-		// Key returns unique key for each Error to use as translation key,...
-		Key() string
-
-		// Params returns params of the Error to use in translation,...
-		Params() Map
-
-		// SetParams set the Error translation parameters to use in reply translation,...
-		SetParams(params Map) Error
+		// ID is error's identifier. its format should be
+		// something like "product.variant.not_found" or "hexa.jwt.not_found" .
+		ID() string
 
 		// Localize localize te message for you.
 		// you can store the gRPC localized error
@@ -41,6 +33,7 @@ type (
 		Localize(t Translator) (string, error)
 
 		// Data returns the extra data of the Error (e.g show this data to user).
+		// Note: we use data as translation prams also.
 		Data() Map
 
 		// SetData set the Error data as extra data of the Error to show to the user.
@@ -61,10 +54,8 @@ type (
 		error
 
 		httpStatus       int
-		code             string
+		id               string
 		localizedMessage string
-		key              string
-		params           Map
 		data             Map
 		reportData       Map
 	}
@@ -74,7 +65,8 @@ const (
 	// ErrorKeyInternalError is the internal error key in Error
 	// messages over all of packages. use this to have just one
 	// internal_error translation key in your translation system.
-	ErrKeyInternalError = "err_internal_error"
+	// TODO: remove this key if we don't use it in our projects.
+	ErrKeyInternalError = "internal_error"
 )
 
 func (e defaultError) Error() string {
@@ -82,7 +74,7 @@ func (e defaultError) Error() string {
 		return e.error.Error()
 	}
 
-	return fmt.Sprintf("Error with code: %s",e.Code())
+	return fmt.Sprintf("Error with id: %s", e.ID())
 }
 
 func (e defaultError) SetError(err error) Error {
@@ -92,7 +84,7 @@ func (e defaultError) SetError(err error) Error {
 
 func (e defaultError) Is(err error) bool {
 	ee, ok := gutil.CauseErr(err).(Error)
-	return ok && e.Code() == ee.Code()
+	return ok && e.ID() == ee.ID()
 }
 
 func (e defaultError) HTTPStatus() int {
@@ -104,28 +96,15 @@ func (e defaultError) SetHTTPStatus(status int) Error {
 	return e
 }
 
-func (e defaultError) Code() string {
-	return e.code
-}
-
-func (e defaultError) Key() string {
-	return e.key
-}
-
-func (e defaultError) Params() Map {
-	return e.params
-}
-
-func (e defaultError) SetParams(params Map) Error {
-	e.params = params
-	return e
+func (e defaultError) ID() string {
+	return e.id
 }
 
 func (e defaultError) Localize(t Translator) (string, error) {
 	if e.localizedMessage != "" {
 		return e.localizedMessage, nil
 	}
-	return t.Translate(e.Key(), gutil.MapToKeyValue(e.Params())...)
+	return t.Translate(e.ID(), gutil.MapToKeyValue(e.Data())...)
 }
 
 func (e defaultError) Data() Map {
@@ -149,7 +128,7 @@ func (e defaultError) SetReportData(data Map) Error {
 func (e defaultError) ReportIfNeeded(l Logger, t Translator) bool {
 	if e.shouldReport() {
 		data := map[string]interface{}{
-			"__code__":        e.Code(),
+			"__error_id__":    e.ID(),
 			"__http_status__": e.HTTPStatus(),
 			"__data__":        e.Data(),
 			"__report__":      e.ReportData(),
@@ -172,27 +151,23 @@ func (e defaultError) shouldReport() bool {
 }
 
 // NewError returns new instance the Error interface.
-func NewError(httpStatus int, code string, key string, err error) Error {
+func NewError(httpStatus int, id string, err error) Error {
 	return defaultError{
 		error:      err,
 		httpStatus: httpStatus,
-		code:       code,
-		key:        key,
-		params:     make(Map),
+		id:         id,
 		data:       make(Map),
 		reportData: make(Map),
 	}
 }
 
 // NewError returns new instance the Error interface.
-func NewLocalizedError(status int, code string, localizedMsg string, err error) Error {
+func NewLocalizedError(status int, id string, localizedMsg string, err error) Error {
 	return defaultError{
 		error:            err,
 		httpStatus:       status,
-		code:             code,
-		key:              TranslateKeyEmptyMessage,
+		id:               id,
 		localizedMessage: localizedMsg,
-		params:           make(Map),
 		data:             make(Map),
 		reportData:       make(Map),
 	}
