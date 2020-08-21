@@ -3,21 +3,22 @@ package hlog
 import (
 	"errors"
 	"fmt"
+	"github.com/getsentry/sentry-go"
 	"github.com/kamva/gutil"
 	"github.com/kamva/hexa"
-	"github.com/getsentry/sentry-go"
 	"net"
 	"net/http"
 )
 
+type SentryOptions struct {
+	DSN         string
+	Debug       bool
+	Environment string
+}
+
 type sentryLogger struct {
 	hub *sentry.Hub
 }
-
-const (
-	LogConfigKeySentryDSN          = "log.sentry.dsn"
-	LogConfigKeySentryEnvirontment = "log.sentry.environment"
-)
 
 func (l *sentryLogger) Core() interface{} {
 	return l.hub
@@ -107,11 +108,11 @@ func (l *sentryLogger) Error(i ...interface{}) {
 }
 
 // NewSentryDriver return new instance of hexa logger with sentry driver.
-func NewSentryDriver(config hexa.Config) (hexa.Logger, error) {
+func NewSentryDriver(o SentryOptions) (hexa.Logger, error) {
 	client, err := sentry.NewClient(sentry.ClientOptions{
-		Dsn:         config.GetString(LogConfigKeySentryDSN),
-		Debug:       config.GetBool("DEBUG"),
-		Environment: config.GetString(LogConfigKeySentryEnvirontment),
+		Dsn:         o.DSN,
+		Debug:       o.Debug,
+		Environment: o.Environment,
 	})
 	if err != nil {
 		return nil, err

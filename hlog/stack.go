@@ -11,7 +11,6 @@ type stackedLogger struct {
 	stack []hexa.Logger
 }
 
-const LogConfigKeyStack = "log.stack"
 
 func (l *stackedLogger) Core() interface{} {
 	return l.stack
@@ -65,10 +64,15 @@ func (l *stackedLogger) Error(i ...interface{}) {
 	}
 }
 
+type LoggerOptions interface {
+	Zap() ZapOptions
+	Printer() PrinterOptions
+	Sentry() SentryOptions
+}
+
 // NewStackLoggerDriver return new stacked logger .
 // If logger name is invalid,it will return error.
-func NewStackLoggerDriver(cfg hexa.Config) (hexa.Logger, error) {
-	stackList := cfg.GetList(LogConfigKeyStack)
+func NewStackLoggerDriver(stackList []string, opts LoggerOptions) (hexa.Logger, error) {
 	stack := make([]hexa.Logger, len(stackList))
 
 	for i, loggerName := range stackList {
@@ -77,11 +81,11 @@ func NewStackLoggerDriver(cfg hexa.Config) (hexa.Logger, error) {
 
 		switch strings.ToLower(loggerName) {
 		case "zap":
-			logger = NewZapDriver(cfg)
+			logger = NewZapDriver(opts.Zap())
 		case "printer":
-			logger = NewPrinterDriver()
+			logger = NewPrinterDriver(opts.Printer())
 		case "sentry":
-			logger, err = NewSentryDriver(cfg)
+			logger, err = NewSentryDriver(opts.Sentry())
 			if err != nil {
 				return nil, tracer.Trace(err)
 			}

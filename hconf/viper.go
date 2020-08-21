@@ -1,4 +1,4 @@
-package hexaconfig
+package hconf
 
 import (
 	"github.com/kamva/hexa"
@@ -7,20 +7,16 @@ import (
 )
 
 type viperConfig struct {
-	*viper.Viper
+	v *viper.Viper
 }
 
 func (v *viperConfig) Unmarshal(instance interface{}) error {
-	return tracer.Trace(v.Viper.Unmarshal(instance))
-}
-
-func (v *viperConfig) GetList(key string) []string {
-	return v.GetStringSlice(key)
+	return tracer.Trace(v.v.Unmarshal(instance))
 }
 
 // NewViperDriver returns new instance of viper driver.
 func NewViperDriver(viper *viper.Viper) hexa.Config {
-	return &viperConfig{Viper: viper}
+	return &viperConfig{v: viper}
 }
 
 // Assert viperConfig is type of hexa Config

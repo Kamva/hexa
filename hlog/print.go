@@ -33,7 +33,7 @@ func (l *printerLogger) With(ctx hexa.Context, keyValues ...interface{}) hexa.Lo
 	m, _ := gutil.KeyValuesToMap(keyValues...)
 	gutil.ExtendMap(newWith, m, true)
 
-	newLogger := NewPrinterDriver().(*printerLogger)
+	newLogger := NewPrinterDriver(PrinterOptions{}).(*printerLogger)
 	newLogger.with = newWith
 	return newLogger
 }
@@ -68,11 +68,14 @@ func (l *printerLogger) Error(i ...interface{}) {
 	l.log(ErrorLevel, i...)
 }
 
+type PrinterOptions struct {
+}
+
 // NewPrinterDriver returns new instance of hexa logger
 // with printer driver.
 // Note: printer logger driver is just for test purpose.
 // dont use it in production.
-func NewPrinterDriver() hexa.Logger {
+func NewPrinterDriver(o PrinterOptions) hexa.Logger {
 	return NewPrinterDriverWith(DebugLevel)
 }
 
