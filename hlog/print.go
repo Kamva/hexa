@@ -68,14 +68,13 @@ func (l *printerLogger) Error(i ...interface{}) {
 	l.log(ErrorLevel, i...)
 }
 
-type PrinterOptions struct {
-}
+
 
 // NewPrinterDriver returns new instance of hexa logger
 // with printer driver.
 // Note: printer logger driver is just for test purpose.
 // dont use it in production.
-func NewPrinterDriver(o PrinterOptions) hexa.Logger {
+func NewPrinterDriver() hexa.Logger {
 	return NewPrinterDriverWith(DebugLevel)
 }
 
