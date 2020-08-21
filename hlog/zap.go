@@ -45,14 +45,14 @@ func (l *zapLogger) Error(i ...interface{}) {
 }
 
 type ZapOptions struct {
-	IsDebug bool
+	Debug bool
 	// TODO: set level also
 }
 
 // NewZapDriver return new instance of hexa logger with zap driver.
 func NewZapDriver(o ZapOptions) hexa.Logger {
 	l, _ := zap.NewProduction()
-	if o.IsDebug {
+	if o.Debug {
 		l, _ = zap.NewDevelopment()
 	}
 	return NewZapDriverWith(l.Sugar())
