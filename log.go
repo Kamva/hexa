@@ -1,9 +1,5 @@
 package hexa
 
-// LogConfigLevel is the config key to say that level of log should use.
-// you can using it to detect the generic log level of the package.
-const LogConfigLevel = "log.level"
-
 type Logger interface {
 
 	// Core function returns the logger core concrete struct.
