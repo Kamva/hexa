@@ -22,7 +22,7 @@ type Client struct {
 	baseUrl *string
 }
 
-func New(baseUrl *string) *Client {
+func NewClient(baseUrl *string) *Client {
 	return &Client{
 		Client:  &http.Client{},
 		baseUrl: baseUrl,
