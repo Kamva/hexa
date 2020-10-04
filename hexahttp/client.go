@@ -8,50 +8,42 @@ import (
 	"github.com/kamva/tracer"
 	"io"
 	"net/http"
-	"net/url"
+	urlpkg "net/url"
 	"path"
 	"strings"
 )
 
-type ClientConfig struct {
-	// optional base uri for all requests (exclude
-	// absolute  http url provided in requests).
-	BaseURI      *string
-	AuthProvider AuthProvider
-}
-
+// RequestOption is like middleware which can change request before the client send it.
 type RequestOption func(req *http.Request) error
 
 // Client is improved version of the net/http client
 type Client struct {
 	*http.Client
-	baseURI      *string
-	authProvider AuthProvider
+	baseUrl *string
 }
 
-func New(cfg ClientConfig) *Client {
+func New(baseUrl *string) *Client {
 	return &Client{
-		Client:       &http.Client{},
-		baseURI:      cfg.BaseURI,
-		authProvider: cfg.AuthProvider,
+		Client:  &http.Client{},
+		baseUrl: baseUrl,
 	}
 }
 
-func (c *Client) PostFormWithOptions(uri string, data url.Values, options ...RequestOption) (*http.Response, error) {
-	return c.PostWithOptions(uri, "application/x-www-form-urlencoded", strings.NewReader(data.Encode()), options...)
+func (c *Client) PostFormWithOptions(url string, data urlpkg.Values, options ...RequestOption) (*http.Response, error) {
+	return c.PostWithOptions(url, "application/x-www-form-urlencoded", strings.NewReader(data.Encode()), options...)
 }
 
-func (c *Client) PostJsonFormWithOptions(uri string, data hexa.Map, options ...RequestOption) (*http.Response, error) {
+func (c *Client) PostJsonFormWithOptions(urlPath string, data hexa.Map, options ...RequestOption) (*http.Response, error) {
 	rBody, err := json.Marshal(data)
 	if err != nil {
 		return nil, tracer.Trace(err)
 	}
 
-	return c.PostWithOptions(uri, "application/json;charset=UTF-8", bytes.NewBuffer(rBody), options...)
+	return c.PostWithOptions(urlPath, "application/json;charset=UTF-8", bytes.NewBuffer(rBody), options...)
 }
 
-func (c *Client) PostWithOptions(uri string, contentType string, body io.Reader, options ...RequestOption) (*http.Response, error) {
-	u, err := c.URL(uri)
+func (c *Client) PostWithOptions(url string, contentType string, body io.Reader, options ...RequestOption) (*http.Response, error) {
+	u, err := c.URL(url)
 	if err != nil {
 		return nil, tracer.Trace(err)
 	}
@@ -64,8 +56,8 @@ func (c *Client) PostWithOptions(uri string, contentType string, body io.Reader,
 	return c.DoWithOptions(req, options...)
 }
 
-func (c *Client) GetWithOptions(uri string, options ...RequestOption) (*http.Response, error) {
-	u, err := c.URL(uri)
+func (c *Client) GetWithOptions(url string, options ...RequestOption) (*http.Response, error) {
+	u, err := c.URL(url)
 	if err != nil {
 		return nil, tracer.Trace(err)
 	}
@@ -77,12 +69,12 @@ func (c *Client) GetWithOptions(uri string, options ...RequestOption) (*http.Res
 	return c.DoWithOptions(req, options...)
 }
 
-func (c *Client) DoWithOptions(req *http.Request, options ...RequestOption) (*http.Response, error) {
-	if err := c.setOptions(req, options...); err != nil {
+func (c *Client) DoWithOptions(url *http.Request, options ...RequestOption) (*http.Response, error) {
+	if err := c.setOptions(url, options...); err != nil {
 		return nil, tracer.Trace(err)
 	}
 
-	res, err := c.Client.Do(req)
+	res, err := c.Client.Do(url)
 	if err != nil {
 		return nil, tracer.Trace(err)
 	}
@@ -90,25 +82,25 @@ func (c *Client) DoWithOptions(req *http.Request, options ...RequestOption) (*ht
 	return res, nil
 }
 
-func (c *Client) URL(uri string) (*url.URL, error) {
-	if isValidURL(uri) {
-		return url.Parse(uri)
+func (c *Client) URL(url string) (*urlpkg.URL, error) {
+	if isValidURL(url) {
+		return urlpkg.Parse(url)
 	}
 
-	if c.baseURI == nil {
-		return nil, tracer.Trace(errors.New("client's base uri is nil, you must provide absolute url for each request"))
+	if c.baseUrl == nil {
+		return nil, tracer.Trace(errors.New("provide client base url otherwise client needs absolute url for each request"))
 	}
 
-	u, err := url.Parse(*c.baseURI)
+	u, err := urlpkg.Parse(*c.baseUrl)
 	if err != nil {
 		return nil, tracer.Trace(err)
 	}
 
-	isAbsolutePath := len(uri) > 0 && uri[0] == '/'
+	isAbsolutePath := len(url) > 0 && url[0] == '/'
 	if isAbsolutePath {
-		u.Path = uri
+		u.Path = url
 	} else {
-		u.Path = path.Join(u.Path, uri)
+		u.Path = path.Join(u.Path, url)
 	}
 
 	return u, nil
