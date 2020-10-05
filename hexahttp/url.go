@@ -2,8 +2,6 @@ package hexahttp
 
 import (
 	"errors"
-	"fmt"
-	"github.com/kamva/hexa"
 	"github.com/kamva/tracer"
 	urlpkg "net/url"
 	"path"
