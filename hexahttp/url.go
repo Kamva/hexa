@@ -59,15 +59,3 @@ func (u *URL) getFromBase(urlPath string) (*urlpkg.URL, error) {
 
 	return resultUrl, nil
 }
-
-func UrlQueryParams(params hexa.Map) URLOption {
-	return func(u *urlpkg.URL) error {
-		q := u.Query()
-
-		for k, v := range params {
-			q.Add(k, fmt.Sprint(v))
-		}
-		u.RawQuery = q.Encode()
-		return nil
-	}
-}
