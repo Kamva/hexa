@@ -27,12 +27,6 @@ func AuthorizationToken(tName string, token string) RequestOption {
 func QueryParams(params hexa.Map) RequestOption {
 	return func(req *http.Request) error {
 		u := req.URL
-		q := u.Query()
-
-		for k, v := range params {
-			q.Add(k, fmt.Sprint(v))
-		}
-		u.RawQuery = q.Encode()
-		return nil
+		return UrlQueryParams(params)(u)
 	}
 }

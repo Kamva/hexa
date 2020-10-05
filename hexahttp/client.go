@@ -3,13 +3,11 @@ package hexahttp
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"github.com/kamva/hexa"
 	"github.com/kamva/tracer"
 	"io"
 	"net/http"
 	urlpkg "net/url"
-	"path"
 	"strings"
 )
 
@@ -43,7 +41,7 @@ func (c *Client) PostJsonFormWithOptions(urlPath string, data hexa.Map, options 
 }
 
 func (c *Client) PostWithOptions(url string, contentType string, body io.Reader, options ...RequestOption) (*http.Response, error) {
-	u, err := c.URL(url)
+	u, err := NewURL(c.baseUrl).URL(url)
 	if err != nil {
 		return nil, tracer.Trace(err)
 	}
@@ -57,7 +55,7 @@ func (c *Client) PostWithOptions(url string, contentType string, body io.Reader,
 }
 
 func (c *Client) GetWithOptions(url string, options ...RequestOption) (*http.Response, error) {
-	u, err := c.URL(url)
+	u, err := NewURL(c.baseUrl).URL(url)
 	if err != nil {
 		return nil, tracer.Trace(err)
 	}
@@ -80,30 +78,6 @@ func (c *Client) DoWithOptions(url *http.Request, options ...RequestOption) (*ht
 	}
 
 	return res, nil
-}
-
-func (c *Client) URL(url string) (*urlpkg.URL, error) {
-	if isValidURL(url) {
-		return urlpkg.Parse(url)
-	}
-
-	if c.baseUrl == nil {
-		return nil, tracer.Trace(errors.New("provide client base url otherwise client needs absolute url for each request"))
-	}
-
-	u, err := urlpkg.Parse(*c.baseUrl)
-	if err != nil {
-		return nil, tracer.Trace(err)
-	}
-
-	isAbsolutePath := len(url) > 0 && url[0] == '/'
-	if isAbsolutePath {
-		u.Path = url
-	} else {
-		u.Path = path.Join(u.Path, url)
-	}
-
-	return u, nil
 }
 
 func (c *Client) setOptions(req *http.Request, options ...RequestOption) error {
