@@ -18,9 +18,18 @@ func BearerToken(token string) RequestOption {
 	return AuthorizationToken("Bearer", token)
 }
 
-func AuthorizationToken(tName string, token string) RequestOption {
+func AuthorizationToken(tokenType string, token string) RequestOption {
+	return AuthenticateHeader("Authorization", tokenType, token)
+}
+
+func AuthenticateHeader(header string, tokenType string, token string) RequestOption {
 	return func(req *http.Request) error {
-		req.Header.Set("Authorization", fmt.Sprintf("%s %s", tName, token))
+		val := fmt.Sprintf("%v %v", tokenType, token)
+		if tokenType == "" {
+			val = token
+		}
+
+		req.Header.Set(header, val)
 		return nil
 	}
 }
@@ -36,7 +45,6 @@ func QueryParams(params hexa.Map) RequestOption {
 // URL options
 //--------------------------------
 
-
 func UrlQueryParams(params hexa.Map) URLOption {
 	return func(u *urlpkg.URL) error {
 		q := u.Query()
@@ -48,4 +56,3 @@ func UrlQueryParams(params hexa.Map) URLOption {
 		return nil
 	}
 }
-
