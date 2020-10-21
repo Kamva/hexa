@@ -1,5 +1,7 @@
 package hexa
 
+const TracedStackLogKey = "__trace__"
+
 type Logger interface {
 
 	// Core function returns the logger core concrete struct.

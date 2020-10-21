@@ -7,7 +7,7 @@ require (
 	github.com/getsentry/sentry-go v0.6.1
 	github.com/kamva/gutil v0.0.0-20200802192905-f876666b3671
 	github.com/kamva/mgm-relation v0.0.0-20200802193925-a960eb9564ab
-	github.com/kamva/tracer v0.0.0-20200802193105-6c0f308b9655
+	github.com/kamva/tracer v0.0.0-20201021233951-a5a489d058f5
 	github.com/labstack/gommon v0.3.0
 	github.com/nicksnyder/go-i18n/v2 v2.0.3
 	github.com/sirupsen/logrus v1.4.2

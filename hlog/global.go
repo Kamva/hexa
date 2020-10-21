@@ -4,7 +4,7 @@ import "github.com/kamva/hexa"
 
 // initialize global with a simple printerDriver as default
 // global logger until you change it in bootstrap stage of
-// your source code.
+// your app.
 var global = NewPrinterDriver()
 
 func SetGlobalLogger(l hexa.Logger) {

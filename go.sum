@@ -149,6 +149,8 @@ github.com/kamva/mgm-relation v0.0.0-20200802193925-a960eb9564ab h1:ffF2dF/UGVNE
 github.com/kamva/mgm-relation v0.0.0-20200802193925-a960eb9564ab/go.mod h1:D7cPWD6YgVfVQ7Q9x0xEABbcz2tuSjYOnuMr73YVy/M=
 github.com/kamva/tracer v0.0.0-20200802193105-6c0f308b9655 h1:znkvBi/J3pUEBcZNTwjmvPZLmmYIxdrypryvOW6DlA8=
 github.com/kamva/tracer v0.0.0-20200802193105-6c0f308b9655/go.mod h1:6TmvuXxFe7FD95QvNyIVEt2ZPfYBk3QiKGhGt+UwFbQ=
+github.com/kamva/tracer v0.0.0-20201021233951-a5a489d058f5 h1:6LcKSbMYh39gdlaN1mZ+tcTemiwllIMghdzdTmso9C8=
+github.com/kamva/tracer v0.0.0-20201021233951-a5a489d058f5/go.mod h1:6TmvuXxFe7FD95QvNyIVEt2ZPfYBk3QiKGhGt+UwFbQ=
 github.com/karrick/godirwalk v1.8.0/go.mod h1:H5KPZjojv4lE+QYImBI8xVtrBRgYrIVsaRPx4tDPEn4=
 github.com/karrick/godirwalk v1.10.3/go.mod h1:RoGL9dQei4vP9ilrpETWE8CLOZ1kiN0LhBygSwrAsHA=
 github.com/kataras/golog v0.0.9/go.mod h1:12HJgwBIZFNGL0EJnMRhmvGA0PQGx8VFwrZtM4CqbAk=
