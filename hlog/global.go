@@ -22,6 +22,6 @@ var With = global.With
 var WithFields = global.WithFields
 var Debug = global.Debug
 var Info = global.Info
-var Message = global.Info
+var Message = global.Message
 var Warn = global.Warn
 var Error = global.Error
