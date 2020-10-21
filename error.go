@@ -137,7 +137,7 @@ func (e defaultError) ReportIfNeeded(l Logger, t Translator) bool {
 
 		// If exists error and error is traced,print its stack.
 		if stack := tracer.StackAsString(e.error); stack != "" {
-			data[ErrorTraceLogKey] = stack
+			data[ErrorStackLogKey] = stack
 		}
 
 		fields := append(gutil.MapToKeyValue(data), gutil.MapToKeyValue(e.ReportData())...)

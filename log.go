@@ -1,6 +1,6 @@
 package hexa
 
-const ErrorTraceLogKey = "__trace__"
+const ErrorStackLogKey = "__stack__"
 
 type Logger interface {
 
