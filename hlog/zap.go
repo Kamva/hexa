@@ -24,6 +24,10 @@ func (l *zapLogger) WithFields(args ...interface{}) hexa.Logger {
 	return l
 }
 
+func (l *zapLogger) WithFunc(f hexa.LogFunc) hexa.Logger {
+	return f(l)
+}
+
 func (l *zapLogger) Debug(i ...interface{}) {
 	l.logger.Debug(i...)
 }

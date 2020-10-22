@@ -20,6 +20,7 @@ func SetGlobalLogger(l hexa.Logger) {
 
 var With = global.With
 var WithFields = global.WithFields
+var WithFunc = global.WithFunc
 var Debug = global.Debug
 var Info = global.Info
 var Message = global.Message

@@ -11,6 +11,7 @@ type printerLogger struct {
 	with  map[string]interface{}
 }
 
+
 func (l *printerLogger) Core() interface{} {
 	return fmt.Println
 }
@@ -40,6 +41,10 @@ func (l *printerLogger) With(ctx hexa.Context, keyValues ...interface{}) hexa.Lo
 
 func (l *printerLogger) WithFields(args ...interface{}) hexa.Logger {
 	return l.With(nil, args...)
+}
+
+func (l *printerLogger) WithFunc(f hexa.LogFunc) hexa.Logger {
+	return f(l)
 }
 
 func (l *printerLogger) log(level Level, i ...interface{}) {

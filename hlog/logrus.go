@@ -29,6 +29,10 @@ func (l *logrusLogger) WithFields(keyValues ...interface{}) hexa.Logger {
 	return NewLogrusDriver(l.entry.WithFields(fields))
 }
 
+func (l *logrusLogger) WithFunc(f hexa.LogFunc) hexa.Logger {
+	return f(l)
+}
+
 func (l *logrusLogger) Debug(i ...interface{}) {
 	l.entry.Debug(i...)
 }

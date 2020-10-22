@@ -2,6 +2,11 @@ package hexa
 
 const ErrorStackLogKey = "__stack__"
 
+// LogFunc gets logger, set data on it and return it.
+// example of such functions is ErrStack function in the
+// hlog package.
+type LogFunc func(Logger) Logger
+
 type Logger interface {
 
 	// Core function returns the logger core concrete struct.
@@ -17,6 +22,9 @@ type Logger interface {
 	// WithFields method set key,values and return new logger
 	// contains this key values as log fields.
 	WithFields(keyValues ...interface{}) Logger
+
+	// WithF call to the provided function to set a field in the logger using provided function.
+	WithFunc(f LogFunc) Logger
 
 	// Debug log debug message.
 	Debug(i ...interface{})

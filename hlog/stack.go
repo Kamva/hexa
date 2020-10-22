@@ -34,6 +34,10 @@ func (l *stackedLogger) WithFields(args ...interface{}) hexa.Logger {
 	return NewStackLoggerDriverWith(stack...)
 }
 
+func (l *stackedLogger) WithFunc(f hexa.LogFunc) hexa.Logger {
+	return f(l)
+}
+
 func (l *stackedLogger) Debug(i ...interface{}) {
 	for _, logger := range l.stack {
 		logger.Debug(i...)

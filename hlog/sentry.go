@@ -87,6 +87,10 @@ func (l *sentryLogger) WithFields(args ...interface{}) hexa.Logger {
 	return NewSentryDriverWith(hub)
 }
 
+func (l *sentryLogger) WithFunc(f hexa.LogFunc) hexa.Logger {
+	return f(l)
+}
+
 func (l *sentryLogger) Debug(i ...interface{}) {
 	// For now we do not capture debug messages in sentry.
 }
