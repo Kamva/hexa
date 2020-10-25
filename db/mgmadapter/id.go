@@ -2,6 +2,7 @@ package mgmadapter
 
 import (
 	"errors"
+	"fmt"
 	"github.com/kamva/hexa"
 	"github.com/kamva/tracer"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -34,7 +35,7 @@ func (i *hexaID) From(val interface{}) error {
 	if idStr, ok := val.(string); ok {
 		id, err := primitive.ObjectIDFromHex(idStr)
 		if err != nil {
-			return tracer.Trace(errors.New("id value is invalid and can not covert it to primitive.ObjectID"))
+			return tracer.Trace(fmt.Errorf("id with value:%v is invalid and can not covert it to primitive.ObjectID", idStr))
 		}
 
 		i.id = id
