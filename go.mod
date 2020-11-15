@@ -8,7 +8,7 @@ require (
 	github.com/kamva/gutil v0.0.0-20200802192905-f876666b3671
 	github.com/kamva/mgm-relation v0.0.0-20201115040639-5cb356991a32
 	github.com/kamva/mgm/v3 v3.1.0
-	github.com/kamva/tracer v0.0.0-20201021233951-a5a489d058f5
+	github.com/kamva/tracer v0.0.0-20201115122932-ea39052d56cd
 	github.com/klauspost/compress v1.11.2 // indirect
 	github.com/labstack/gommon v0.3.0
 	github.com/nicksnyder/go-i18n/v2 v2.0.3

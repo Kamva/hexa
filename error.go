@@ -14,6 +14,9 @@ type (
 		// SetError set the internal error.
 		SetError(error) Error
 
+		// InternalError returns the internal error.
+		InternalError() error
+
 		//Is function satisfy Is interface of errors package.
 		Is(error) bool
 
@@ -83,6 +86,10 @@ func (e defaultError) SetError(err error) Error {
 	return e
 }
 
+func (e defaultError) InternalError() error {
+	return e.error
+}
+
 func (e defaultError) Is(err error) bool {
 	ee, ok := gutil.CauseErr(err).(Error)
 	return ok && e.ID() == ee.ID()
@@ -136,7 +143,7 @@ func (e defaultError) ReportIfNeeded(l Logger, t Translator) bool {
 		}
 
 		// If exists error and error is traced,print its stack.
-		if stack := tracer.StackAsString(e.error); stack != "" {
+		if stack := tracer.StackAsString(tracer.MoveStackIfNeeded(e, e.error)); stack != "" {
 			data[ErrorStackLogKey] = stack
 		}
 
