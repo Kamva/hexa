@@ -5,9 +5,8 @@ go 1.13
 require (
 	github.com/aws/aws-sdk-go v1.35.28 // indirect
 	github.com/getsentry/sentry-go v0.6.1
-	github.com/golang/snappy v0.0.2 // indirect
 	github.com/kamva/gutil v0.0.0-20200802192905-f876666b3671
-	github.com/kamva/mgm-relation v0.0.0-20200802193925-a960eb9564ab
+	github.com/kamva/mgm-relation v0.0.0-20201115040639-5cb356991a32
 	github.com/kamva/mgm/v3 v3.1.0
 	github.com/kamva/tracer v0.0.0-20201021233951-a5a489d058f5
 	github.com/klauspost/compress v1.11.2 // indirect
@@ -19,7 +18,6 @@ require (
 	go.mongodb.org/mongo-driver v1.4.3
 	go.uber.org/zap v1.14.1
 	golang.org/x/crypto v0.0.0-20201112155050-0c6587e931a9 // indirect
-	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9 // indirect
 	golang.org/x/sys v0.0.0-20191228213918-04cbcbbfeed8 // indirect
 	golang.org/x/text v0.3.4 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
