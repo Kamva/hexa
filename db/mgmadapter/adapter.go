@@ -3,7 +3,7 @@ package mgmadapter
 import (
 	"context"
 	"errors"
-	"github.com/Kamva/mgm/v3"
+	"github.com/kamva/mgm/v3"
 	"github.com/kamva/gutil"
 	"github.com/kamva/tracer"
 	"go.mongodb.org/mongo-driver/bson"

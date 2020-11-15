@@ -3,7 +3,7 @@ package mgmadapter
 import (
 	"github.com/kamva/hexa"
 	mgmrel "github.com/kamva/mgm-relation"
-	"github.com/Kamva/mgm/v3"
+	"github.com/kamva/mgm/v3"
 	"github.com/kamva/tracer"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
