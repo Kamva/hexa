@@ -25,3 +25,11 @@ func fieldsToMap(fields ...Field) map[string]interface{} {
 	}
 	return m
 }
+
+func MapToFields(m map[string]interface{}) []Field {
+	fields := make([]Field, 0)
+	for k, v := range m {
+		fields = append(fields, Any(k, v))
+	}
+	return fields
+}
