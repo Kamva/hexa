@@ -135,19 +135,25 @@ func (e defaultError) SetReportData(data Map) Error {
 
 func (e defaultError) ReportIfNeeded(l Logger, t Translator) bool {
 	if e.shouldReport() {
-		data := map[string]interface{}{
-			"__error_id__":    e.ID(),
-			"__http_status__": e.HTTPStatus(),
-			"__data__":        e.Data(),
-			"__report__":      e.ReportData(),
+		fields := []LogField{
+			StringField("__error_id", e.ID()),
+			IntField("__http_status__", e.HTTPStatus()),
+		}
+		for k, v := range e.Data() {
+			fields = append(fields, AnyField(k, v))
+		}
+		for k, v := range e.ReportData() {
+			fields = append(fields, AnyField(k, v))
 		}
 
 		// If exists error and error is traced,print its stack.
 		if stack := tracer.StackAsString(tracer.MoveStackIfNeeded(e, e.error)); stack != "" {
-			data[ErrorStackLogKey] = stack
+			fields = append(fields, StringField(ErrorStackLogKey, stack))
+		}
+		if e.error != nil {
+			fields = append(fields, ErrField(e.error))
 		}
 
-		fields := append(gutil.MapToKeyValue(data), gutil.MapToKeyValue(e.ReportData())...)
 		l.WithFields(fields...).Error(e.Error())
 		return true
 	}

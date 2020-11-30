@@ -9,7 +9,6 @@ import (
 	"net/http"
 )
 
-
 type (
 	// Context is the hexa context to use in services.
 	Context interface {
@@ -157,7 +156,7 @@ func NewCtx(request *http.Request, correlationID string, locale string, user Use
 	}
 
 	// Bind context to the context's logger.
-	ctx.logger =  tuneCtxLogger(request, correlationID, user, logger).With(ctx)
+	ctx.logger = tuneCtxLogger(request, correlationID, user, logger).With(ctx)
 	return ctx
 }
 
@@ -172,31 +171,33 @@ func NewCtxExporterImporter(ue UserExporterImporter, l Logger, t Translator) Con
 
 // tuneLogger function tune the logger for each context.
 func tuneCtxLogger(r *http.Request, correlationID string, u User, logger Logger) Logger {
-	tags := map[string]interface{}{
-		"__user_type__":      u.Type(),
-		"__user_id__":        u.Identifier().String(),
-		"__username__":       u.Username(),
-		"__correlation_id__": correlationID,
+	field := StringField
+
+	tags := []LogField{
+		field("__user_type__", string(u.Type())),
+		field("__user_id__", u.Identifier().String()),
+		field("__username__", u.Username()),
+		field("__correlation_id__", correlationID),
 	}
 
 	if u.Type() == UserTypeRegular {
-		tags["__email__"] = u.Email()
-		tags["__phone__"] = u.Phone()
+		tags = append(tags, field("__email__", u.Email()))
+		tags = append(tags, field("__phone__", u.Phone()))
 	}
 
 	if r != nil {
 		rid := r.Header.Get("X-Request-ID")
 		if rid != "" {
-			tags["__request_id__"] = rid
+			tags = append(tags, field("__request_id__", rid))
 		}
 
 		if ip, port, err := net.SplitHostPort(gutil.IP(r)); err == nil {
-			tags["__ip__"] = ip
-			tags["__port__"] = port
+			tags = append(tags, field("__ip__", ip))
+			tags = append(tags, field("__port__", port))
 		}
 	}
 
-	logger = logger.WithFields(gutil.MapToKeyValue(tags)...)
+	logger = logger.WithFields(tags...)
 	return logger
 }
 

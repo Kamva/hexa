@@ -24,20 +24,11 @@ func (l *sentryLogger) Core() interface{} {
 	return l.hub
 }
 
-func (l *sentryLogger) argsToMap(args ...interface{}) map[string]interface{} {
-	// if key values is not odd, add another item to make it odd.
-	if len(args)%2 != 0 {
-		args = append(args, errMissingValue)
-	}
-	fields, _ := gutil.KeyValuesToMap(args...)
-	return fields
-}
-
-func (l *sentryLogger) addArgsToScope(scope *sentry.Scope, args []interface{}) {
+func (l *sentryLogger) addArgsToScope(scope *sentry.Scope, args []Field) {
 	if len(args) == 0 {
 		return
 	}
-	fields := l.argsToMap(args...)
+	fields := fieldsToMap(args...)
 	for key, val := range fields {
 		// Just keys that begin and end with "_", set as tags.
 		if len(key) >= 2 && key[0] == '_' && key[len(key)-1] == '_' {
@@ -63,7 +54,7 @@ func (l *sentryLogger) setUser(scope *sentry.Scope, user hexa.User, r *http.Requ
 	scope.SetUser(u)
 }
 
-func (l *sentryLogger) With(ctx hexa.Context, args ...interface{}) hexa.Logger {
+func (l *sentryLogger) With(ctx hexa.Context, args ...Field) hexa.Logger {
 	hub := l.hub.Clone()
 	scope := hub.Scope()
 
@@ -81,7 +72,7 @@ func (l *sentryLogger) With(ctx hexa.Context, args ...interface{}) hexa.Logger {
 // WithFields get some fields and set check if field's key start and end
 // with single '_' character, then insert it as tag, otherwise
 // insert it as extra data.
-func (l *sentryLogger) WithFields(args ...interface{}) hexa.Logger {
+func (l *sentryLogger) WithFields(args ...Field) hexa.Logger {
 	hub := l.hub.Clone()
 	l.addArgsToScope(hub.Scope(), args)
 	return NewSentryDriverWith(hub)
@@ -91,24 +82,24 @@ func (l *sentryLogger) WithFunc(f hexa.LogFunc) hexa.Logger {
 	return f(l)
 }
 
-func (l *sentryLogger) Debug(i ...interface{}) {
+func (l *sentryLogger) Debug(msg string, args ...Field) {
 	// For now we do not capture debug messages in sentry.
 }
 
-func (l *sentryLogger) Info(i ...interface{}) {
+func (l *sentryLogger) Info(msg string, args ...Field) {
 	// For now we do not capture messages in info .
 }
 
-func (l *sentryLogger) Message(i ...interface{}) {
-	l.hub.CaptureMessage(fmt.Sprint(i...))
+func (l *sentryLogger) Message(msg string, args ...Field) {
+	l.WithFields(args...).(*sentryLogger).hub.CaptureMessage(msg)
 }
 
-func (l *sentryLogger) Warn(i ...interface{}) {
+func (l *sentryLogger) Warn(msg string, args ...Field) {
 	// For now we do not capture message in warn.
 }
 
-func (l *sentryLogger) Error(i ...interface{}) {
-	l.hub.CaptureException(errors.New(fmt.Sprint(i...)))
+func (l *sentryLogger) Error(msg string, args ...Field) {
+	l.WithFields(args...).(*sentryLogger).hub.CaptureException(errors.New(msg))
 }
 
 // NewSentryDriver return new instance of hexa logger with sentry driver.

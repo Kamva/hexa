@@ -3,21 +3,22 @@ package hlog
 import (
 	"github.com/kamva/hexa"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type zapLogger struct {
-	logger *zap.SugaredLogger
+	logger *zap.Logger
 }
 
 func (l *zapLogger) Core() interface{} {
-	return l.logger.Fatal
+	return l.logger
 }
 
-func (l *zapLogger) With(ctx hexa.Context, keyValues ...interface{}) hexa.Logger {
-	return l.WithFields(keyValues...)
+func (l *zapLogger) With(ctx hexa.Context, args ...Field) hexa.Logger {
+	return l.WithFields(args...)
 }
 
-func (l *zapLogger) WithFields(args ...interface{}) hexa.Logger {
+func (l *zapLogger) WithFields(args ...Field) hexa.Logger {
 	if len(args) > 0 {
 		return NewZapDriverWith(l.logger.With(args...))
 	}
@@ -28,42 +29,48 @@ func (l *zapLogger) WithFunc(f hexa.LogFunc) hexa.Logger {
 	return f(l)
 }
 
-func (l *zapLogger) Debug(i ...interface{}) {
-	l.logger.Debug(i...)
+func (l *zapLogger) Debug(msg string, args ...Field) {
+	l.logger.Debug(msg, args...)
 }
 
-func (l *zapLogger) Info(i ...interface{}) {
-	l.logger.Info(i...)
+func (l *zapLogger) Info(msg string, args ...Field) {
+	l.logger.Info(msg, args...)
 }
 
-func (l *zapLogger) Message(i ...interface{}) {
-	l.logger.Info(i...)
+func (l *zapLogger) Message(msg string, args ...Field) {
+	l.logger.Info(msg, args...)
 }
 
-func (l *zapLogger) Warn(i ...interface{}) {
-	l.logger.Warn(i...)
+func (l *zapLogger) Warn(msg string, args ...Field) {
+	l.logger.Warn(msg, args...)
 }
 
-func (l *zapLogger) Error(i ...interface{}) {
-	l.logger.Error(i...)
+func (l *zapLogger) Error(msg string, args ...Field) {
+	l.logger.Error(msg, args...)
 }
 
 type ZapOptions struct {
 	Debug bool
-	// TODO: set level also
+	Level zapcore.Level
 }
 
 // NewZapDriver return new instance of hexa logger with zap driver.
 func NewZapDriver(o ZapOptions) hexa.Logger {
-	l, _ := zap.NewProduction()
+	cfg := zap.NewProductionConfig()
 	if o.Debug {
-		l, _ = zap.NewDevelopment()
+		cfg = zap.NewDevelopmentConfig()
 	}
-	return NewZapDriverWith(l.Sugar())
+	cfg.Level.SetLevel(o.Level)
+
+	l, err := cfg.Build()
+	if err != nil {
+		panic(err)
+	}
+	return NewZapDriverWith(l)
 }
 
 // NewZapDriver return new instance of hexa logger with zap driver.
-func NewZapDriverWith(logger *zap.SugaredLogger) hexa.Logger {
+func NewZapDriverWith(logger *zap.Logger) hexa.Logger {
 	return &zapLogger{logger}
 }
 

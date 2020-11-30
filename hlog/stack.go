@@ -25,7 +25,7 @@ func (l *stackedLogger) Core() interface{} {
 	return l.stack
 }
 
-func (l *stackedLogger) With(ctx hexa.Context, args ...interface{}) hexa.Logger {
+func (l *stackedLogger) With(ctx hexa.Context, args ...Field) hexa.Logger {
 	stack := make(map[string]hexa.Logger)
 	for k, logger := range l.stack {
 		stack[k] = logger.With(ctx, args...)
@@ -34,7 +34,7 @@ func (l *stackedLogger) With(ctx hexa.Context, args ...interface{}) hexa.Logger 
 	return NewStackLoggerDriverWith(stack)
 }
 
-func (l *stackedLogger) WithFields(args ...interface{}) hexa.Logger {
+func (l *stackedLogger) WithFields(args ...Field) hexa.Logger {
 	stack := make(map[string]hexa.Logger)
 	for k, logger := range l.stack {
 		stack[k] = logger.WithFields(args...)
@@ -47,33 +47,33 @@ func (l *stackedLogger) WithFunc(f hexa.LogFunc) hexa.Logger {
 	return f(l)
 }
 
-func (l *stackedLogger) Debug(i ...interface{}) {
+func (l *stackedLogger) Debug(msg string, args ...Field) {
 	for _, logger := range l.stack {
-		logger.Debug(i...)
+		logger.Debug(msg, args...)
 	}
 }
 
-func (l *stackedLogger) Info(i ...interface{}) {
+func (l *stackedLogger) Info(msg string, args ...Field) {
 	for _, logger := range l.stack {
-		logger.Info(i...)
+		logger.Info(msg, args...)
 	}
 }
 
-func (l *stackedLogger) Message(i ...interface{}) {
+func (l *stackedLogger) Message(msg string, args ...Field) {
 	for _, logger := range l.stack {
-		logger.Message(i...)
+		logger.Message(msg, args...)
 	}
 }
 
-func (l *stackedLogger) Warn(i ...interface{}) {
+func (l *stackedLogger) Warn(msg string, args ...Field) {
 	for _, logger := range l.stack {
-		logger.Warn(i...)
+		logger.Warn(msg, args...)
 	}
 }
 
-func (l *stackedLogger) Error(i ...interface{}) {
+func (l *stackedLogger) Error(msg string, args ...Field) {
 	for _, logger := range l.stack {
-		logger.Error(i...)
+		logger.Error(msg, args...)
 	}
 }
 

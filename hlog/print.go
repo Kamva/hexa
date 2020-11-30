@@ -2,44 +2,34 @@ package hlog
 
 import (
 	"fmt"
-	"github.com/kamva/gutil"
 	"github.com/kamva/hexa"
 )
 
 type printerLogger struct {
 	level Level
-	with  map[string]interface{}
+	with  []Field
 }
-
 
 func (l *printerLogger) Core() interface{} {
 	return fmt.Println
 }
 
-func (l *printerLogger) newWith() map[string]interface{} {
-	newWith := make(map[string]interface{})
-	for k, v := range l.with {
-		newWith[k] = v
-	}
-	return newWith
+func (l *printerLogger) newWith() []Field {
+	dst := make([]Field, len(l.with))
+	copy(l.with, dst)
+	return dst
 }
 
-func (l *printerLogger) With(ctx hexa.Context, keyValues ...interface{}) hexa.Logger {
-	// if key values is not odd, add another item to make it odd.
-	if len(keyValues)%2 != 0 {
-		keyValues = append(keyValues, errMissingValue)
-	}
-
+func (l *printerLogger) With(ctx hexa.Context, args ...Field) hexa.Logger {
 	newWith := l.newWith()
-	m, _ := gutil.KeyValuesToMap(keyValues...)
-	gutil.ExtendMap(newWith, m, true)
+	newWith = append(newWith, args...)
 
 	newLogger := NewPrinterDriver().(*printerLogger)
 	newLogger.with = newWith
 	return newLogger
 }
 
-func (l *printerLogger) WithFields(args ...interface{}) hexa.Logger {
+func (l *printerLogger) WithFields(args ...Field) hexa.Logger {
 	return l.With(nil, args...)
 }
 
@@ -47,30 +37,31 @@ func (l *printerLogger) WithFunc(f hexa.LogFunc) hexa.Logger {
 	return f(l)
 }
 
-func (l *printerLogger) log(level Level, i ...interface{}) {
+func (l *printerLogger) log(level Level, msg string, args ...Field) {
+	ll := l.WithFields(args...).(*printerLogger)
 	if l.level.CanLog(level) {
-		fmt.Println(fmt.Sprintf("%s: ", level), l.with, i)
+		fmt.Println(fmt.Sprintf("%s: ", level), fieldsToMap(ll.with...), msg)
 	}
 }
 
-func (l *printerLogger) Debug(i ...interface{}) {
-	l.log(DebugLevel, i...)
+func (l *printerLogger) Debug(msg string, args ...Field) {
+	l.log(DebugLevel, msg, args...)
 }
 
-func (l *printerLogger) Info(i ...interface{}) {
-	l.log(InfoLevel, i...)
+func (l *printerLogger) Info(msg string, args ...Field) {
+	l.log(InfoLevel, msg, args...)
 }
 
-func (l *printerLogger) Message(i ...interface{}) {
-	l.log(MessageLevel, i...)
+func (l *printerLogger) Message(msg string, args ...Field) {
+	l.log(MessageLevel, msg, args...)
 }
 
-func (l *printerLogger) Warn(i ...interface{}) {
-	l.log(WarnLevel, i...)
+func (l *printerLogger) Warn(msg string, args ...Field) {
+	l.log(WarnLevel, msg, args...)
 }
 
-func (l *printerLogger) Error(i ...interface{}) {
-	l.log(ErrorLevel, i...)
+func (l *printerLogger) Error(msg string, args ...Field) {
+	l.log(ErrorLevel, msg, args...)
 }
 
 // NewPrinterDriver returns new instance of hexa logger
@@ -82,7 +73,7 @@ func NewPrinterDriver() hexa.Logger {
 }
 
 func NewPrinterDriverWith(l Level) hexa.Logger {
-	return &printerLogger{level: l, with: map[string]interface{}{}}
+	return &printerLogger{level: l, with: make([]Field, 0)}
 }
 
 // Assert printerLogger implements hexa Logger.
