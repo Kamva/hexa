@@ -77,7 +77,7 @@ func (l *stackedLogger) Error(msg string, args ...Field) {
 	}
 }
 
-type LoggerOptions struct {
+type StackOptions struct {
 	Level      Level
 	ZapOpts    *ZapOptions
 	SentryOpts *SentryOptions
@@ -85,7 +85,7 @@ type LoggerOptions struct {
 
 // NewStackLoggerDriver return new stacked logger .
 // If logger name is invalid,it will return error.
-func NewStackLoggerDriver(stackList []string, opts LoggerOptions) (hexa.Logger, error) {
+func NewStackLoggerDriver(stackList []string, opts StackOptions) (hexa.Logger, error) {
 	stack := make(map[string]hexa.Logger, len(stackList))
 
 	zap := "zap"
