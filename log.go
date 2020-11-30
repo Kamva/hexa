@@ -38,11 +38,11 @@ type Logger interface {
 	// With get the hexa context and some keyValues
 	// and return new logger contains key values as
 	// log fields.
-	With(ctx Context, args ...LogField) Logger
+	WithCtx(ctx Context, args ...LogField) Logger
 
 	// WithFields method set key,values and return new logger
 	// contains this key values as log fields.
-	WithFields(f ...LogField) Logger
+	With(f ...LogField) Logger
 
 	// WithF call to the provided function to set a field in the logger using provided function.
 	WithFunc(f LogFunc) Logger

@@ -154,7 +154,7 @@ func (e defaultError) ReportIfNeeded(l Logger, t Translator) bool {
 			fields = append(fields, ErrField(e.error))
 		}
 
-		l.WithFields(fields...).Error(e.Error())
+		l.With(fields...).Error(e.Error())
 		return true
 	}
 	return false

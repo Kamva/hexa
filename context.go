@@ -156,7 +156,7 @@ func NewCtx(request *http.Request, correlationID string, locale string, user Use
 	}
 
 	// Bind context to the context's logger.
-	ctx.logger = tuneCtxLogger(request, correlationID, user, logger).With(ctx)
+	ctx.logger = tuneCtxLogger(request, correlationID, user, logger).WithCtx(ctx)
 	return ctx
 }
 
@@ -197,7 +197,7 @@ func tuneCtxLogger(r *http.Request, correlationID string, u User, logger Logger)
 		}
 	}
 
-	logger = logger.WithFields(tags...)
+	logger = logger.With(tags...)
 	return logger
 }
 

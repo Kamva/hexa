@@ -9,8 +9,8 @@ var global = NewPrinterDriver()
 
 func SetGlobalLogger(l hexa.Logger) {
 	global = l
+	WithCtx = global.WithCtx
 	With = global.With
-	WithFields = global.WithFields
 	Debug = global.Debug
 	Info = global.Info
 	Message = global.Info
@@ -18,8 +18,8 @@ func SetGlobalLogger(l hexa.Logger) {
 	Error = global.Error
 }
 
+var WithCtx = global.WithCtx
 var With = global.With
-var WithFields = global.WithFields
 var WithFunc = global.WithFunc
 var Debug = global.Debug
 var Info = global.Info

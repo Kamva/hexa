@@ -25,19 +25,19 @@ func (l *stackedLogger) Core() interface{} {
 	return l.stack
 }
 
-func (l *stackedLogger) With(ctx hexa.Context, args ...Field) hexa.Logger {
+func (l *stackedLogger) WithCtx(ctx hexa.Context, args ...Field) hexa.Logger {
 	stack := make(map[string]hexa.Logger)
 	for k, logger := range l.stack {
-		stack[k] = logger.With(ctx, args...)
+		stack[k] = logger.WithCtx(ctx, args...)
 	}
 
 	return NewStackLoggerDriverWith(stack)
 }
 
-func (l *stackedLogger) WithFields(args ...Field) hexa.Logger {
+func (l *stackedLogger) With(args ...Field) hexa.Logger {
 	stack := make(map[string]hexa.Logger)
 	for k, logger := range l.stack {
-		stack[k] = logger.WithFields(args...)
+		stack[k] = logger.With(args...)
 	}
 
 	return NewStackLoggerDriverWith(stack)

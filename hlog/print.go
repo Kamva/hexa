@@ -20,7 +20,7 @@ func (l *printerLogger) newWith() []Field {
 	return dst
 }
 
-func (l *printerLogger) With(ctx hexa.Context, args ...Field) hexa.Logger {
+func (l *printerLogger) WithCtx(ctx hexa.Context, args ...Field) hexa.Logger {
 	newWith := l.newWith()
 	newWith = append(newWith, args...)
 
@@ -29,8 +29,8 @@ func (l *printerLogger) With(ctx hexa.Context, args ...Field) hexa.Logger {
 	return newLogger
 }
 
-func (l *printerLogger) WithFields(args ...Field) hexa.Logger {
-	return l.With(nil, args...)
+func (l *printerLogger) With(args ...Field) hexa.Logger {
+	return l.WithCtx(nil, args...)
 }
 
 func (l *printerLogger) WithFunc(f hexa.LogFunc) hexa.Logger {
@@ -38,7 +38,7 @@ func (l *printerLogger) WithFunc(f hexa.LogFunc) hexa.Logger {
 }
 
 func (l *printerLogger) log(level Level, msg string, args ...Field) {
-	ll := l.WithFields(args...).(*printerLogger)
+	ll := l.With(args...).(*printerLogger)
 	if l.level.CanLog(level) {
 		fmt.Println(fmt.Sprintf("%s: ", level), fieldsToMap(ll.with...), msg)
 	}

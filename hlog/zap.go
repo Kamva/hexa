@@ -14,11 +14,11 @@ func (l *zapLogger) Core() interface{} {
 	return l.logger
 }
 
-func (l *zapLogger) With(ctx hexa.Context, args ...Field) hexa.Logger {
-	return l.WithFields(args...)
+func (l *zapLogger) WithCtx(ctx hexa.Context, args ...Field) hexa.Logger {
+	return l.With(args...)
 }
 
-func (l *zapLogger) WithFields(args ...Field) hexa.Logger {
+func (l *zapLogger) With(args ...Field) hexa.Logger {
 	if len(args) > 0 {
 		return NewZapDriverWith(l.logger.With(args...))
 	}

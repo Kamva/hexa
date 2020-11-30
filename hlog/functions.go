@@ -10,7 +10,7 @@ import (
 func ErrStackF(err error) hexa.LogFunc {
 	return func(l hexa.Logger) hexa.Logger {
 		if stack := tracer.StackAsString(err); stack != "" {
-			return l.WithFields(String(hexa.ErrorStackLogKey, fmt.Sprintf("%+v", stack)))
+			return l.With(String(hexa.ErrorStackLogKey, fmt.Sprintf("%+v", stack)))
 		}
 		return l
 	}

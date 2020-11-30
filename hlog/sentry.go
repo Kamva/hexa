@@ -54,7 +54,7 @@ func (l *sentryLogger) setUser(scope *sentry.Scope, user hexa.User, r *http.Requ
 	scope.SetUser(u)
 }
 
-func (l *sentryLogger) With(ctx hexa.Context, args ...Field) hexa.Logger {
+func (l *sentryLogger) WithCtx(ctx hexa.Context, args ...Field) hexa.Logger {
 	hub := l.hub.Clone()
 	scope := hub.Scope()
 
@@ -69,10 +69,10 @@ func (l *sentryLogger) With(ctx hexa.Context, args ...Field) hexa.Logger {
 	return NewSentryDriverWith(hub)
 }
 
-// WithFields get some fields and set check if field's key start and end
+// With get some fields and set check if field's key start and end
 // with single '_' character, then insert it as tag, otherwise
 // insert it as extra data.
-func (l *sentryLogger) WithFields(args ...Field) hexa.Logger {
+func (l *sentryLogger) With(args ...Field) hexa.Logger {
 	hub := l.hub.Clone()
 	l.addArgsToScope(hub.Scope(), args)
 	return NewSentryDriverWith(hub)
@@ -91,7 +91,7 @@ func (l *sentryLogger) Info(msg string, args ...Field) {
 }
 
 func (l *sentryLogger) Message(msg string, args ...Field) {
-	l.WithFields(args...).(*sentryLogger).hub.CaptureMessage(msg)
+	l.With(args...).(*sentryLogger).hub.CaptureMessage(msg)
 }
 
 func (l *sentryLogger) Warn(msg string, args ...Field) {
@@ -99,7 +99,7 @@ func (l *sentryLogger) Warn(msg string, args ...Field) {
 }
 
 func (l *sentryLogger) Error(msg string, args ...Field) {
-	l.WithFields(args...).(*sentryLogger).hub.CaptureException(errors.New(msg))
+	l.With(args...).(*sentryLogger).hub.CaptureException(errors.New(msg))
 }
 
 // NewSentryDriver return new instance of hexa logger with sentry driver.
