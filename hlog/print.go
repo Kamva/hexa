@@ -24,7 +24,7 @@ func (l *printerLogger) WithCtx(ctx hexa.Context, args ...Field) hexa.Logger {
 	newWith := l.newWith()
 	newWith = append(newWith, args...)
 
-	newLogger := NewPrinterDriver().(*printerLogger)
+	newLogger := NewPrinterDriver(l.level).(*printerLogger)
 	newLogger.with = newWith
 	return newLogger
 }
@@ -68,11 +68,7 @@ func (l *printerLogger) Error(msg string, args ...Field) {
 // with printer driver.
 // Note: printer logger driver is just for test purpose.
 // dont use it in production.
-func NewPrinterDriver() hexa.Logger {
-	return NewPrinterDriverWith(DebugLevel)
-}
-
-func NewPrinterDriverWith(l Level) hexa.Logger {
+func NewPrinterDriver(l Level) hexa.Logger {
 	return &printerLogger{level: l, with: make([]Field, 0)}
 }
 

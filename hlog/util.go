@@ -8,7 +8,7 @@ func fieldToKeyVal(f Field) (key string, val interface{}) {
 	switch f.Type {
 	case zapcore.Int64Type:
 		val = f.Integer
-	case zapcore.StringerType:
+	case zapcore.StringType:
 		val = f.String
 	default:
 		val = f.Interface

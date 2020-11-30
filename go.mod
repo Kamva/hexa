@@ -11,6 +11,7 @@ require (
 	github.com/kamva/tracer v0.0.0-20201115122932-ea39052d56cd
 	github.com/klauspost/compress v1.11.2 // indirect
 	github.com/labstack/gommon v0.3.0
+	github.com/magiconair/properties v1.8.1
 	github.com/nicksnyder/go-i18n/v2 v2.0.3
 	github.com/spf13/viper v1.6.2
 	github.com/stretchr/testify v1.6.1

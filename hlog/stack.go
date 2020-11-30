@@ -77,9 +77,10 @@ func (l *stackedLogger) Error(msg string, args ...Field) {
 	}
 }
 
-type LoggerOptions interface {
-	Zap() ZapOptions
-	Sentry() SentryOptions
+type LoggerOptions struct {
+	Level      Level
+	ZapOpts    *ZapOptions
+	SentryOpts *SentryOptions
 }
 
 // NewStackLoggerDriver return new stacked logger .
@@ -97,11 +98,11 @@ func NewStackLoggerDriver(stackList []string, opts LoggerOptions) (hexa.Logger, 
 
 		switch strings.ToLower(loggerName) {
 		case zap:
-			stack[zap] = NewZapDriver(opts.Zap())
+			stack[zap] = NewZapDriver(*opts.ZapOpts)
 		case printer:
-			stack[printer] = NewPrinterDriver()
+			stack[printer] = NewPrinterDriver(opts.Level)
 		case sentry:
-			logger, err = NewSentryDriver(opts.Sentry())
+			logger, err = NewSentryDriver(*opts.SentryOpts)
 			if err != nil {
 				return nil, tracer.Trace(err)
 			}
