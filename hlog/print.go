@@ -53,7 +53,7 @@ func (l *printerLogger) Info(msg string, args ...Field) {
 }
 
 func (l *printerLogger) Message(msg string, args ...Field) {
-	l.log(MessageLevel, msg, args...)
+	l.log(InfoLevel, msg, args...)
 }
 
 func (l *printerLogger) Warn(msg string, args ...Field) {
