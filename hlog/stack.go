@@ -7,6 +7,12 @@ import (
 	"strings"
 )
 
+const (
+	ZapLogger     = "zap"
+	SentryLogger  = "sentry"
+	PrinterLogger = "printer"
+)
+
 type StackedLogger interface {
 	// LoggerByName returns logger by its name.
 	// logger can be nil if does not exists.
@@ -88,25 +94,21 @@ type StackOptions struct {
 func NewStackLoggerDriver(stackList []string, opts StackOptions) (hexa.Logger, error) {
 	stack := make(map[string]hexa.Logger, len(stackList))
 
-	zap := "zap"
-	printer := "printer"
-	sentry := "sentry"
-
 	for _, loggerName := range stackList {
 		var logger hexa.Logger
 		var err error
 
 		switch strings.ToLower(loggerName) {
-		case zap:
-			stack[zap] = NewZapDriver(*opts.ZapOpts)
-		case printer:
-			stack[printer] = NewPrinterDriver(opts.Level)
-		case sentry:
+		case ZapLogger:
+			stack[ZapLogger] = NewZapDriver(*opts.ZapOpts)
+		case PrinterLogger:
+			stack[PrinterLogger] = NewPrinterDriver(opts.Level)
+		case SentryLogger:
 			logger, err = NewSentryDriver(*opts.SentryOpts)
 			if err != nil {
 				return nil, tracer.Trace(err)
 			}
-			stack[sentry] = logger
+			stack[SentryLogger] = logger
 		default:
 			return nil, tracer.Trace(fmt.Errorf("logger with name %s not found", loggerName))
 		}
