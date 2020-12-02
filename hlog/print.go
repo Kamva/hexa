@@ -3,11 +3,13 @@ package hlog
 import (
 	"fmt"
 	"github.com/kamva/hexa"
+	"time"
 )
 
 type printerLogger struct {
-	level Level
-	with  []Field
+	timeFormat string
+	level      Level
+	with       []Field
 }
 
 func (l *printerLogger) Core() interface{} {
@@ -39,8 +41,10 @@ func (l *printerLogger) WithFunc(f hexa.LogFunc) hexa.Logger {
 
 func (l *printerLogger) log(level Level, msg string, args ...Field) {
 	ll := l.With(args...).(*printerLogger)
+	t := time.Now().Format(l.timeFormat)
+
 	if l.level.CanLog(level) {
-		fmt.Println(fmt.Sprintf("%s: ", level), fieldsToMap(ll.with...), msg)
+		fmt.Println(fmt.Sprintf("%s %s: ", t, level), fieldsToMap(ll.with...), msg)
 	}
 }
 
@@ -69,7 +73,11 @@ func (l *printerLogger) Error(msg string, args ...Field) {
 // Note: printer logger driver is just for test purpose.
 // dont use it in production.
 func NewPrinterDriver(l Level) hexa.Logger {
-	return &printerLogger{level: l, with: make([]Field, 0)}
+	return &printerLogger{
+		timeFormat: "2006-01-02T15:04:05.000-0700",
+		level:      l,
+		with:       make([]Field, 0),
+	}
 }
 
 // Assert printerLogger implements hexa Logger.
