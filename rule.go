@@ -4,7 +4,7 @@ type (
 	// Rule is a rule signature.
 	Rule func() error
 
-	// RuleChecker get a list of rules and check if a rule is broken,
+	// RuleChecker get a propagators of rules and check if a rule is broken,
 	// returns that rule error message.
 	// You can use rule checker in your aggregates,
 	//entities, valueObjects or services,...

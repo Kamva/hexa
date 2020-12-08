@@ -2,96 +2,17 @@ package hexa
 
 import (
 	"errors"
+	"fmt"
+
 	"github.com/kamva/gutil"
 	"github.com/kamva/tracer"
 )
 
-type (
-	// IDGenerator can generate fresh ID.
-	IDGenerator func() ID
-
-	// UserType is type of a user. possible values is :
-	// guest: Use for guest users.
-	// regular: Use for regular users of app (real registered users)
-	// service: Use for service users (microservices,...)
-	UserType string
-
-	// User who sends request to the app (can be guest,regular user,service user,...)
-	User interface {
-		// Type specifies user's type (guest,regular,...)
-		Type() UserType
-
-		// Identifier returns user's identifier
-		Identifier() ID
-
-		// Email returns the user's email.
-		// This value can be empty.
-		Email() string
-
-		// Phone returns the user's phone number.
-		// This value can be empty.
-		Phone() string
-
-		// Name returns the user name.
-		Name() string
-
-		// Username can be unique username,email,phone number or
-		// everything else which can be used as username.
-		Username() string
-
-		// IsActive specify that user is active or no.
-		IsActive() bool
-
-		// Roles returns user's roles.
-		Roles() []string
-	}
-
-	// user is default implementation of hexa User for real users.
-	user struct {
-		id       ID
-		userType UserType
-		email    string
-		phone    string
-		name     string
-		username string
-		isActive bool
-		roles    []string
-	}
-
-	// UserExporterImporter export a user to json and then import it.
-	exportedUser struct {
-		ID       interface{} `json:"id"`
-		Type     UserType    `json:"type"`
-		Email    string      `json:"email"`
-		Phone    string      `json:"phone"`
-		Name     string      `json:"name"`
-		Username string      `json:"username"`
-		IsActive bool        `json:"is_active"`
-		Roles    []string    `json:"roles"`
-	}
-
-	// UserExporterImporter export a user to json and then import it.
-	UserExporterImporter interface {
-		Export(user User) (Map, error)
-		Import(exportedMap Map) (User, error)
-	}
-	// userExporterImporter implements the UserExporterImporter interface.
-	userExporterImporter struct {
-		idGenerator IDGenerator
-	}
-
-	// UserSDK is the user's kit to import, export and generate guest.
-	UserSDK interface {
-		UserExporterImporter
-		// GenerateGuest returns new Guest User.
-		NewGuest() User
-	}
-
-	// userSDK implements the UserSDK.
-	userSDK struct {
-		UserExporterImporter
-	}
-)
+// UserType is type of a user. possible values is :
+// guest: Use for guest users.
+// regular: Use for regular users of app (real registered users)
+// service: Use for service users (microservices,...)
+type UserType string
 
 const (
 	UserTypeGuest   UserType = "__guest__"
@@ -99,131 +20,233 @@ const (
 	UserTypeService UserType = "__service__"
 )
 
-// guestUserID is the guest user's id
-var guestUserID = "__guest_id__"
+// User meta keys.
+const (
+	UserMetaKeyUserType   = "_user_type"
+	UserMetaKeyIdentifier = "_user_identifier"
+	UserMetaKeyEmail      = "_user_email"
+	UserMetaKeyPhone      = "_user_phone"
+	UserMetaKeyName       = "_user_name"
+	UserMetaKeyUsername   = "_user_username"
+	UserMetaKeyIsActive   = "_user_is_active"
+	UserMetaKeyRoles      = "_user_roles"
+)
 
-func (u *user) Type() UserType {
-	return u.userType
+var userMetaKeys = []string{
+	UserMetaKeyUserType,
+	UserMetaKeyIdentifier,
+	UserMetaKeyEmail,
+	UserMetaKeyPhone,
+	UserMetaKeyName,
+	UserMetaKeyUsername,
+	UserMetaKeyIsActive,
+	UserMetaKeyRoles,
 }
 
-func (u *user) Identifier() ID {
-	return u.id
+// guestUserID is the guest user's id
+const guestUserID = "__guest_id__"
+
+// User who sends request to the app (can be guest,regular user,service user,...)
+type User interface {
+	// Type specifies user's type (guest,regular,...)
+	Type() UserType
+
+	// Identifier returns user's identifier
+	Identifier() string
+
+	// Email returns the user's email.
+	// This value can be empty.
+	Email() string
+
+	// Phone returns the user's phone number.
+	// This value can be empty.
+	Phone() string
+
+	// Name returns the user name.
+	Name() string
+
+	// Username can be unique username,email,phone number or
+	// everything else which can be used as username.
+	Username() string
+
+	// IsActive specify that user is active or no.
+	IsActive() bool
+
+	// Roles returns user's roles.
+	Roles() []string
+
+	Meta(key string) (val interface{}, exists bool)
+
+	SetMeta(key string, val interface{}) error
+
+	// User must be able be export and import using this meta data.
+	// Meta data must be json serializable.
+	MetaData() Map
+}
+
+// user is default implementation of hexa User for real users.
+type user struct {
+	meta map[string]interface{}
+}
+
+func (u *user) Meta(key string) (val interface{}, exists bool) {
+	val, exists = u.meta[key]
+	return
+}
+
+func (u *user) SetMeta(key string, val interface{}) error {
+	// Validate new meta value:
+	m := map[string]interface{}{key: val}
+	gutil.ExtendMap(m, u.meta, false)
+	if err := validateUserMetaData(m); err != nil {
+		return tracer.Trace(err)
+	}
+
+	u.meta[key] = val
+	return nil
+}
+
+func (u *user) MetaData() Map {
+	m := make(map[string]interface{})
+	for k, v := range u.meta {
+		m[k] = v
+	}
+	return m
+}
+
+func (u *user) metaString(k string) string {
+	return u.meta[k].(string)
+}
+
+func (u *user) Type() UserType {
+	return u.meta[UserMetaKeyUserType].(UserType)
+}
+
+func (u *user) Identifier() string {
+	return u.metaString(UserMetaKeyIdentifier)
 }
 
 func (u *user) Email() string {
-	return u.email
+	return u.metaString(UserMetaKeyEmail)
 }
 
 func (u *user) Phone() string {
-	return u.phone
+	return u.metaString(UserMetaKeyPhone)
 }
 
 func (u *user) Name() string {
-	return u.name
+	return u.metaString(UserMetaKeyName)
 }
 
 func (u *user) Username() string {
-	return u.email
+	return u.metaString(UserMetaKeyUsername)
 }
 
 func (u *user) IsActive() bool {
-	return u.isActive
+	return u.meta[UserMetaKeyIsActive].(bool)
 }
 
 func (u *user) Roles() []string {
-	return u.roles
+	return u.meta[UserMetaKeyRoles].([]string)
 }
 
-// Export method export a user to map.
-func (e *userExporterImporter) Export(user User) (Map, error) {
-	if user == nil {
-		return nil, tracer.Trace(errors.New("user can not be nil"))
+// NewUserFromMeta creates new user from the meta keys.
+func NewUserFromMeta(meta Map) (User, error) {
+	if err := validateUserMetaData(meta); err != nil {
+		return nil, tracer.Trace(err)
 	}
-	return gutil.StructToMap(exportedUser{
-		ID:       user.Identifier().Val(),
-		Type:     user.Type(),
-		Email:    user.Email(),
-		Phone:    user.Phone(),
-		Name:     user.Name(),
-		Username: user.Username(),
-		IsActive: user.IsActive(),
-		Roles:    user.Roles(),
-	}), nil
+
+	return &user{meta: meta}, nil
 }
 
-// Import method a user from map.
-func (e *userExporterImporter) Import(exportedMap Map) (User, error) {
-	eu := exportedUser{}
-	err := gutil.MapToStruct(exportedMap, &eu)
+func MustNewUserFromMeta(meta Map) User {
+	u, err := NewUserFromMeta(meta)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
-
-	id := e.idGenerator()
-
-	// By convention guest and service users use stringID type,
-	// but for user we should generate, because each app can
-	// uses specific database with specific implemented userID
-	//type.
-	if eu.Type == UserTypeGuest || eu.Type == UserTypeService {
-		id = NewStringID(eu.ID.(string))
-	} else {
-		if err := id.From(eu.ID); err != nil {
-			return nil, err
-		}
-	}
-
-	user := NewUser(id, eu.Type, eu.Email, eu.Phone, eu.Name, eu.Username, eu.IsActive, eu.Roles)
-
-	return user, nil
+	return u
 }
 
-func (u *userSDK) NewGuest() User {
-	return NewGuest()
+type UserParams struct {
+	Id       string
+	Type     UserType
+	Email    string
+	Phone    string
+	Name     string
+	UserName string
+	IsActive bool
+	Roles    []string
 }
 
 // NewUser returns new hexa user instance.
-func NewUser(id ID, utype UserType, email, phone, name, username string, isActive bool, roles []string) User {
-	return &user{
-		id:       id,
-		userType: utype,
-		email:    email,
-		phone:    phone,
-		name:     name,
-		username: username,
-		isActive: isActive,
-		roles:    roles,
+func NewUser(p UserParams) User {
+	meta := map[string]interface{}{
+		UserMetaKeyIdentifier: p.Id,
+		UserMetaKeyUserType:   p.Type,
+		UserMetaKeyEmail:      p.Email,
+		UserMetaKeyPhone:      p.Phone,
+		UserMetaKeyName:       p.Name,
+		UserMetaKeyUsername:   p.UserName,
+		UserMetaKeyIsActive:   p.IsActive,
+		UserMetaKeyRoles:      p.Roles,
 	}
+	return MustNewUserFromMeta(meta)
 }
 
 // NewGuest returns new instance of guest user.
 func NewGuest() User {
-	email := ""
-	phone := ""
-	name := "__guest__"
-	username := "__guest__username__"
-	return NewUser(NewStringID(guestUserID), UserTypeGuest, email, phone, name, username, false, []string{})
+	return NewUser(UserParams{
+		Id:       guestUserID,
+		Type:     UserTypeGuest,
+		Email:    "",
+		Phone:    "",
+		Name:     "_guest",
+		UserName: "_guest_username",
+		IsActive: false,
+		Roles:    []string{},
+	})
 }
 
 // NewServiceUser returns new instance of Service user.
 func NewServiceUser(id, name string, isActive bool, roles []string) User {
-	email := ""
-	phone := ""
-	username := "__service_username__"
-	return NewUser(NewStringID(id), UserTypeService, email, phone, name, username, isActive, roles)
+	return NewUser(UserParams{
+		Id:       id,
+		Type:     UserTypeService,
+		Email:    "",
+		Phone:    "",
+		Name:     name,
+		UserName: "__service_username__",
+		IsActive: isActive,
+		Roles:    roles,
+	})
 }
 
-// NewUserExporterImporter returns new instance of user exporter.
-func NewUserExporterImporter(idGenerator IDGenerator) UserExporterImporter {
-	return &userExporterImporter{idGenerator}
-}
+func validateUserMetaData(meta map[string]interface{}) error {
+	// validate meta keys: all required meta keys must exists.
+	for _, k := range userMetaKeys {
+		if _, ok := meta[k]; !ok {
+			errStr := fmt.Sprintf("key %s not found in user's meta keys", k)
+			return tracer.Trace(errors.New(errStr))
+		}
+	}
 
-// NewUserSDK returns new instance of the user SDK.
-func NewUserSDK(ei UserExporterImporter) UserSDK {
-	return &userSDK{ei}
+	// Validate userType field
+	if _, ok := meta[UserMetaKeyUserType].(UserType); !ok {
+		return tracer.Trace(errors.New("invalid type for usertype field in user's meta data"))
+	}
+
+	// Validate IsActive field
+	if _, ok := meta[UserMetaKeyIsActive]; !ok {
+		return tracer.Trace(errors.New("invalid type for isActive field in user's meta data"))
+	}
+
+	// Validate roles field:
+	if _, ok := meta[UserMetaKeyRoles]; !ok {
+		return tracer.Trace(errors.New("invalid type for roles field in user's meta data"))
+	}
+
+	return nil
 }
 
 // Assertion
 var _ User = &user{}
-var _ UserExporterImporter = &userExporterImporter{}
-var _ UserSDK = &userSDK{}

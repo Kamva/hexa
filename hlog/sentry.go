@@ -3,11 +3,12 @@ package hlog
 import (
 	"errors"
 	"fmt"
+	"net"
+	"net/http"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/kamva/gutil"
 	"github.com/kamva/hexa"
-	"net"
-	"net/http"
 )
 
 type SentryOptions struct {
@@ -43,7 +44,7 @@ func (l *sentryLogger) setUser(scope *sentry.Scope, user hexa.User, r *http.Requ
 	u := sentry.User{
 		IPAddress: gutil.IP(r),
 		Email:     user.Email(),
-		ID:        user.Identifier().String(),
+		ID:        user.Identifier(),
 		Username:  user.Username(),
 	}
 

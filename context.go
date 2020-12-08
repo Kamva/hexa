@@ -3,206 +3,113 @@ package hexa
 import (
 	"context"
 	"errors"
-	"github.com/kamva/gutil"
-	"github.com/kamva/tracer"
+	"fmt"
 	"net"
 	"net/http"
+
+	"github.com/kamva/gutil"
+	"github.com/kamva/tracer"
 )
 
-type (
-	// Context is the hexa context to use in services.
-	Context interface {
-		context.Context
-
-		// WithUser returns new instance of context with provided user.
-		WithUser(User) Context
-
-		// Request returns the current request and can be nil for not http requests.
-		Request() *http.Request
-
-		// Correlation returns the request correlation id.
-		CorrelationID() string
-
-		// User returns the user
-		User() User
-
-		// Logger returns the hexa logger customized for specific request.
-		Logger() Logger
-
-		// Translator returns the translator localized relative to the users request.
-		Translator() Translator
-
-		// ToMap method convert context to map to export and import.
-		ToMap(UserExporterImporter) (Map, error)
-	}
-
-	defaultContext struct {
-		context.Context
-		baseLogger     Logger
-		baseTranslator Translator
-		locale         string
-		request        *http.Request
-		correlationID  string
-		user           User
-		logger         Logger
-		translator     Translator
-	}
-
-	// exportedCtx use export and import Context.
-	exportedCtx struct {
-		Locale        string `json:"locale"`
-		CorrelationID string `json:"correlation_id"`
-		User          Map    `json:"user"`
-	}
-
-	// ContextExporterImporter export and import the context
-	ContextExporterImporter interface {
-		Export(Context) (Map, error)
-		Import(Map) (Context, error)
-	}
-
-	// contextExporterImporter export & import the context.
-	contextExporterImporter struct {
-		ue UserExporterImporter
-		l  Logger
-		t  Translator
-	}
+const (
+	ContextKeyRequest       = "_ctx_request"        // value must be *http.Request (optional)
+	ContextKeyCorrelationID = "_ctx_correlation_id" // value Must be cid string
+	ContextKeyLocale        = "_ctx_local"          // value must be locale string (can be empty string)
+	ContextKeyUser          = "_ctx_user"           // Value must be user
+	ContextKeyLogger        = "_ctx_logger"         // value must be Logger interface
+	ContextKeyTranslator    = "_ctx_translator"     // value must be Translator interface
 )
 
-func (e exportedCtx) validate() error {
-	if e.CorrelationID == "" || e.User == nil {
-		return tracer.Trace(errors.New("exported data is invalid"))
-	}
-
-	return nil
+var requiredContextKeys = []string{
+	ContextKeyUser,
+	ContextKeyCorrelationID,
+	ContextKeyLocale,
+	ContextKeyLogger,
+	ContextKeyTranslator,
 }
 
-func (c defaultContext) WithUser(user User) Context {
-	return NewCtx(c.request, c.correlationID, c.locale, user, c.baseLogger, c.baseTranslator)
+// Context is the hexa context to use in services.
+// This context must be just a wrapper of the golang context.
+type Context interface {
+	context.Context
+
+	// Request returns the current request and can be nil for not http requests.
+	Request() *http.Request
+
+	// Correlation returns the request correlation id.
+	CorrelationID() string
+
+	// User returns the user
+	User() User
+
+	// Logger returns the hexa logger customized for specific request.
+	Logger() Logger
+
+	// Translator returns the translator localized relative to the users request.
+	Translator() Translator
 }
 
-func (c defaultContext) Request() *http.Request {
-	return c.request
+type contextImpl struct {
+	context.Context
+	baseLogger     Logger // TODO: remove all these fields.
+	baseTranslator Translator
+	locale         string
+	request        *http.Request
+	correlationID  string
+	user           User
+	logger         Logger
+	translator     Translator
 }
 
-func (c defaultContext) CorrelationID() string {
-	return c.correlationID
+func (c contextImpl) Request() *http.Request {
+	return c.Value(ContextKeyRequest).(*http.Request)
 }
 
-func (c defaultContext) User() User {
-	return c.user
+func (c contextImpl) CorrelationID() string {
+	return c.Value(ContextKeyCorrelationID).(string)
 }
 
-func (c defaultContext) Logger() Logger {
-	return c.logger
+func (c contextImpl) User() User {
+	return c.Value(ContextKeyUser).(User)
 }
 
-func (c defaultContext) Translator() Translator {
-	return c.translator
-}
-
-func (c defaultContext) ToMap(ue UserExporterImporter) (Map, error) {
-	if ue == nil {
-		return nil, tracer.Trace(errors.New("user exporter can not be nil"))
-	}
-
-	exportedUser, err := ue.Export(c.User())
-	if err != nil {
-		return nil, tracer.Trace(err)
-	}
-
-	return gutil.StructToMap(exportedCtx{
-		Locale:        c.locale,
-		CorrelationID: c.CorrelationID(),
-		User:          exportedUser,
-	}), nil
-}
-
-func (ce *contextExporterImporter) Export(ctx Context) (Map, error) {
-	return ctx.ToMap(ce.ue)
-}
-
-func (ce *contextExporterImporter) Import(m Map) (Context, error) {
-	e := exportedCtx{}
-	err := gutil.MapToStruct(m, &e)
-	if err != nil {
-		return nil, tracer.Trace(err)
-	}
-	if err := e.validate(); err != nil {
-		return nil, tracer.Trace(err)
-	}
-
-	u, err := ce.ue.Import(e.User)
-	if err != nil {
-		return nil, err
-	}
-
-	return NewCtx(nil, e.CorrelationID, e.Locale, u, ce.l, ce.t), nil
-}
-
-// NewCtx returns new hexa Context.
-// locale syntax is just same as HTTP Accept-Language header.
-func NewCtx(request *http.Request, correlationID string, locale string, user User, logger Logger, translator Translator) Context {
-	ctx := &defaultContext{
-		Context:        context.Background(),
-		baseLogger:     logger,
-		baseTranslator: translator,
-		request:        request,
-		locale:         locale,
-		correlationID:  correlationID,
-		user:           user,
-		logger:         logger,
-		translator:     tuneCtxTranslator(locale, translator),
-	}
-
-	// Bind context to the context's logger.
-	ctx.logger = tuneCtxLogger(request, correlationID, user, logger).WithCtx(ctx)
-	return ctx
-}
-
-// NewCtxExporterImporter returns new instance of the ContextExporterImporter to export and import context.
-func NewCtxExporterImporter(ue UserExporterImporter, l Logger, t Translator) ContextExporterImporter {
-	return &contextExporterImporter{
-		ue: ue,
-		l:  l,
-		t:  t,
-	}
-}
-
-// tuneLogger function tune the logger for each context.
-func tuneCtxLogger(r *http.Request, correlationID string, u User, logger Logger) Logger {
+func (c contextImpl) Logger() Logger {
 	field := StringField
+	u := c.User()
+	r := c.Request()
 
 	tags := []LogField{
-		field("__user_type__", string(u.Type())),
-		field("__user_id__", u.Identifier().String()),
-		field("__username__", u.Username()),
-		field("__correlation_id__", correlationID),
+		field("_user_type", string(u.Type())),
+		field("_user_id", u.Identifier()),
+		field("_username", u.Username()),
+		field("_correlation_id", c.CorrelationID()),
 	}
 
 	if u.Type() == UserTypeRegular {
-		tags = append(tags, field("__email__", u.Email()))
-		tags = append(tags, field("__phone__", u.Phone()))
+		tags = append(tags, field("_email", u.Email()))
+		tags = append(tags, field("_phone", u.Phone()))
 	}
 
 	if r != nil {
 		rid := r.Header.Get("X-Request-ID")
 		if rid != "" {
-			tags = append(tags, field("__request_id__", rid))
+			tags = append(tags, field("_request_id", rid))
 		}
 
 		if ip, port, err := net.SplitHostPort(gutil.IP(r)); err == nil {
-			tags = append(tags, field("__ip__", ip))
-			tags = append(tags, field("__port__", port))
+			tags = append(tags, field("_ip", ip))
+			tags = append(tags, field("_port", port))
 		}
 	}
+	logger := c.Value(ContextKeyLogger).(Logger)
 
-	logger = logger.With(tags...)
-	return logger
+	return logger.With(tags...)
 }
 
-// tuneCtxTranslator localize translator for each context.
-func tuneCtxTranslator(locale string, t Translator) Translator {
+func (c contextImpl) Translator() Translator {
+	t := c.Value(ContextKeyTranslator).(Translator)
+	locale := c.Value(ContextKeyLocale).(string)
+
 	if locale != "" {
 		return t.Localize(locale)
 	}
@@ -210,6 +117,95 @@ func tuneCtxTranslator(locale string, t Translator) Translator {
 	return t.Localize()
 }
 
-// Assert defaultContext implements the hexa Context.
-var _ Context = &defaultContext{}
-var _ ContextExporterImporter = &contextExporterImporter{}
+func WithUser(c Context, user User) Context {
+	rawCtx := context.WithValue(c, ContextKeyUser, user)
+	return &contextImpl{Context: rawCtx}
+}
+
+func NewContextFromRawContext(c context.Context) (Context, error) {
+	if err := validateRawContext(c); err != nil {
+		return nil, tracer.Trace(err)
+	}
+
+	return &contextImpl{Context: c}, nil
+}
+
+func MustNewContextFromRawContext(c context.Context) Context {
+	return gutil.Must(NewContextFromRawContext(c)).(Context)
+}
+
+type ContextParams struct {
+	Request       *http.Request
+	CorrelationId string
+	Locale        string
+	User          User
+	Logger        Logger
+	Translator    Translator
+}
+
+// NewContext returns new hexa Context.
+// locale syntax is just same as HTTP Accept-Language header.
+func NewContext(p ContextParams) Context {
+	c := contextWithParams(context.Background(), p)
+
+	return MustNewContextFromRawContext(c)
+}
+
+func contextWithParams(c context.Context, p ContextParams) context.Context {
+	c = context.WithValue(c, ContextKeyRequest, p.Request)
+	c = context.WithValue(c, ContextKeyCorrelationID, p.CorrelationId)
+	c = context.WithValue(c, ContextKeyLocale, p.Locale)
+	c = context.WithValue(c, ContextKeyUser, p.User)
+	c = context.WithValue(c, ContextKeyLogger, p.Logger)
+	c = context.WithValue(c, ContextKeyTranslator, p.Translator)
+
+	return c
+}
+
+// validateRawContext validate check whether a raw context
+// can be converted to a hexa context or not.
+func validateRawContext(c context.Context) error {
+	if k := getMissedKeyInContext(c, requiredContextKeys...); k != "" {
+		errMsg := fmt.Sprintf("can not found key %s in context keys to generate hexa context", k)
+		return tracer.Trace(errors.New(errMsg))
+	}
+
+	// assert user type:
+	if _, ok := c.Value(ContextKeyUser).(User); !ok {
+		return tracer.Trace(errors.New("invalid user for hexa context"))
+	}
+
+	// Request must be *http.Request if exists:
+	if v := c.Value(ContextKeyRequest); v != nil {
+		if _, ok := v.(*http.Request); !ok {
+			return tracer.Trace(errors.New("request type is invalid for hexa context"))
+		}
+	}
+
+	// CorrelationId can not be empty
+	if cid, ok := c.Value(ContextKeyCorrelationID).(string); !ok {
+		return tracer.Trace(errors.New("correlation id type is invalid for hexa context"))
+	} else if cid == "" {
+		return tracer.Trace(errors.New("correlation id can not be empty for hexa context"))
+	}
+
+	// local must be string
+	if _, ok := c.Value(ContextKeyLocale).(string); !ok {
+		return tracer.Trace(errors.New("local type is invalid for hexa context"))
+	}
+
+	// assert logger type
+	if _, ok := c.Value(ContextKeyLogger).(Logger); !ok {
+		return tracer.Trace(errors.New("invalid logger for hexa context"))
+	}
+
+	// assert translator type:
+	if _, ok := c.Value(ContextKeyTranslator).(Translator); !ok {
+		return tracer.Trace(errors.New("invalid translator for hexa context"))
+	}
+
+	return nil
+}
+
+// Assert contextImpl implements the hexa Context.
+var _ Context = &contextImpl{}
