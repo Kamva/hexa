@@ -3,13 +3,18 @@ package hexa
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
+	"github.com/kamva/gutil"
 	"github.com/kamva/tracer"
 )
 
 type ContextPropagator interface {
+	// Extract extracts values from context and add to the map
 	Extract(context.Context) (map[string][]byte, error)
+
+	// Inject injects values from map to the context.
 	Inject(map[string][]byte, context.Context) (context.Context, error)
 }
 
@@ -26,6 +31,9 @@ type keysPropagator struct {
 	strict bool
 }
 
+// defaultContextPropagator propagate the default implementation of the Hexa context.
+// You can use it as one of hexa propagators to propagate hexa context itself across
+// microservices.
 type defaultContextPropagator struct {
 	logger     Logger
 	translator Translator
@@ -33,18 +41,6 @@ type defaultContextPropagator struct {
 
 type multiPropagator struct {
 	propagators []ContextPropagator
-}
-
-func NewMultiPropagator(propagators ...ContextPropagator) ContextPropagator {
-	return &multiPropagator{propagators: propagators}
-}
-
-func NewContextPropagator(l Logger, t Translator) ContextPropagator {
-	return &defaultContextPropagator{logger: l, translator: t}
-}
-
-func NewKeysPropagator(keys []string, strict bool) ContextPropagator {
-	return &keysPropagator{keys: keys, strict: strict}
 }
 
 func (p *multiPropagator) Extract(c context.Context) (map[string][]byte, error) {
@@ -68,6 +64,10 @@ func (p *multiPropagator) Inject(m map[string][]byte, c context.Context) (contex
 		}
 	}
 	return c, nil
+}
+
+func (p *multiPropagator) AddPropagator(propagator ContextPropagator) {
+	p.propagators = append(p.propagators, propagator)
 }
 
 func (p *defaultContextPropagator) Extract(c context.Context) (map[string][]byte, error) {
@@ -124,6 +124,15 @@ func (p *defaultContextPropagator) prepareUserMeta(m map[string][]byte) (map[str
 
 	// Convert Usertype:
 	userMeta[UserMetaKeyUserType] = UserType(userMeta[UserMetaKeyUserType].(string))
+
+	// Convert user roles from []interface{} to []string:
+	roles := make([]string, 0)
+	err := gutil.UnmarshalStruct(userMeta[UserMetaKeyRoles], &roles)
+	if err != nil {
+		return nil, tracer.Trace(err)
+	}
+	userMeta[UserMetaKeyRoles] = roles
+
 	return userMeta, nil
 }
 
@@ -153,6 +162,31 @@ func (p *keysPropagator) Inject(m map[string][]byte, c context.Context) (context
 		c = context.WithValue(c, k, string(v))
 	}
 	return c, nil
+}
+
+func NewMultiPropagator(propagators ...ContextPropagator) ContextPropagator {
+	return &multiPropagator{propagators: propagators}
+}
+
+// NewContextPropagator returns new context propagator to propagate
+// the Hexa context itself.
+func NewContextPropagator(l Logger, t Translator) ContextPropagator {
+	return &defaultContextPropagator{logger: l, translator: t}
+}
+
+func NewKeysPropagator(keys []string, strict bool) ContextPropagator {
+	return &keysPropagator{keys: keys, strict: strict}
+}
+
+// WithPropagator add another propagator to ourself implemented multiPropagator.
+func WithPropagator(multi ContextPropagator, p ContextPropagator) error {
+	multiP, ok := multi.(*multiPropagator)
+	if !ok {
+		msg := "propagator is not multi propagator, we can not add another propagator to it."
+		return tracer.Trace(errors.New(msg))
+	}
+	multiP.AddPropagator(p)
+	return nil
 }
 
 var _ ContextPropagator = &multiPropagator{}

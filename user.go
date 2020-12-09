@@ -236,12 +236,12 @@ func validateUserMetaData(meta map[string]interface{}) error {
 	}
 
 	// Validate IsActive field
-	if _, ok := meta[UserMetaKeyIsActive]; !ok {
+	if _, ok := meta[UserMetaKeyIsActive].(bool); !ok {
 		return tracer.Trace(errors.New("invalid type for isActive field in user's meta data"))
 	}
 
 	// Validate roles field:
-	if _, ok := meta[UserMetaKeyRoles]; !ok {
+	if _, ok := meta[UserMetaKeyRoles].([]string); !ok {
 		return tracer.Trace(errors.New("invalid type for roles field in user's meta data"))
 	}
 
