@@ -15,9 +15,9 @@ import (
 type UserType string
 
 const (
-	UserTypeGuest   UserType = "__guest__"
-	UserTypeRegular UserType = "__regular__"
-	UserTypeService UserType = "__service__"
+	UserTypeGuest   UserType = "_guest"
+	UserTypeRegular UserType = "_regular"
+	UserTypeService UserType = "_service"
 )
 
 // User meta keys.
@@ -44,7 +44,7 @@ var userMetaKeys = []string{
 }
 
 // guestUserID is the guest user's id
-const guestUserID = "__guest_id__"
+const guestUserID = "_guest_id"
 
 // User who sends request to the app (can be guest,regular user,service user,...)
 type User interface {
@@ -215,7 +215,7 @@ func NewServiceUser(id, name string, isActive bool, roles []string) User {
 		Email:    "",
 		Phone:    "",
 		Name:     name,
-		UserName: "__service_username__",
+		UserName: "_service_username",
 		IsActive: isActive,
 		Roles:    roles,
 	})

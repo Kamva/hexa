@@ -14,7 +14,7 @@ type (
 		// and error handler can check Reply type and return the proper
 		// response.
 		// in implementation of Reply we can return just empty string or
-		// special value (like "__reply__") as error message.
+		// special value (like "_reply") as error message.
 		error
 
 		//Is function satisfy Is interface of errors package.
@@ -52,7 +52,7 @@ func (r defaultReply) Is(err error) bool {
 
 // Error implements to just satisfy the Reply and error interface.
 func (r defaultReply) Error() string {
-	return "__reply__"
+	return "_reply"
 }
 
 func (r defaultReply) HTTPStatus() int {

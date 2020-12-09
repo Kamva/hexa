@@ -5,7 +5,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-const ErrorStackLogKey = "__stack__"
+const ErrorStackLogKey = "_stack"
 
 // LogFunc gets logger, set data on it and return it.
 // example of such functions is ErrStack function in the
@@ -55,7 +55,7 @@ type Logger interface {
 
 	// Message log the value as a message.
 	// Use this to send message to some loggers that just want to get messages.
-	// all loggers see message as info and just add simple __message__ tag to it.
+	// all loggers see message as info and just add simple _message tag to it.
 	// but some other loggers just log messages (like our sentry logger).
 	// severity of Message it just like info.
 	Message(msg string, args ...LogField)

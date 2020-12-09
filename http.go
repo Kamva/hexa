@@ -26,7 +26,7 @@ func (b HttpRespBody) MarshalJSON() ([]byte, error) {
 		m["data"] = b.Data
 	}
 	if b.debug {
-		m["__debug__"] = b.debugData
+		m["_debug"] = b.debugData
 	}
 
 	return json.Marshal(m)

@@ -136,8 +136,8 @@ func (e defaultError) SetReportData(data Map) Error {
 func (e defaultError) ReportIfNeeded(l Logger, t Translator) bool {
 	if e.shouldReport() {
 		fields := []LogField{
-			StringField("__error_id", e.ID()),
-			IntField("__http_status__", e.HTTPStatus()),
+			StringField("_error_id", e.ID()),
+			IntField("_http_status", e.HTTPStatus()),
 		}
 		for k, v := range e.Data() {
 			fields = append(fields, AnyField(k, v))
