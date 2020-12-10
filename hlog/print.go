@@ -2,8 +2,9 @@ package hlog
 
 import (
 	"fmt"
-	"github.com/kamva/hexa"
 	"time"
+
+	"github.com/kamva/hexa"
 )
 
 type printerLogger struct {
@@ -16,19 +17,24 @@ func (l *printerLogger) Core() interface{} {
 	return fmt.Println
 }
 
-func (l *printerLogger) newWith() []Field {
+func (l *printerLogger) cloneData() []Field {
 	dst := make([]Field, len(l.with))
-	copy(l.with, dst)
+	for i, v := range l.with {
+		dst[i] = v
+	}
 	return dst
 }
-
+func (l *printerLogger) clone() *printerLogger {
+	return &printerLogger{
+		timeFormat: l.timeFormat,
+		level:      l.level,
+		with:       l.cloneData(),
+	}
+}
 func (l *printerLogger) WithCtx(ctx hexa.Context, args ...Field) hexa.Logger {
-	newWith := l.newWith()
-	newWith = append(newWith, args...)
-
-	newLogger := NewPrinterDriver(l.level).(*printerLogger)
-	newLogger.with = newWith
-	return newLogger
+	clone := l.clone()
+	clone.with = append(clone.with, args...)
+	return clone
 }
 
 func (l *printerLogger) With(args ...Field) hexa.Logger {
