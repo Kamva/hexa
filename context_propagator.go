@@ -2,11 +2,9 @@ package hexa
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 
-	"github.com/kamva/gutil"
 	"github.com/kamva/tracer"
 )
 
@@ -35,6 +33,7 @@ type keysPropagator struct {
 // You can use it as one of hexa propagators to propagate hexa context itself across
 // microservices.
 type defaultContextPropagator struct {
+	up         UserPropagator
 	logger     Logger
 	translator Translator
 }
@@ -78,8 +77,7 @@ func (p *defaultContextPropagator) Extract(c context.Context) (map[string][]byte
 
 	// user
 	user := c.Value(ContextKeyUser).(User)
-	userMeta := user.MetaData()
-	uBytes, err := json.Marshal(userMeta)
+	uBytes, err := p.up.ToBytes(user)
 	if err != nil {
 		return nil, tracer.Trace(err)
 	}
@@ -94,12 +92,7 @@ func (p *defaultContextPropagator) Inject(m map[string][]byte, c context.Context
 			return nil, tracer.Trace(fmt.Errorf("key %s not found in map", k))
 		}
 	}
-	userMeta, err := p.prepareUserMeta(m)
-	if err != nil {
-		return nil, tracer.Trace(err)
-	}
-
-	user, err := NewUserFromMeta(userMeta)
+	user, err := p.up.FromBytes(m[ContextKeyUser])
 	if err != nil {
 		return nil, tracer.Trace(err)
 	}
@@ -114,26 +107,6 @@ func (p *defaultContextPropagator) Inject(m map[string][]byte, c context.Context
 		Translator:    p.translator,
 	})
 	return c, nil
-}
-
-func (p *defaultContextPropagator) prepareUserMeta(m map[string][]byte) (map[string]interface{}, error) {
-	userMeta := make(map[string]interface{})
-	if err := json.Unmarshal(m[ContextKeyUser], &userMeta); err != nil {
-		return nil, tracer.Trace(err)
-	}
-
-	// Convert Usertype:
-	userMeta[UserMetaKeyUserType] = UserType(userMeta[UserMetaKeyUserType].(string))
-
-	// Convert user roles from []interface{} to []string:
-	roles := make([]string, 0)
-	err := gutil.UnmarshalStruct(userMeta[UserMetaKeyRoles], &roles)
-	if err != nil {
-		return nil, tracer.Trace(err)
-	}
-	userMeta[UserMetaKeyRoles] = roles
-
-	return userMeta, nil
 }
 
 func (p *keysPropagator) Extract(c context.Context) (map[string][]byte, error) {
@@ -171,7 +144,7 @@ func NewMultiPropagator(propagators ...ContextPropagator) ContextPropagator {
 // NewContextPropagator returns new context propagator to propagate
 // the Hexa context itself.
 func NewContextPropagator(l Logger, t Translator) ContextPropagator {
-	return &defaultContextPropagator{logger: l, translator: t}
+	return &defaultContextPropagator{up: NewUserPropagator(), logger: l, translator: t}
 }
 
 func NewKeysPropagator(keys []string, strict bool) ContextPropagator {
