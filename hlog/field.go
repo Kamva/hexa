@@ -17,3 +17,6 @@ var Err = hexa.ErrField
 var NamedErr = hexa.NamedErrField
 var Bool = hexa.BoolField
 var Duration = hexa.DurationField
+var Time = hexa.TimeField
+var Times = hexa.TimesField
+var Timep = hexa.TimepField

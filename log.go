@@ -26,7 +26,9 @@ var ErrField = zap.Error
 var NamedErrField = zap.NamedError
 var BoolField = zap.Bool
 var DurationField = zap.Duration
-
+var TimeField = zap.Time
+var TimesField = zap.Times
+var TimepField = zap.Timep
 
 type Logger interface {
 
