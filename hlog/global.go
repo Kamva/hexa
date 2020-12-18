@@ -20,7 +20,6 @@ func SetGlobalLogger(l hexa.Logger) {
 
 var WithCtx = global.WithCtx
 var With = global.With
-var WithFunc = global.WithFunc
 var Debug = global.Debug
 var Info = global.Info
 var Message = global.Message

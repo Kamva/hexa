@@ -20,3 +20,4 @@ var Duration = hexa.DurationField
 var Time = hexa.TimeField
 var Times = hexa.TimesField
 var Timep = hexa.TimepField
+var ErrStack = hexa.ErrStackField

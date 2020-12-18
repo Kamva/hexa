@@ -25,10 +25,6 @@ func (l *zapLogger) With(args ...Field) hexa.Logger {
 	return l
 }
 
-func (l *zapLogger) WithFunc(f hexa.LogFunc) hexa.Logger {
-	return f(l)
-}
-
 func (l *zapLogger) Debug(msg string, args ...Field) {
 	l.logger.Debug(msg, args...)
 }

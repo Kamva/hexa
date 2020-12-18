@@ -41,10 +41,6 @@ func (l *printerLogger) With(args ...Field) hexa.Logger {
 	return l.WithCtx(nil, args...)
 }
 
-func (l *printerLogger) WithFunc(f hexa.LogFunc) hexa.Logger {
-	return f(l)
-}
-
 func (l *printerLogger) log(level Level, msg string, args ...Field) {
 	ll := l.With(args...).(*printerLogger)
 	t := time.Now().Format(l.timeFormat)

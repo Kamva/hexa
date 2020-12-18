@@ -1,6 +1,7 @@
 package hexa
 
 import (
+	"github.com/kamva/tracer"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -30,6 +31,11 @@ var TimeField = zap.Time
 var TimesField = zap.Times
 var TimepField = zap.Timep
 
+// ErrStackField print error stack(if exists) using logger
+func ErrStackField(err error) LogField {
+	return StringField(ErrorStackLogKey, tracer.StackAsString(err))
+}
+
 type Logger interface {
 
 	// Core function returns the logger core concrete struct.
@@ -45,9 +51,6 @@ type Logger interface {
 	// WithFields method set key,values and return new logger
 	// contains this key values as log fields.
 	With(f ...LogField) Logger
-
-	// WithF call to the provided function to set a field in the logger using provided function.
-	WithFunc(f LogFunc) Logger
 
 	// Debug log debug message.
 	Debug(msg string, args ...LogField)

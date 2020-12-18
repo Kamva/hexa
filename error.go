@@ -2,6 +2,7 @@ package hexa
 
 import (
 	"fmt"
+
 	"github.com/kamva/gutil"
 	"github.com/kamva/tracer"
 )
@@ -147,9 +148,8 @@ func (e defaultError) ReportIfNeeded(l Logger, t Translator) bool {
 		}
 
 		// If exists error and error is traced,print its stack.
-		if stack := tracer.StackAsString(tracer.MoveStackIfNeeded(e, e.error)); stack != "" {
-			fields = append(fields, StringField(ErrorStackLogKey, stack))
-		}
+		fields = append(fields, ErrStackField(tracer.MoveStackIfNeeded(e, e.error)))
+
 		if e.error != nil {
 			fields = append(fields, ErrField(e.error))
 		}
