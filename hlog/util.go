@@ -6,7 +6,8 @@ import (
 
 func fieldToKeyVal(f Field) (key string, val interface{}) {
 	switch f.Type {
-	case zapcore.Int64Type:
+	case zapcore.Int64Type, zapcore.Int32Type, zapcore.Int16Type, zapcore.Int8Type, zapcore.UintptrType,
+		zapcore.Uint64Type, zapcore.Uint32Type, zapcore.Uint16Type, zapcore.Uint8Type:
 		val = f.Integer
 	case zapcore.StringType:
 		val = f.String
