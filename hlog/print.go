@@ -1,7 +1,6 @@
 package hlog
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -46,17 +45,8 @@ func (l *printerLogger) log(level Level, msg string, args ...Field) {
 	ll := l.With(args...).(*printerLogger)
 	t := time.Now().Format(l.timeFormat)
 
-	var fields string
-	fieldsMap := fieldsToMap(ll.with...)
-	m, err := json.Marshal(fieldsMap)
-	if err == nil {
-		fields = string(m)
-	} else {
-		fields = fmt.Sprint(fieldsMap)
-	}
-
 	if l.level.CanLog(level) {
-		fmt.Println(fmt.Sprintf("%s %s: ", t, level),fields, msg)
+		fmt.Println(fmt.Sprintf("%s %s: ", t, level), fieldsToMap(ll.with...), msg)
 	}
 }
 
