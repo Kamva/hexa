@@ -17,7 +17,7 @@ const (
 )
 
 type Health interface {
-	Identifier() string
+	HealthIdentifier() string
 	LivenessStatus(ctx context.Context) LivenessStatus
 	ReadinessStatus(ctx context.Context) ReadinessStatus
 }
@@ -25,7 +25,7 @@ type Health interface {
 func LivenessCheck(l ...Health) map[string]LivenessStatus {
 	r := make(map[string]LivenessStatus, len(l))
 	for _, health := range l {
-		r[health.Identifier()] = health.LivenessStatus(context.Background())
+		r[health.HealthIdentifier()] = health.LivenessStatus(context.Background())
 	}
 	return r
 }
@@ -34,7 +34,7 @@ func ReadinessCheck(l ...Health) map[string]ReadinessStatus {
 	// TODO: check using go routine
 	r := make(map[string]ReadinessStatus, len(l))
 	for _, health := range l {
-		r[health.Identifier()] = health.ReadinessStatus(context.Background())
+		r[health.HealthIdentifier()] = health.ReadinessStatus(context.Background())
 	}
 	return r
 }
@@ -48,7 +48,7 @@ func HealthCheck(l ...Health) map[string]HealthCheckResult {
 	// TODO: check using go routines
 	r := make(map[string]HealthCheckResult, len(l))
 	for _, health := range l {
-		r[health.Identifier()] = HealthCheckResult{
+		r[health.HealthIdentifier()] = HealthCheckResult{
 			Live:  health.LivenessStatus(context.Background()),
 			Ready: health.ReadinessStatus(context.Background()),
 		}
