@@ -32,7 +32,7 @@ type (
 	HealthStatus struct {
 		Id    string            `json:"id"`
 		Tags  map[string]string `json:"tags,omitempty"`
-		Live  LivenessStatus    `json:"live"`
+		Alive LivenessStatus    `json:"alive"`
 		Ready ReadinessStatus   `json:"ready"`
 	}
 )
@@ -61,7 +61,7 @@ func HealthCheck(l ...Health) []HealthStatus {
 	for i, health := range l {
 		r[i] = HealthStatus{
 			Id:    health.HealthIdentifier(),
-			Live:  health.LivenessStatus(context.Background()),
+			Alive: health.LivenessStatus(context.Background()),
 			Ready: health.ReadinessStatus(context.Background()),
 		}
 	}
@@ -71,7 +71,7 @@ func HealthCheck(l ...Health) []HealthStatus {
 
 func AllAliveStatus(l ...HealthStatus) bool {
 	for _, s := range l {
-		if s.Live != StatusAlive {
+		if s.Alive != StatusAlive {
 			return false
 		}
 	}

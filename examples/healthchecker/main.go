@@ -35,8 +35,8 @@ func (h *HealthExample) ReadinessStatus(ctx context.Context) hexa.ReadinessStatu
 func (h *HealthExample) HealthStatus(ctx context.Context) hexa.HealthStatus {
 	return hexa.HealthStatus{
 		Id:    h.HealthIdentifier(),
-		Tags: map[string]string{"I'm":"ok :)"},
-		Live:  h.LivenessStatus(ctx),
+		Tags:  map[string]string{"I'm":"ok :)"},
+		Alive: h.LivenessStatus(ctx),
 		Ready: h.ReadinessStatus(ctx),
 	}
 }

@@ -100,7 +100,7 @@ func (h *healthChecker) readinessHandler(hp HealthReporter) func(http.ResponseWr
 func (h *healthChecker) statusHandler(hp HealthReporter) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		report := hp.HealthReport(r.Context())
-		w.Header().Set(LivenessStatusKey, string(report.Live))
+		w.Header().Set(LivenessStatusKey, string(report.Alive))
 		w.Header().Set(ReadinessStatusKey, string(report.Ready))
 		//fmt.Fprint(w, gutil.UnmarshalStruct())
 		//return w.WriteHeader(http.StatusOK)
