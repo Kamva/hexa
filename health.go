@@ -49,8 +49,40 @@ type Health interface {
 	HealthStatus(ctx context.Context) HealthStatus
 }
 
-type HealthProbe interface {
+type HealthReporter interface {
 	LivenessStatus(ctx context.Context) LivenessStatus
 	ReadinessStatus(ctx context.Context) ReadinessStatus
 	HealthReport(ctx context.Context) HealthReport
+}
+
+func HealthCheck(l ...Health) []HealthStatus {
+	// TODO: check using go routines
+	r := make([]HealthStatus, len(l))
+	for i, health := range l {
+		r[i] = HealthStatus{
+			Id:    health.HealthIdentifier(),
+			Live:  health.LivenessStatus(context.Background()),
+			Ready: health.ReadinessStatus(context.Background()),
+		}
+	}
+
+	return r
+}
+
+func AllAliveStatus(l ...HealthStatus) bool {
+	for _, s := range l {
+		if s.Live != StatusAlive {
+			return false
+		}
+	}
+	return true
+}
+
+func AllReadyStatus(l ...HealthStatus) bool {
+	for _, s := range l {
+		if s.Ready != StatusReady {
+			return false
+		}
+	}
+	return true
 }

@@ -17,8 +17,7 @@ const (
 )
 
 type HealthChecker interface {
-	HealthCheck(l ...Health) []HealthStatus
-	StartHealthCheckServer(hp HealthProbe) error
+	StartHealthCheckServer(hp HealthReporter) error
 	StopHealthCheckServer() error
 }
 
@@ -40,21 +39,7 @@ func NewHealthChecker(o HealthCheckerOptions) HealthChecker {
 	}
 }
 
-func (h *healthChecker) HealthCheck(l ...Health) []HealthStatus {
-	// TODO: check using go routines
-	r := make([]HealthStatus, len(l))
-	for i, health := range l {
-		r[i] = HealthStatus{
-			Id:    health.HealthIdentifier(),
-			Live:  health.LivenessStatus(context.Background()),
-			Ready: health.ReadinessStatus(context.Background()),
-		}
-	}
-
-	return r
-}
-
-func (h *healthChecker) StartHealthCheckServer(hp HealthProbe) error {
+func (h *healthChecker) StartHealthCheckServer(hp HealthReporter) error {
 	if h.server != nil {
 		if err := h.server.Shutdown(context.Background()); err != nil && err != http.ErrServerClosed {
 			return tracer.Trace(err)
@@ -84,7 +69,7 @@ func (h *healthChecker) StopHealthCheckServer() error {
 // HTTP Health Check Handlers
 //--------------------------------
 
-func (h *healthChecker) livenessHandler(hp HealthProbe) func(http.ResponseWriter, *http.Request) {
+func (h *healthChecker) livenessHandler(hp HealthReporter) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		status := hp.LivenessStatus(r.Context())
 		w.Header().Set(LivenessStatusKey, string(status))
@@ -98,7 +83,7 @@ func (h *healthChecker) livenessHandler(hp HealthProbe) func(http.ResponseWriter
 	}
 }
 
-func (h *healthChecker) readinessHandler(hp HealthProbe) func(http.ResponseWriter, *http.Request) {
+func (h *healthChecker) readinessHandler(hp HealthReporter) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		status := hp.ReadinessStatus(r.Context())
 		w.Header().Set(ReadinessStatusKey, string(status))
@@ -112,7 +97,7 @@ func (h *healthChecker) readinessHandler(hp HealthProbe) func(http.ResponseWrite
 	}
 }
 
-func (h *healthChecker) statusHandler(hp HealthProbe) func(http.ResponseWriter, *http.Request) {
+func (h *healthChecker) statusHandler(hp HealthReporter) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		report := hp.HealthReport(r.Context())
 		w.Header().Set(LivenessStatusKey, string(report.Live))

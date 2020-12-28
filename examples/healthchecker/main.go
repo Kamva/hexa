@@ -54,4 +54,4 @@ func main() {
 }
 
 var _ hexa.Health = &HealthExample{}
-var _ hexa.HealthProbe = &HealthExample{}
+var _ hexa.HealthReporter = &HealthExample{}
