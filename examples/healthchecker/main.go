@@ -35,7 +35,7 @@ func (h *HealthExample) ReadinessStatus(ctx context.Context) hexa.ReadinessStatu
 func (h *HealthExample) HealthStatus(ctx context.Context) hexa.HealthStatus {
 	return hexa.HealthStatus{
 		Id:    h.HealthIdentifier(),
-		Tags:  map[string]string{"I'm":"ok :)"},
+		Tags:  map[string]string{"I'm": "ok :)"},
 		Alive: h.LivenessStatus(ctx),
 		Ready: h.ReadinessStatus(ctx),
 	}
@@ -43,10 +43,7 @@ func (h *HealthExample) HealthStatus(ctx context.Context) hexa.HealthStatus {
 
 func main() {
 	l := hlog.NewPrinterDriver(hlog.DebugLevel)
-	checker := hexa.NewHealthChecker(hexa.HealthCheckerOptions{
-		Logger:  l,
-		Address: "localhost:7676",
-	})
+	checker := hexa.NewHealthChecker(l, "localhost:7676")
 
 	var ex = &HealthExample{}
 	gutil.PanicErr(checker.StartHealthCheckServer(ex))

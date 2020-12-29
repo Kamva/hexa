@@ -28,14 +28,12 @@ type healthChecker struct {
 }
 
 type HealthCheckerOptions struct {
-	Logger  Logger
-	Address string
 }
 
-func NewHealthChecker(o HealthCheckerOptions) HealthChecker {
+func NewHealthChecker(l Logger, addr string) HealthChecker {
 	return &healthChecker{
-		l:    o.Logger,
-		addr: o.Address,
+		l:    l,
+		addr: addr,
 	}
 }
 
