@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/kamva/gutil"
-	"github.com/kamva/hexa/hlog"
 	"github.com/kamva/tracer"
 )
 
@@ -58,7 +57,7 @@ func (h *healthChecker) StartHealthCheckServer(hp HealthReporter) error {
 	go func() {
 		err := h.server.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
-			hlog.Error("error on health check server", hlog.ErrStack(tracer.Trace(err)), hlog.Err(err))
+			h.l.Error("error on health check server", ErrStackField(tracer.Trace(err)), ErrField(err))
 		}
 	}()
 
