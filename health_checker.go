@@ -17,7 +17,7 @@ const (
 )
 
 type HealthChecker interface {
-	StartServer(hp HealthReporter) error
+	StartServer(r HealthReporter) error
 	StopServer() error
 }
 
@@ -34,7 +34,7 @@ func NewHealthChecker(l Logger, addr string) HealthChecker {
 	}
 }
 
-func (h *healthChecker) StartServer(hp HealthReporter) error {
+func (h *healthChecker) StartServer(r HealthReporter) error {
 	if h.server != nil {
 		if err := h.server.Shutdown(context.Background()); err != nil && err != http.ErrServerClosed {
 			return tracer.Trace(err)
@@ -44,9 +44,9 @@ func (h *healthChecker) StartServer(hp HealthReporter) error {
 	mux := http.NewServeMux()
 	h.server = &http.Server{Addr: h.addr, Handler: mux}
 
-	mux.HandleFunc("/alive", h.livenessHandler(hp))
-	mux.HandleFunc("/ready", h.readinessHandler(hp))
-	mux.HandleFunc("/status", h.statusHandler(hp))
+	mux.HandleFunc("/live", h.livenessHandler(r))
+	mux.HandleFunc("/ready", h.readinessHandler(r))
+	mux.HandleFunc("/status", h.statusHandler(r))
 
 	h.l.Info("start serving health check requests", StringField("address", h.addr))
 	go func() {
