@@ -51,9 +51,9 @@ type Health interface {
 }
 
 type HealthReporter interface {
-	AddLivenessCheck(l ...Health) HealthReporter
-	AddReadinessCheck(l ...Health) HealthReporter
-	AddStatusCheck(l ...Health) HealthReporter
+	AddLivenessChecks(l ...Health) HealthReporter
+	AddReadinessChecks(l ...Health) HealthReporter
+	AddStatusChecks(l ...Health) HealthReporter
 	AddToChecks(l ...Health) HealthReporter
 	LivenessStatus(ctx context.Context) LivenessStatus
 	ReadinessStatus(ctx context.Context) ReadinessStatus
@@ -74,23 +74,23 @@ func NewHealthReporter() HealthReporter {
 	}
 }
 
-func (h *healthReporter) AddLivenessCheck(l ...Health) HealthReporter {
+func (h *healthReporter) AddLivenessChecks(l ...Health) HealthReporter {
 	h.livenssCheck = append(h.livenssCheck, l...)
 	return h
 }
 
-func (h *healthReporter) AddReadinessCheck(l ...Health) HealthReporter {
+func (h *healthReporter) AddReadinessChecks(l ...Health) HealthReporter {
 	h.readinessCheck = append(h.readinessCheck, l...)
 	return h
 }
 
-func (h *healthReporter) AddStatusCheck(l ...Health) HealthReporter {
+func (h *healthReporter) AddStatusChecks(l ...Health) HealthReporter {
 	h.statusCheck = append(h.statusCheck, l...)
 	return h
 }
 
 func (h *healthReporter) AddToChecks(l ...Health) HealthReporter {
-	return h.AddLivenessCheck(l...).AddReadinessCheck(l...).AddStatusCheck(l...)
+	return h.AddLivenessChecks(l...).AddReadinessChecks(l...).AddStatusChecks(l...)
 }
 
 func (h healthReporter) LivenessStatus(ctx context.Context) LivenessStatus {
