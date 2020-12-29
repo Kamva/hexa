@@ -69,20 +69,20 @@ func HealthCheck(l ...Health) []HealthStatus {
 	return r
 }
 
-func AllAliveStatus(l ...HealthStatus) bool {
+func AliveStatus(l ...HealthStatus) LivenessStatus {
 	for _, s := range l {
 		if s.Alive != StatusAlive {
-			return false
+			return StatusDead
 		}
 	}
-	return true
+	return StatusAlive
 }
 
-func AllReadyStatus(l ...HealthStatus) bool {
+func ReadyStatus(l ...HealthStatus) ReadinessStatus {
 	for _, s := range l {
 		if s.Ready != StatusReady {
-			return false
+			return StatusUnReady
 		}
 	}
-	return true
+	return StatusReady
 }
