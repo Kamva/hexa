@@ -31,9 +31,9 @@ type (
 
 	HealthStatus struct {
 		Id    string            `json:"id"`
-		Tags  map[string]string `json:"tags,omitempty"`
 		Alive LivenessStatus    `json:"alive"`
 		Ready ReadinessStatus   `json:"ready"`
+		Tags  map[string]string `json:"tags,omitempty"`
 	}
 )
 
@@ -55,6 +55,7 @@ type HealthReporter interface {
 	AddReadinessChecks(l ...Health) HealthReporter
 	AddStatusChecks(l ...Health) HealthReporter
 	AddToChecks(l ...Health) HealthReporter
+
 	LivenessStatus(ctx context.Context) LivenessStatus
 	ReadinessStatus(ctx context.Context) ReadinessStatus
 	HealthReport(ctx context.Context) HealthReport
@@ -126,11 +127,7 @@ func HealthCheck(l ...Health) []HealthStatus {
 	// TODO: check using go routines
 	r := make([]HealthStatus, len(l))
 	for i, health := range l {
-		r[i] = HealthStatus{
-			Id:    health.HealthIdentifier(),
-			Alive: health.LivenessStatus(context.Background()),
-			Ready: health.ReadinessStatus(context.Background()),
-		}
+		r[i] = health.HealthStatus(context.Background())
 	}
 
 	return r
