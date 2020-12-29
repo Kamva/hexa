@@ -46,7 +46,7 @@ func main() {
 	checker := hexa.NewHealthChecker(l, "localhost:7676")
 
 	var ex = &HealthExample{}
-	gutil.PanicErr(checker.StartHealthCheckServer(ex))
+	gutil.PanicErr(checker.StartServer(ex))
 	gutil.WaitForSignals(syscall.SIGINT, syscall.SIGTERM)
 }
 

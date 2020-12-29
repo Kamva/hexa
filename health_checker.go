@@ -17,8 +17,8 @@ const (
 )
 
 type HealthChecker interface {
-	StartHealthCheckServer(hp HealthReporter) error
-	StopHealthCheckServer() error
+	StartServer(hp HealthReporter) error
+	StopServer() error
 }
 
 type healthChecker struct {
@@ -27,8 +27,6 @@ type healthChecker struct {
 	addr   string
 }
 
-type HealthCheckerOptions struct {
-}
 
 func NewHealthChecker(l Logger, addr string) HealthChecker {
 	return &healthChecker{
@@ -37,7 +35,7 @@ func NewHealthChecker(l Logger, addr string) HealthChecker {
 	}
 }
 
-func (h *healthChecker) StartHealthCheckServer(hp HealthReporter) error {
+func (h *healthChecker) StartServer(hp HealthReporter) error {
 	if h.server != nil {
 		if err := h.server.Shutdown(context.Background()); err != nil && err != http.ErrServerClosed {
 			return tracer.Trace(err)
@@ -62,7 +60,7 @@ func (h *healthChecker) StartHealthCheckServer(hp HealthReporter) error {
 	return nil
 }
 
-func (h *healthChecker) StopHealthCheckServer() error {
+func (h *healthChecker) StopServer() error {
 	return h.server.Close()
 }
 
