@@ -27,7 +27,6 @@ type healthChecker struct {
 	addr   string
 }
 
-
 func NewHealthChecker(l Logger, addr string) HealthChecker {
 	return &healthChecker{
 		l:    l,
@@ -45,7 +44,7 @@ func (h *healthChecker) StartServer(hp HealthReporter) error {
 	mux := http.NewServeMux()
 	h.server = &http.Server{Addr: h.addr, Handler: mux}
 
-	mux.HandleFunc("/live", h.livenessHandler(hp))
+	mux.HandleFunc("/alive", h.livenessHandler(hp))
 	mux.HandleFunc("/ready", h.readinessHandler(hp))
 	mux.HandleFunc("/status", h.statusHandler(hp))
 

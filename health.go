@@ -38,8 +38,9 @@ type (
 )
 
 type HealthReport struct {
-	HealthStatus
-	Statuses []HealthStatus `json:"statuses"`
+	Alive    LivenessStatus  `json:"alive"`
+	Ready    ReadinessStatus `json:"ready"`
+	Statuses []HealthStatus  `json:"statuses"`
 }
 
 type Health interface {
@@ -50,10 +51,76 @@ type Health interface {
 }
 
 type HealthReporter interface {
+	AddLivenessCheck(l ...Health) HealthReporter
+	AddReadinessCheck(l ...Health) HealthReporter
+	AddStatusCheck(l ...Health) HealthReporter
+	AddToChecks(l ...Health) HealthReporter
 	LivenessStatus(ctx context.Context) LivenessStatus
 	ReadinessStatus(ctx context.Context) ReadinessStatus
 	HealthReport(ctx context.Context) HealthReport
 }
+
+type healthReporter struct {
+	livenssCheck   []Health
+	readinessCheck []Health
+	statusCheck    []Health
+}
+
+func NewHealthReporter() HealthReporter {
+	return &healthReporter{
+		livenssCheck:   []Health{},
+		readinessCheck: []Health{},
+		statusCheck:    []Health{},
+	}
+}
+
+func (h *healthReporter) AddLivenessCheck(l ...Health) HealthReporter {
+	h.livenssCheck = append(h.livenssCheck, l...)
+	return h
+}
+
+func (h *healthReporter) AddReadinessCheck(l ...Health) HealthReporter {
+	h.readinessCheck = append(h.readinessCheck, l...)
+	return h
+}
+
+func (h *healthReporter) AddStatusCheck(l ...Health) HealthReporter {
+	h.statusCheck = append(h.statusCheck, l...)
+	return h
+}
+
+func (h *healthReporter) AddToChecks(l ...Health) HealthReporter {
+	return h.AddLivenessCheck(l...).AddReadinessCheck(l...).AddStatusCheck(l...)
+}
+
+func (h healthReporter) LivenessStatus(ctx context.Context) LivenessStatus {
+	for _, health := range h.livenssCheck {
+		if st := health.LivenessStatus(ctx); st != StatusAlive {
+			return st
+		}
+	}
+	return StatusAlive
+}
+
+func (h healthReporter) ReadinessStatus(ctx context.Context) ReadinessStatus {
+	for _, health := range h.readinessCheck {
+		if st := health.ReadinessStatus(ctx); st != StatusReady {
+			return st
+		}
+	}
+	return StatusReady
+}
+
+func (h healthReporter) HealthReport(ctx context.Context) HealthReport {
+	l := HealthCheck(h.statusCheck...)
+	return HealthReport{
+		Alive:    AliveStatus(l...),
+		Ready:    ReadyStatus(l...),
+		Statuses: l,
+	}
+}
+
+var _ HealthReporter = &healthReporter{}
 
 func HealthCheck(l ...Health) []HealthStatus {
 	// TODO: check using go routines

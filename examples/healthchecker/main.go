@@ -12,14 +12,6 @@ import (
 type HealthExample struct {
 }
 
-func (h *HealthExample) HealthReport(ctx context.Context) hexa.HealthReport {
-	l := h.HealthStatus(ctx)
-	return hexa.HealthReport{
-		HealthStatus: l,
-		Statuses:     []hexa.HealthStatus{l},
-	}
-}
-
 func (h *HealthExample) HealthIdentifier() string {
 	return "health_example"
 }
@@ -45,10 +37,10 @@ func main() {
 	l := hlog.NewPrinterDriver(hlog.DebugLevel)
 	checker := hexa.NewHealthChecker(l, "localhost:7676")
 
-	var ex = &HealthExample{}
-	gutil.PanicErr(checker.StartServer(ex))
+	r := hexa.NewHealthReporter().AddToChecks(&HealthExample{})
+
+	gutil.PanicErr(checker.StartServer(r))
 	gutil.WaitForSignals(syscall.SIGINT, syscall.SIGTERM)
 }
 
 var _ hexa.Health = &HealthExample{}
-var _ hexa.HealthReporter = &HealthExample{}
