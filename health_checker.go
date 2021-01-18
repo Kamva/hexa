@@ -44,7 +44,7 @@ func (h *healthChecker) StartServer(r HealthReporter) error {
 	mux := http.NewServeMux()
 	h.server = &http.Server{Addr: h.addr, Handler: mux}
 
-	mux.HandleFunc("/live", h.livenessHandler(r))
+	mux.HandleFunc("/alive", h.livenessHandler(r))
 	mux.HandleFunc("/ready", h.readinessHandler(r))
 	mux.HandleFunc("/status", h.statusHandler(r))
 
