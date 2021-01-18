@@ -20,7 +20,7 @@ func (l *zapLogger) WithCtx(ctx hexa.Context, args ...Field) hexa.Logger {
 
 func (l *zapLogger) With(args ...Field) hexa.Logger {
 	if len(args) > 0 {
-		return NewZapDriverWith(l.logger.With(args...))
+		return NewZapDriver(l.logger.With(args...))
 	}
 	return l
 }
@@ -50,23 +50,35 @@ type ZapOptions struct {
 	Level zapcore.Level
 }
 
-// NewZapDriver return new instance of hexa logger with zap driver.
-func NewZapDriver(o ZapOptions) hexa.Logger {
+// DefaultZapConfig generate zap config using default values.
+// You can leave encoding empty to set to the default value
+// which is json.
+func DefaultZapConfig(debug bool, level zapcore.Level,encoding string) zap.Config {
+	if encoding==""{
+		encoding="json"
+	}
+
 	cfg := zap.NewProductionConfig()
-	if o.Debug {
+	if debug {
 		cfg = zap.NewDevelopmentConfig()
 	}
-	cfg.Level.SetLevel(o.Level)
 
+	cfg.Level.SetLevel(level)
+	cfg.Encoding = encoding
+
+	return cfg
+}
+
+func NewZapDriverFromConfig(cfg zap.Config) hexa.Logger {
 	l, err := cfg.Build()
 	if err != nil {
 		panic(err)
 	}
-	return NewZapDriverWith(l)
+	return NewZapDriver(l)
 }
 
 // NewZapDriver return new instance of hexa logger with zap driver.
-func NewZapDriverWith(logger *zap.Logger) hexa.Logger {
+func NewZapDriver(logger *zap.Logger) hexa.Logger {
 	return &zapLogger{logger}
 }
 

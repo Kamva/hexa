@@ -2,9 +2,11 @@ package hlog
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/kamva/hexa"
 	"github.com/kamva/tracer"
-	"strings"
+	"go.uber.org/zap"
 )
 
 const (
@@ -81,7 +83,7 @@ func (l *stackedLogger) Error(msg string, args ...Field) {
 
 type StackOptions struct {
 	Level      Level
-	ZapOpts    *ZapOptions
+	ZapConfig  zap.Config
 	SentryOpts *SentryOptions
 }
 
@@ -96,7 +98,7 @@ func NewStackLoggerDriver(stackList []string, opts StackOptions) (hexa.Logger, e
 
 		switch strings.ToLower(loggerName) {
 		case ZapLogger:
-			stack[ZapLogger] = NewZapDriver(*opts.ZapOpts)
+			stack[ZapLogger] = NewZapDriverFromConfig(opts.ZapConfig)
 		case PrinterLogger:
 			stack[PrinterLogger] = NewPrinterDriver(opts.Level)
 		case SentryLogger:

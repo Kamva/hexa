@@ -121,6 +121,7 @@ func (h healthReporter) HealthReport(ctx context.Context) HealthReport {
 	}
 }
 
+// Assertion
 var _ HealthReporter = &healthReporter{}
 
 func HealthCheck(l ...Health) []HealthStatus {

@@ -1,18 +1,16 @@
 package hlog
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap/zapcore"
-	"testing"
 )
 
 func TestStackedLogger_LoggerByName(t *testing.T) {
 	o := StackOptions{
-		Level: DebugLevel,
-		ZapOpts: &ZapOptions{
-			Debug: true,
-			Level: zapcore.DebugLevel,
-		},
+		Level:     DebugLevel,
+		ZapConfig: DefaultZapConfig(true, zapcore.DebugLevel,"json"),
 	}
 
 	l, err := NewStackLoggerDriver([]string{PrinterLogger, ZapLogger}, o)

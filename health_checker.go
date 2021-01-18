@@ -67,9 +67,9 @@ func (h *healthChecker) StopServer() error {
 // HTTP Health Check Handlers
 //--------------------------------
 
-func (h *healthChecker) livenessHandler(hp HealthReporter) func(http.ResponseWriter, *http.Request) {
+func (h *healthChecker) livenessHandler(hr HealthReporter) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		status := hp.LivenessStatus(r.Context())
+		status := hr.LivenessStatus(r.Context())
 		w.Header().Set(LivenessStatusKey, string(status))
 
 		if status != StatusAlive {
