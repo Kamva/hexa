@@ -33,7 +33,7 @@ func (l Level) String() string {
 }
 
 func (l Level) CanLog(target Level) bool {
-	return l <= target
+	return l >= target
 }
 
 // LevelFromString converts string to log level.
