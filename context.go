@@ -51,14 +51,6 @@ type Context interface {
 
 type contextImpl struct {
 	context.Context
-	baseLogger     Logger // TODO: remove all these fields.
-	baseTranslator Translator
-	locale         string
-	request        *http.Request
-	correlationID  string
-	user           User
-	logger         Logger
-	translator     Translator
 }
 
 func (c contextImpl) Request() *http.Request {
@@ -120,6 +112,12 @@ func (c contextImpl) Translator() Translator {
 func WithUser(c Context, user User) Context {
 	rawCtx := context.WithValue(c, ContextKeyUser, user)
 	return &contextImpl{Context: rawCtx}
+}
+
+// WithValue is just same as context.WithValue function but returns
+// hexa Context.
+func WithValue(c Context, key interface{}, value interface{}) Context {
+	return MustNewContextFromRawContext(context.WithValue(c, key, value))
 }
 
 func NewContextFromRawContext(c context.Context) (Context, error) {

@@ -77,7 +77,7 @@ type User interface {
 
 	Meta(key string) (val interface{}, exists bool)
 
-	SetMeta(key string, val interface{}) error
+	SetMeta(key string, val interface{}) (User, error)
 
 	// User must be able be export and import using this meta data.
 	// Meta data must be json serializable.
@@ -94,16 +94,27 @@ func (u *user) Meta(key string) (val interface{}, exists bool) {
 	return
 }
 
-func (u *user) SetMeta(key string, val interface{}) error {
-	// Validate new meta value:
-	m := map[string]interface{}{key: val}
-	gutil.ExtendMap(m, u.meta, false)
-	if err := validateUserMetaData(m); err != nil {
-		return tracer.Trace(err)
+func (u *user) copyMeta() (map[string]interface{}, error) {
+	m := make(map[string]interface{})
+	if err := gutil.UnmarshalStruct(u.meta, &m); err != nil {
+		return nil, tracer.Trace(err)
+	}
+	return m, tracer.Trace(userMetaInterfaceToTrueTypedMeta(m))
+}
+
+func (u *user) SetMeta(key string, val interface{}) (User, error) {
+	m, err := u.copyMeta()
+	if err != nil {
+		return nil, tracer.Trace(err)
 	}
 
-	u.meta[key] = val
-	return nil
+	m[key] = val
+
+	if err := validateUserMetaData(m); err != nil {
+		return nil, tracer.Trace(err)
+	}
+
+	return NewUserFromMeta(m)
 }
 
 func (u *user) MetaData() Map {
@@ -245,6 +256,25 @@ func validateUserMetaData(meta map[string]interface{}) error {
 		return tracer.Trace(errors.New("invalid type for roles field in user's meta data"))
 	}
 
+	return nil
+}
+
+func WithUserRole(u User, role string) User {
+	roles := append(u.Roles(), role)
+	return gutil.Must(u.SetMeta(UserMetaKeyRoles, roles)).(User)
+}
+
+func userMetaInterfaceToTrueTypedMeta(meta map[string]interface{}) error {
+
+	meta[UserMetaKeyUserType] = UserType(meta[UserMetaKeyUserType].(string))
+
+	// Convert user roles from []interface{} to []string:
+	roles := make([]string, 0)
+	err := gutil.UnmarshalStruct(meta[UserMetaKeyRoles], &roles)
+	if err != nil {
+		return tracer.Trace(err)
+	}
+	meta[UserMetaKeyRoles] = roles
 	return nil
 }
 

@@ -22,7 +22,7 @@ var propagatingContextKeys = []string{
 	ContextKeyUser,
 }
 
-// keysPropagator get propagators of keys which should propagate from context.
+// keysPropagator get a list of keys and propagate that key,values from context.
 // all values in the context for these keys must be string.
 type keysPropagator struct {
 	keys   []string
@@ -38,6 +38,8 @@ type defaultContextPropagator struct {
 	translator Translator
 }
 
+// multiPropagator get multiple propagator and return as one
+// propagator which you can use as your propagator.
 type multiPropagator struct {
 	propagators []ContextPropagator
 }

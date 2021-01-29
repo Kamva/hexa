@@ -3,7 +3,6 @@ package hexa
 import (
 	"encoding/json"
 
-	"github.com/kamva/gutil"
 	"github.com/kamva/tracer"
 )
 
@@ -25,16 +24,9 @@ func (p *userPropagator) FromBytes(m []byte) (User, error) {
 		return nil, tracer.Trace(err)
 	}
 
-	// Convert Usertype:
-	meta[UserMetaKeyUserType] = UserType(meta[UserMetaKeyUserType].(string))
-
-	// Convert user roles from []interface{} to []string:
-	roles := make([]string, 0)
-	err := gutil.UnmarshalStruct(meta[UserMetaKeyRoles], &roles)
-	if err != nil {
+	if err := userMetaInterfaceToTrueTypedMeta(meta); err != nil {
 		return nil, tracer.Trace(err)
 	}
-	meta[UserMetaKeyRoles] = roles
 
 	return NewUserFromMeta(meta)
 }
