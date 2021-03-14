@@ -1,6 +1,7 @@
 package hexa
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/kamva/gutil"
@@ -185,6 +186,22 @@ func NewLocalizedError(status int, id string, localizedMsg string, err error) Er
 		data:             make(Map),
 		reportData:       make(Map),
 	}
+}
+
+// AsHexaErr check whether provided error can be used as hexa error or not.
+// by this method, we don't need to use guilt.CauseErr and then check if
+// caused error is hexa error or not, and we can simply like any other
+// error implement the errors.Unwrap interface on our Error interface.
+func AsHexaErr(err error) (Error, bool) {
+	for err != nil {
+		if hexaErr, ok := err.(Error); ok {
+			return hexaErr, true
+		}
+
+		err = errors.Unwrap(err)
+	}
+
+	return nil, false
 }
 
 // Assert defaultReply implements the Error interface.
