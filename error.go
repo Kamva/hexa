@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/kamva/gutil"
-	"github.com/kamva/hexa/hlog"
 	"github.com/kamva/tracer"
 )
 
@@ -137,10 +136,6 @@ func (e defaultError) SetReportData(data Map) Error {
 }
 
 func (e defaultError) ReportIfNeeded(l Logger, _ Translator) bool {
-	if l == nil {
-		l = hlog.With()
-	}
-
 	if e.shouldReport() {
 		fields := []LogField{
 			StringField("_error_id", e.ID()),
