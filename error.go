@@ -192,16 +192,16 @@ func NewLocalizedError(status int, id string, localizedMsg string, err error) Er
 // by this method, we don't need to use guilt.CauseErr and then check if
 // caused error is hexa error or not, and we can simply like any other
 // error implement the errors.Unwrap interface on our Error interface.
-func AsHexaErr(err error) (Error, bool) {
+func AsHexaErr(err error) Error {
 	for err != nil {
 		if hexaErr, ok := err.(Error); ok {
-			return hexaErr, true
+			return hexaErr
 		}
 
 		err = errors.Unwrap(err)
 	}
 
-	return nil, false
+	return nil
 }
 
 // Assert defaultReply implements the Error interface.
