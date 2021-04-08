@@ -1,0 +1,28 @@
+package {{.Package}}
+
+type {{.Name}} struct {
+    app App
+}
+
+{{ range $index, $element := .Interface.Methods -}}
+    func (a *{{$.Name}}) {{$index}}({{$element.Params | joinParamsWithType}}) {{$element.Results | joinResultsForSignature}} {
+    {{- if $element.Results | len | eq 0}}
+        a.app.{{$index}}({{$element.Params | joinParams}})
+    {{else}}
+        {{$element.Results | genResultsVars}} := a.app.{{$index}}({{$element.Params | joinParams}})
+        {{if $element.Results | hasErrInResults}}
+            if {{$element.Results | errResultVar}} != nil {
+            // do something when error occured.
+            }
+        {{end}}
+        return {{$element.Results | genResultsVars }}
+    {{end}}
+    }
+
+{{end -}}
+
+func New{{.Name | title}}(app App) App {
+    return &{{.Name}}{
+    app: app,
+    }
+}
