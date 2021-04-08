@@ -46,6 +46,7 @@ type (
 )
 
 func (r defaultReply) Is(err error) bool {
+	// TODO: same as IsHexaErr write another IsReply function and use it.
 	e, ok := gutil.CauseErr(err).(Reply)
 	return ok && r.ID() == e.ID()
 }

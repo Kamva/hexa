@@ -93,8 +93,8 @@ func (e defaultError) InternalError() error {
 }
 
 func (e defaultError) Is(err error) bool {
-	ee, ok := gutil.CauseErr(err).(Error)
-	return ok && e.ID() == ee.ID()
+	ee := AsHexaErr(err)
+	return ee != nil && e.ID() == ee.ID()
 }
 
 func (e defaultError) HTTPStatus() int {
