@@ -1,10 +1,12 @@
 package hexahttp
 
 import (
-	"github.com/kamva/tracer"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/kamva/tracer"
 )
 
 func isValidURL(u string) bool {
@@ -21,4 +23,19 @@ func Bytes(response *http.Response, err error) ([]byte, error) {
 	defer response.Body.Close()
 
 	return ioutil.ReadAll(response.Body)
+}
+
+// HttpErrFromResponse return http error if response status code
+// is more than 300.
+func ResponseError(r *http.Response) error {
+	if r.StatusCode <= 300 {
+		return nil
+	}
+
+	respBytes, err := Bytes(r, nil)
+	if err != nil {
+		return tracer.Trace(err)
+	}
+
+	return fmt.Errorf("Http error, status: %s,  code: %d, body: %s", r.Status, r.StatusCode, string(respBytes))
 }
