@@ -48,7 +48,7 @@ func (c *Client) PostWithOptions(url string, contentType string, body io.Reader,
 
 	req, err := http.NewRequest("POST", u.String(), body)
 	if err != nil {
-		return nil, err
+		return nil, tracer.Trace(err)
 	}
 	req.Header.Set("Content-Type", contentType)
 	return c.DoWithOptions(req, options...)
@@ -62,7 +62,7 @@ func (c *Client) GetWithOptions(url string, options ...RequestOption) (*http.Res
 
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
-		return nil, err
+		return nil, tracer.Trace(err)
 	}
 	return c.DoWithOptions(req, options...)
 }
