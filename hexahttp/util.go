@@ -37,5 +37,10 @@ func ResponseError(r *http.Response) error {
 		return tracer.Trace(err)
 	}
 
-	return fmt.Errorf("Http error, status: %s,  code: %d, body: %s", r.Status, r.StatusCode, string(respBytes))
+	return fmt.Errorf("Http error, status: %s,  code: %d,body_length: %d, body: %s",
+		r.Status,
+		r.StatusCode,
+		len(respBytes),
+		string(respBytes),
+	)
 }

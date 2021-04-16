@@ -16,7 +16,7 @@ type TemplateData struct {
 	Interface *InterfaceMetadata
 }
 
-func GenerateLayer(tmpl string, funcs template.FuncMap, outputFile string, data interface{}) error {
+func GenerateLayer(tmpl string, funcs template.FuncMap, outputFile string, data interface{}, reformat bool) error {
 	t := template.Must(template.New(path.Base(tmpl)).Funcs(funcs).ParseFiles(tmpl))
 
 	out := bytes.NewBufferString("")
@@ -24,10 +24,14 @@ func GenerateLayer(tmpl string, funcs template.FuncMap, outputFile string, data 
 	if err != nil {
 		return tracer.Trace(err)
 	}
+	code := out.Bytes()
 
-	formattedCode, err := imports.Process(outputFile, out.Bytes(), &imports.Options{Comments: true})
-	if err != nil {
-		return tracer.Trace(err)
+	if reformat {
+		code, err = imports.Process(outputFile, code, &imports.Options{Comments: true})
+		if err != nil {
+			return tracer.Trace(err)
+		}
 	}
-	return tracer.Trace(ioutil.WriteFile(outputFile, formattedCode, 0644))
+
+	return tracer.Trace(ioutil.WriteFile(outputFile, code, 0644))
 }

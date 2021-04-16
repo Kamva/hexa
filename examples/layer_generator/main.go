@@ -32,7 +32,7 @@ func main() {
 		Interface: metadata,
 	}
 
-	if err := lg.GenerateLayer(tmpl, lg.Funcs(), output, data); err != nil {
+	if err := lg.GenerateLayer(tmpl, lg.Funcs(), output, data,true); err != nil {
 		panic(err)
 	}
 }
