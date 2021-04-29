@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/aws/aws-sdk-go v1.35.28 // indirect
 	github.com/getsentry/sentry-go v0.6.1
-	github.com/kamva/gutil v0.0.0-20201228200354-f965254d674b
+	github.com/kamva/gutil v0.0.0-20210429104414-128b9b78e4cf
 	github.com/kamva/mgm-relation v0.0.0-20201115040639-5cb356991a32
 	github.com/kamva/mgm/v3 v3.1.0
 	github.com/kamva/tracer v0.0.0-20201115122932-ea39052d56cd

@@ -143,9 +143,12 @@ type ContextParams struct {
 
 // NewContext returns new hexa Context.
 // locale syntax is just same as HTTP Accept-Language header.
-func NewContext(p ContextParams) Context {
-	c := contextWithParams(context.Background(), p)
+func NewContext(ctx context.Context, p ContextParams) Context {
+	if ctx == nil {
+		ctx = context.Background()
+	}
 
+	c := contextWithParams(ctx, p)
 	return MustNewContextFromRawContext(c)
 }
 

@@ -192,6 +192,11 @@ func NewLocalizedError(status int, id string, localizedMsg string, err error) Er
 // by this method, we don't need to use guilt.CauseErr and then check if
 // caused error is hexa error or not, and we can simply like any other
 // error implement the errors.Unwrap interface on our Error interface.
+// Why we don't use errors.As() method? We can use it also, these two
+// methods do not conflict each other, it gets a new instance of target
+// and check target's type and then if found error with that type in the
+// chain, assign its value to the target, but here we want to just return
+// our hexa error (with any implementation of hexa error) to the user.
 func AsHexaErr(err error) Error {
 	for err != nil {
 		if hexaErr, ok := err.(Error); ok {

@@ -18,7 +18,7 @@ func newTestContext() (Context, *ContextParams) {
 		Logger:        &emptyLogger{},
 		Translator:    &emptyTranslator{},
 	}
-	return NewContext(params), &params
+	return NewContext(nil, params), &params
 }
 
 func assertContextWithParams(t *testing.T, ctx Context, params *ContextParams) {
