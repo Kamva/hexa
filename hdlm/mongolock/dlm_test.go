@@ -40,7 +40,7 @@ func setupDefConnection() {
 
 	gutil.PanicErr(cli.Connect(nil))
 
-	collection = cli.Database("lock_labs").Collection(DefaultCollectionName)
+	collection = cli.Database("lock_labs").Collection(CollectionName)
 }
 func disconnect(){
 	if err := cli.Disconnect(nil); err != nil {

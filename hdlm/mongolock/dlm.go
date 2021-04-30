@@ -14,7 +14,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const DefaultCollectionName = "locks"
+// CollectionName is just a default collection name, you can use
+// any other collection name you want.
+const CollectionName = "locks"
 
 type DlmOptions struct {
 	Collection *mongo.Collection
