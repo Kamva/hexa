@@ -7,6 +7,7 @@ import (
 
 	"github.com/kamva/gutil"
 	"github.com/kamva/hexa"
+	"github.com/kamva/hexa/db/mgmadapter"
 	"github.com/kamva/tracer"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -26,6 +27,8 @@ type DlmOptions struct {
 
 // dlm implements the Hexa DLM.
 type dlm struct {
+	hexa.Health
+
 	coll *mongo.Collection
 	// owner is default lock owner.
 	owner string
@@ -38,6 +41,8 @@ type dlm struct {
 
 func NewDlm(o DlmOptions) (hexa.DLM, error) {
 	dlm := &dlm{
+		Health: mgmadapter.NewDBHealth("distributed_locks", o.Collection.Database().Client()),
+
 		coll:     o.Collection,
 		ttl:      o.DefaultTTL,
 		owner:    o.DefaultOwner,
@@ -128,7 +133,7 @@ func (m *mutex) TryLock(c hexa.Context) error {
 		{"expiry": bson.M{"$lt": time.Now()}},
 	}}
 
-	_, err := m.coll.UpdateOne(c, filter, bson.M{"$set":&m}, &options.UpdateOptions{
+	_, err := m.coll.UpdateOne(c, filter, bson.M{"$set": &m}, &options.UpdateOptions{
 		Upsert: gutil.NewBool(true),
 	})
 
