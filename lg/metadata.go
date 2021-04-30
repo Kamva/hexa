@@ -37,6 +37,8 @@ func (r MethodResult) joinNameAndType() string {
 	return fmt.Sprintf("%s %s", r.Name, r.Type)
 }
 
+// ExtractInterfaceMetadata extracts the interface meta data, it also recursively extract
+// embedded interfaces metadata.
 func ExtractInterfaceMetadata(srcfile string, ifaceName string) (*InterfaceMetadata, error) {
 	fset := token.NewFileSet()
 	src, err := readAll(srcfile)
@@ -49,11 +51,14 @@ func ExtractInterfaceMetadata(srcfile string, ifaceName string) (*InterfaceMetad
 		return nil, tracer.Trace(err)
 	}
 
-	metadata := InterfaceMetadata{
+	return &InterfaceMetadata{
 		Name:    ifaceName,
-		Methods: make(map[string]MethodMetadata),
-	}
+		Methods: extractInterfaceMethods(src, f, ifaceName),
+	}, nil
+}
 
+func extractInterfaceMethods(src []byte, f *ast.File, ifaceName string) map[string]MethodMetadata {
+	methods := make(map[string]MethodMetadata)
 	ast.Inspect(f, func(node ast.Node) bool {
 		t, ok := node.(*ast.TypeSpec)
 		if !ok || t.Name.Name != ifaceName {
@@ -61,13 +66,19 @@ func ExtractInterfaceMetadata(srcfile string, ifaceName string) (*InterfaceMetad
 		}
 
 		for _, m := range t.Type.(*ast.InterfaceType).Methods.List {
-			metadata.Methods[m.Names[0].Name] = extractMethodMetadata(src, m)
+			//if its embedded interface in parent, we need to extract its methods too.
+			if fieldIsEmbeddedInterface(m) {
+				mergeMaps(methods, extractInterfaceMethods(src, f, m.Type.(*ast.Ident).Name))
+				continue
+			}
+
+			methods[m.Names[0].Name] = extractMethodMetadata(src, m)
 		}
 
 		return false
 	})
 
-	return &metadata, nil
+	return methods
 }
 
 func extractMethodMetadata(src []byte, method *ast.Field) MethodMetadata {

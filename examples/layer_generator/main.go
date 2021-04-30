@@ -20,6 +20,7 @@ func main() {
 	tmpl := path.Join(gutil.SourcePath(), "err_layer.tmpl")
 	output := path.Join(gutil.SourcePath(), "err_layer.go")
 
+
 	metadata, err := lg.ExtractInterfaceMetadata(src, "App")
 	if err != nil {
 		fmt.Println(tracer.StackAsString(tracer.Trace(err)))
