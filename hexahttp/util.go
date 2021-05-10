@@ -14,7 +14,7 @@ func isValidURL(u string) bool {
 	return err == nil
 }
 
-// ResponseBytes gets result of call from the client and then converts response body to bytes.
+// Bytes gets result of call from the client and then converts response body to bytes.
 func Bytes(response *http.Response, err error) ([]byte, error) {
 	if err != nil {
 		return nil, tracer.Trace(err)
@@ -25,7 +25,7 @@ func Bytes(response *http.Response, err error) ([]byte, error) {
 	return ioutil.ReadAll(response.Body)
 }
 
-// HttpErrFromResponse return http error if response status code
+// ResponseError returns http error if response status code
 // is more than 300.
 func ResponseError(r *http.Response) error {
 	if r.StatusCode <= 300 {

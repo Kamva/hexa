@@ -21,6 +21,7 @@ var Int64Field = zap.Int64
 var Int32Field = zap.Int32
 var IntField = zap.Int
 var Uint32Field = zap.Uint32
+var Uint64Field = zap.Uint64
 var StringField = zap.String
 var AnyField = zap.Any
 var ErrField = zap.Error

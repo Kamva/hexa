@@ -3,12 +3,13 @@ package hexahttp
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/kamva/hexa"
-	"github.com/kamva/tracer"
 	"io"
 	"net/http"
 	urlpkg "net/url"
 	"strings"
+
+	"github.com/kamva/hexa"
+	"github.com/kamva/tracer"
 )
 
 // RequestOption is like middleware which can change request before the client send it.

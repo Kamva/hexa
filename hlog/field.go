@@ -11,6 +11,7 @@ var Int64 = hexa.Int64Field
 var Int32 = hexa.Int32Field
 var Int = hexa.IntField
 var Uint32 = hexa.Uint32Field
+var Uint64 = hexa.Uint64Field
 var String = hexa.StringField
 var Any = hexa.AnyField
 var Err = hexa.ErrField
