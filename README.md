@@ -1,6 +1,6 @@
 #### Hexa is a microservice SDK.
 
-__Note : Hexa is in progress, it does not have stable version until now, so use it at your risk.__
+__Note : Hexa is in progress, it does not have stable version until now, so use it at your own risk.__
 
 #### Requirements:
 
@@ -49,11 +49,10 @@ config := hexaconfig.NewViperDriver(v)
 
 - [ ] Replace http status code with gRPC status code in our errors (also maybe in replies).
 
-- [ ] We should implement Distributed tracing by using zipkin and open tracing and also use it in gRPC,... . but I think
-  this should be in the service mesh not in the business logic.
+- [ ] Implement Hexa Context propagators for distributed tracing.
 
-- [ ] Implement a service (e.g `Ping`) which should implement by all of the Hexa services to check health of that
-  service [**Accepted**].
+- [x] Implement a service (e.g `Health`) which should implement by all Hexa services to check health of that
+  service [**Accepted**][Implemented].
 
 #### Todo
 
