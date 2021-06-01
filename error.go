@@ -25,7 +25,7 @@ type (
 		// HTTPStatus returns the http status code for the Error.
 		HTTPStatus() int
 
-		// HTTPStatus returns the http status code for the reply.
+		// SetHTTPStatus sets the http status code for the reply.
 		SetHTTPStatus(status int) Error
 
 		// ID is error's identifier. its format should be
@@ -68,7 +68,7 @@ type (
 )
 
 const (
-	// ErrorKeyInternalError is the internal error key in Error
+	// ErrKeyInternalError is the internal error key in Error
 	// messages over all of packages. use this to have just one
 	// internal_error translation key in your translation system.
 	// TODO: remove this key if we don't use it in our projects.
@@ -176,7 +176,7 @@ func NewError(httpStatus int, id string, err error) Error {
 	}
 }
 
-// NewError returns new instance the Error interface.
+// NewLocalizedError returns new instance the Error interface.
 func NewLocalizedError(status int, id string, localizedMsg string, err error) Error {
 	return defaultError{
 		error:            err,

@@ -5,11 +5,7 @@ import (
 	"time"
 )
 
-// ----------
-// errors
-var (
-	ErrLockAlreadyAcquired = errors.New("lock already acquired")
-)
+var ErrLockAlreadyAcquired = errors.New("lock already acquired")
 
 type MutexOptions struct {
 	Key string
