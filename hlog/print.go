@@ -7,6 +7,17 @@ import (
 	"github.com/kamva/hexa"
 )
 
+
+// TODO: fix bugs for duration(shows duration as nil) and nil error(does not show the "err" as key in map props) :
+// e.g. (use printer driver instead of zp),
+// z, err := zap.NewDevelopment()
+//	gutil.PanicErr(err)
+//	l := hlog.NewZapDriver(z)
+//	l.Info("salam",
+//		hlog.Err(errors.New("errrr")),
+//		hlog.String("sa", "lam"),
+//		hlog.Duration("i", time.Second),
+//	)
 type printerLogger struct {
 	timeFormat string
 	level      Level

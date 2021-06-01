@@ -6,6 +6,7 @@ import (
 	"go/parser"
 	"go/token"
 
+	"github.com/kamva/gutil"
 	"github.com/kamva/tracer"
 )
 
@@ -41,7 +42,7 @@ func (r MethodResult) joinNameAndType() string {
 // embedded interfaces metadata.
 func ExtractInterfaceMetadata(srcfile string, ifaceName string) (*InterfaceMetadata, error) {
 	fset := token.NewFileSet()
-	src, err := readAll(srcfile)
+	src, err := gutil.ReadAll(srcfile)
 	if err != nil {
 		return nil, tracer.Trace(err)
 	}
