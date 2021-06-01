@@ -57,13 +57,8 @@ config := hexaconfig.NewViperDriver(v)
 
 #### Todo
 
-- [ ] Where we are checking log level on logger initialization step?
-- [ ] Change all of kamva packages from uppercase to lowercase.
+- [x] Where are we checking log level on logger initialization step?
+- [x] Change all of kamva packages from uppercase to lowercase.
 - [ ] Write Tests
 - [ ] Add badges to readme.
-- [ ] CI
-
-#### Client conventions:
-
-- [ ] on occure error and want to say to user that "some error occured", give the requestID to the user, then user can
-  give it back to the support team, and support team can see logs relative to that request id.
+- [ ] CI for tests.
