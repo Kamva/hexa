@@ -26,7 +26,7 @@ go get github.com/kamva/hexa
 - [Hexa Arranger to manage your workflow using Temporal](https://github.com/Kamva/hexa-arranger)
 - [Tools and interceptors for gRPC](https://github.com/Kamva/hexa-rpc)
 - [Hexa Tuner](https://github.com/Kamva/hexa-tuner) boot all Hexa services without headache
-- [Hexa Sendo](https://github.com/Kamva/hexa-sendo) Send notifications, email and push notifications(todo) in your
+- [Hexa Sendo](https://github.com/Kamva/hexa-sendo) Send SMS, email and push notifications(todo) in your
   microservices.
 - [Hexa Jobs](https://github.com/Kamva/hexa-job) push your jobs and use queues to handle jobs.
 - [Hexa tools for routing and web server](https://github.com/Kamva/hexa-echo)
