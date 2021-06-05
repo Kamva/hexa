@@ -9,9 +9,9 @@ import (
 	"github.com/kamva/tracer"
 )
 
-func isValidURL(u string) bool {
-	_, err := url.ParseRequestURI(u)
-	return err == nil
+func isValidURL(val string) bool {
+	u, err := url.ParseRequestURI(val)
+	return err == nil && u.Scheme != "" && u.Host != ""
 }
 
 // Bytes gets result of call from the client and then converts response body to bytes.
