@@ -3,6 +3,11 @@ package main
 import "fmt"
 
 type App interface {
+	// Hi is my first comment.
+	// and this is second line.
+	// we went to the third line :)
+	// @myAnnotation `json:"a"`
+	// @tx `retry:"4"`
 	Hi(username string, password string) (sentence string, err error)
 	By() (string, error)
 	B

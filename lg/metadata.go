@@ -16,9 +16,10 @@ type InterfaceMetadata struct {
 }
 
 type MethodMetadata struct {
-	Name    string
-	Params  []MethodParam
-	Results []MethodResult
+	Annotations Annotations
+	Name        string
+	Params      []MethodParam
+	Results     []MethodResult
 }
 
 type MethodParam struct {
@@ -121,10 +122,14 @@ func extractMethodMetadata(src []byte, method *ast.Field) MethodMetadata {
 			}
 		}
 	}
-
+	var annotations Annotations
+	if method.Doc != nil {
+		annotations = annotationsFromCommentGroup(method.Doc.List)
+	}
 	return MethodMetadata{
-		Name:    method.Names[0].Name,
-		Params:  params,
-		Results: results,
+		Annotations: annotations,
+		Name:        method.Names[0].Name,
+		Params:      params,
+		Results:     results,
 	}
 }
