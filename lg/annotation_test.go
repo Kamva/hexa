@@ -17,15 +17,23 @@ func Test_annotationsFromCommentGroup(t *testing.T) {
 		},
 		&ast.Comment{
 			Slash: 0,
-			Text:  "//@abc `a:\"b\"`",
+			Text:  "// @abc",
+		},
+		&ast.Comment{
+			Slash: 0,
+			Text:  "//@cde `a:\"b\"`",
 		},
 	}
 
 	annotations := annotationsFromCommentGroup(g)
-	require.Equal(t, 1, len(annotations))
-	a := annotations[0]
-	assert.Equal(t, "abc", a.Name)
-	assert.Equal(t, reflect.StructTag(`a:"b"`), a.Tag)
+	require.Equal(t, 2, len(annotations))
+
+	first := annotations[0]
+	assert.Equal(t, "abc", first.Name)
+
+	second := annotations[1]
+	assert.Equal(t, "cde", second.Name)
+	assert.Equal(t, reflect.StructTag(`a:"b"`), second.Tag)
 }
 
 func TestAnnotations_Lookup(t *testing.T) {

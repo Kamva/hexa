@@ -14,6 +14,8 @@ type App interface {
 }
 
 type B interface {
+	// ByFromB says By from the B method :)
+	// @trace
 	ByFromB() (string, error)
 }
 

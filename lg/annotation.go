@@ -6,7 +6,7 @@ import (
 	"regexp"
 )
 
-var annotationRegex = regexp.MustCompile(`@(\w+)(\s+)\x60(.*)\x60`) // \x60 is backtick.
+var annotationRegex = regexp.MustCompile(`@(\w+)(?:(?:\s+)\x60(.*)\x60)?`) // \x60 is backtick.
 
 // Annotation is a type of comment on any goalng ndoe (struct, method, field,...) that has following format:
 // @annotationName	`tagField:"tag val" anotherField:"another val"`
@@ -34,7 +34,11 @@ func annotationsFromCommentGroup(l []*ast.Comment) Annotations {
 	for _, c := range l {
 		if annotationRegex.Match([]byte(c.Text)) {
 			res := annotationRegex.FindStringSubmatch(c.Text)
-			annotations = append(annotations, Annotation{Name: res[1], Tag: reflect.StructTag(res[3])})
+			if res[2] == "" {
+				annotations = append(annotations, Annotation{Name: res[1]})
+			} else {
+				annotations = append(annotations, Annotation{Name: res[1], Tag: reflect.StructTag(res[2])})
+			}
 		}
 	}
 	return annotations

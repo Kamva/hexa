@@ -15,6 +15,11 @@ type {{.Name}} struct {
             // do something when error occured.
             }
         {{end}}
+
+         {{if hasAnnotation $element.Annotations "trace"}}
+           // Do something, this method has "trace" annotation
+        {{end}}
+
         return {{$element.Results | genResultsVars }}
     {{end}}
     }

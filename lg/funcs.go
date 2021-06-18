@@ -10,7 +10,7 @@ var joinResults = func(results []MethodResult, formattedName bool) string {
 	joined := make([]string, len(results))
 	for i, r := range results {
 		if formattedName {
-			joined[i] = fmt.Sprintf("%s %s", ResultVar(i+1), r.Type) // e.g., r2 *dto.User
+			joined[i] = fmt.Sprintf("%s %s", ResultVar(i), r.Type) // e.g., r2 *dto.User
 		} else {
 			joined[i] = r.joinNameAndType() // e.g, *dto.User
 		}
@@ -20,7 +20,7 @@ var joinResults = func(results []MethodResult, formattedName bool) string {
 }
 
 func ResultVar(index int) string {
-	return fmt.Sprintf("r%d", index)
+	return fmt.Sprintf("r%d", index+1)
 }
 
 func Funcs() template.FuncMap {
@@ -52,7 +52,7 @@ func Funcs() template.FuncMap {
 		"genResultsVars": func(results []MethodResult) string {
 			genList := make([]string, len(results))
 			for i, _ := range results {
-				genList[i] = ResultVar(i+1)
+				genList[i] = ResultVar(i)
 			}
 
 			return strings.Join(genList, ",")
@@ -70,6 +70,10 @@ func Funcs() template.FuncMap {
 		},
 		"title": func(val string) string {
 			return strings.Title(val)
+		},
+		"hasAnnotation": func(annotations Annotations, name string) bool {
+			fmt.Println(annotations)
+			return annotations.Lookup(name) != nil
 		},
 	}
 }
