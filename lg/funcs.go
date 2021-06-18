@@ -6,10 +6,14 @@ import (
 	"text/template"
 )
 
-var joinResults = func(results []MethodResult) string {
+var joinResults = func(results []MethodResult, formattedName bool) string {
 	joined := make([]string, len(results))
 	for i, r := range results {
-		joined[i] = r.joinNameAndType()
+		if formattedName {
+			joined[i] = fmt.Sprintf("%s %s", ResultVar(i+1), r.Type) // e.g., r2 *dto.User
+		} else {
+			joined[i] = r.joinNameAndType() // e.g, *dto.User
+		}
 	}
 
 	return strings.Join(joined, ",")
@@ -37,17 +41,18 @@ func Funcs() template.FuncMap {
 
 			return strings.Join(joined, ",")
 		},
-		"joinResults": joinResults,
-		"joinResultsForSignature": func(results []MethodResult) string {
+		// Example for formatted name is : (r1 *dto.User,r2 err error)
+		// Example for original name is: (*dto.User, error) or (u *dto.User,e error)
+		"joinResultsForSignature": func(results []MethodResult, formattedName bool) string {
 			if len(results) == 0 || (len(results) == 1 && results[0].Name == "") {
-				return joinResults(results)
+				return joinResults(results, formattedName)
 			}
-			return fmt.Sprintf("(%s)", joinResults(results))
+			return fmt.Sprintf("(%s)", joinResults(results, formattedName))
 		},
 		"genResultsVars": func(results []MethodResult) string {
 			genList := make([]string, len(results))
 			for i, _ := range results {
-				genList[i] = ResultVar(i)
+				genList[i] = ResultVar(i+1)
 			}
 
 			return strings.Join(genList, ",")
