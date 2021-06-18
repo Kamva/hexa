@@ -6,14 +6,19 @@ import (
 	"text/template"
 )
 
-var joinResults = func(results []MethodResult, formattedName bool) string {
+var joinResults = func(results []MethodResult) string {
 	joined := make([]string, len(results))
 	for i, r := range results {
-		if formattedName {
-			joined[i] = fmt.Sprintf("%s %s", ResultVar(i), r.Type) // e.g., r2 *dto.User
-		} else {
-			joined[i] = r.joinNameAndType() // e.g, *dto.User
-		}
+		joined[i] = r.joinNameAndType()
+	}
+
+	return strings.Join(joined, ",")
+}
+
+var joinResultsInSameNameFormat = func(results []MethodResult) string {
+	joined := make([]string, len(results))
+	for i, r := range results {
+		joined[i] = fmt.Sprintf("%s %s", ResultVar(i), r.Type)
 	}
 
 	return strings.Join(joined, ",")
@@ -41,13 +46,20 @@ func Funcs() template.FuncMap {
 
 			return strings.Join(joined, ",")
 		},
-		// Example for formatted name is : (r1 *dto.User,r2 err error)
 		// Example for original name is: (*dto.User, error) or (u *dto.User,e error)
-		"joinResultsForSignature": func(results []MethodResult, formattedName bool) string {
+		"joinResultsForSignature": func(results []MethodResult) string {
 			if len(results) == 0 || (len(results) == 1 && results[0].Name == "") {
-				return joinResults(results, formattedName)
+				return joinResults(results)
 			}
-			return fmt.Sprintf("(%s)", joinResults(results, formattedName))
+			return fmt.Sprintf("(%s)", joinResults(results))
+		},
+		// Example for formatted name is : (r1 *dto.User,r2 err error)
+		"joinResultsForSignatureInSameNameFormat": func(results []MethodResult) string {
+			if len(results) == 0 {
+				return ""
+			}
+
+			return fmt.Sprintf("(%s)", joinResultsInSameNameFormat(results))
 		},
 		"genResultsVars": func(results []MethodResult) string {
 			genList := make([]string, len(results))
@@ -72,7 +84,6 @@ func Funcs() template.FuncMap {
 			return strings.Title(val)
 		},
 		"hasAnnotation": func(annotations Annotations, name string) bool {
-			fmt.Println(annotations)
 			return annotations.Lookup(name) != nil
 		},
 	}

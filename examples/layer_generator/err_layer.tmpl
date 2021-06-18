@@ -5,7 +5,7 @@ type {{.Name}} struct {
 }
 
 {{ range $index, $element := .Interface.Methods -}}
-    func (a *{{$.Name}}) {{$index}}({{$element.Params | joinParamsWithType}}) {{joinResultsForSignature $element.Results false}} {
+    func (a *{{$.Name}}) {{$index}}({{$element.Params | joinParamsWithType}}) {{joinResultsForSignature $element.Results}} {
     {{- if $element.Results | len | eq 0}}
         a.app.{{$index}}({{$element.Params | joinParams}})
     {{else}}
