@@ -14,8 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// CollectionName is just a default collection name, you can use
-// any other collection name you want.
+// CollectionName is default collection name.
 const CollectionName = "locks"
 
 type DlmOptions struct {
@@ -23,8 +22,10 @@ type DlmOptions struct {
 	// If a lock already held by another mutex, we need to interval
 	// to check it again.
 	WaitingInterval time.Duration
-	DefaultTTL      time.Duration
-	DefaultOwner    string
+	// Default ttl value for a lock. e.g, 2s.
+	DefaultTTL time.Duration
+	// usually your machine name. e.g., k8s-pod-199831uf.
+	DefaultOwner string
 }
 
 // dlm implements the Hexa DLM.
@@ -58,11 +59,8 @@ func (m *dlm) createIndexesIfNotExists() error {
 	// Please note this index doesn't have any effect on the mutex behavior,
 	// its just for cleanup.
 	_, err := m.coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
-		Keys: bson.D{bson.E{Key: "expiry", Value: 1}},
-		Options: &options.IndexOptions{
-			ExpireAfterSeconds: gutil.NewInt32(0),
-			Name:               gutil.NewString("expired_locks"),
-		},
+		Keys:    bson.D{bson.E{Key: "expiry", Value: 1}},
+		Options: &options.IndexOptions{Name: gutil.NewString("expired_locks")},
 	})
 	return tracer.Trace(err)
 }
@@ -73,6 +71,10 @@ func (m *dlm) NewMutex(Key string) hexa.Mutex {
 		Owner: m.owner,
 		TTL:   m.ttl,
 	})
+}
+
+func (m *dlm) NewMutexWithTTL(Key string, ttl time.Duration) hexa.Mutex {
+	return m.NewMutexWithOptions(hexa.MutexOptions{Key: Key, TTL: ttl})
 }
 
 func (m *dlm) NewMutexWithOptions(o hexa.MutexOptions) hexa.Mutex {

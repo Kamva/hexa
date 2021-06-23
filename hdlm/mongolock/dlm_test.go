@@ -76,6 +76,7 @@ func TestNewDlmDatabaseIndex(t *testing.T) {
 	_, err = collection.Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.D{bson.E{Key: "expiry", Value: 1}},
 		Options: &options.IndexOptions{
+			ExpireAfterSeconds: gutil.NewInt32(0),
 			Name: gutil.NewString("expired_locks"),
 		},
 	})
@@ -85,7 +86,6 @@ func TestNewDlmDatabaseIndex(t *testing.T) {
 	_, err = collection.Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.D{bson.E{Key: "expiry", Value: 1}},
 		Options: &options.IndexOptions{
-			ExpireAfterSeconds: gutil.NewInt32(0),
 			Name:               gutil.NewString("expired_locks"),
 		},
 	})
@@ -120,6 +120,37 @@ func TestDlm_NewMutex(t *testing.T) {
 	assert.Equal(t, mObj.ID, "abc")
 	assert.Equal(t, mObj.Owner, "lab")
 	assert.Equal(t, mObj.ttl, ttl)
+	assert.True(t, now.Before(mObj.Expiry)) // now+ttl < lock_time + ttl.
+}
+
+func TestDlm_NewMutexWithTTL(t *testing.T) {
+	setupDefConnection()
+	defer disconnect()
+
+	resetCollection()
+
+
+	ttl := time.Second * 30
+	dlm, err := NewDlm(DlmOptions{
+		Collection:      collection,
+		WaitingInterval: time.Millisecond * 200,
+		DefaultTTL:      ttl,
+		DefaultOwner:    "lab",
+	})
+
+	require.Nil(t, err)
+	mttl:=time.Second * 60
+	m := dlm.NewMutexWithTTL("abc",mttl)
+	var mObj = m.(*mutex)
+	require.NotNil(t, m)
+
+	now := time.Now().Add(ttl)
+	time.Sleep(time.Millisecond * 200)
+
+	assert.Nil(t, m.Lock(nil))
+	assert.Equal(t, mObj.ID, "abc")
+	assert.Equal(t, mObj.Owner, "lab")
+	assert.Equal(t, mObj.ttl, mttl)
 	assert.True(t, now.Before(mObj.Expiry)) // now+ttl < lock_time + ttl.
 }
 

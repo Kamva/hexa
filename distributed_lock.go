@@ -20,6 +20,10 @@ type DLM interface {
 	// and default owner and ttl.
 	NewMutex(Key string) Mutex
 
+	// NewMutexWithTTL creates a new mutex with
+	// the provided key and ttl.
+	NewMutexWithTTL(key string, ttl time.Duration) Mutex
+
 	// NewMutexWithOptions returns new mutex with
 	// provided options.
 	NewMutexWithOptions(o MutexOptions) Mutex
@@ -39,7 +43,7 @@ type Mutex interface {
 
 	// TryLock tries to lock or returns the ErrLockAlreadyAcquired
 	// error if it acquired.
-	// Please note different mutex with same lock name and same
+	// Please note different mutexes with same lock name and same
 	// owner can lock and unlock each other.
 	// expiry date should begin after call to this method, not at the
 	// creation time of this mutex.
@@ -47,8 +51,8 @@ type Mutex interface {
 	// 1. try to refresh the lock
 	// 2. return error
 	// 3. return nil and ignore next calls.
-	// behavior in our implementation should be 1, means
-	// you should try to refresh lock when user call
+	// behavior in our implementation should be the option number 1, means
+	// you should try to refresh lock when user calls to
 	// this method again.
 	TryLock(ctx Context) error
 
