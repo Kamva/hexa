@@ -14,9 +14,11 @@ const ErrorStackLogKey = "_stack"
 type LogFunc func(Logger) Logger
 
 // Type and function aliases from zap to limit the libraries scope into hexa code
+
 type LogField = zapcore.Field
 
-// hlog LogField helpers to create fields from types.
+// LogField helpers to create fields from types.
+
 var Int64Field = zap.Int64
 var Int32Field = zap.Int32
 var IntField = zap.Int
@@ -37,6 +39,46 @@ func ErrStackField(err error) LogField {
 	return StringField(ErrorStackLogKey, tracer.StackAsString(err))
 }
 
+// ErrFields checks if the provided error is a Hexa error, returns
+// hexa error fields, otherwise returns regular error fields.
+func ErrFields(err error) []LogField {
+	if hexaErrFields := hexaErrFields(err); len(hexaErrFields) != 0 {
+		return hexaErrFields
+	}
+
+	return []LogField{
+		ErrField(err),
+		ErrStackField(tracer.Trace(err)),
+	}
+}
+
+func hexaErrFields(err error) []LogField {
+	e := AsHexaErr(err)
+	if e == nil {
+		return nil
+	}
+
+	// Hexa error fields:
+	fields := []LogField{
+		StringField("_error_id", e.ID()),
+		IntField("_http_status", e.HTTPStatus()),
+	}
+	for k, v := range e.Data() {
+		fields = append(fields, AnyField(k, v))
+	}
+	for k, v := range e.ReportData() {
+		fields = append(fields, AnyField(k, v))
+	}
+
+	// If exists error and error is traced,print its stack.
+	fields = append(fields, ErrStackField(tracer.MoveStackIfNeeded(e, e.InternalError())))
+	if e.InternalError() != nil {
+		fields = append(fields, ErrField(e.InternalError()))
+	}
+
+	return fields
+}
+
 type Logger interface {
 
 	// Core function returns the logger core concrete struct.
@@ -44,12 +86,12 @@ type Logger interface {
 	// interface to another and need to the concrete logger.
 	Core() interface{}
 
-	// With get the hexa context and some keyValues
+	// WithCtx gets the hexa context and some keyValues
 	// and return new logger contains key values as
 	// log fields.
 	WithCtx(ctx Context, args ...LogField) Logger
 
-	// WithFields method set key,values and return new logger
+	// With method set key,values and return new logger
 	// contains this key values as log fields.
 	With(f ...LogField) Logger
 

@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/kamva/gutil"
-	"github.com/kamva/tracer"
 )
 
 type (
@@ -137,25 +136,7 @@ func (e defaultError) SetReportData(data Map) Error {
 
 func (e defaultError) ReportIfNeeded(l Logger, _ Translator) bool {
 	if e.shouldReport() {
-		fields := []LogField{
-			StringField("_error_id", e.ID()),
-			IntField("_http_status", e.HTTPStatus()),
-		}
-		for k, v := range e.Data() {
-			fields = append(fields, AnyField(k, v))
-		}
-		for k, v := range e.ReportData() {
-			fields = append(fields, AnyField(k, v))
-		}
-
-		// If exists error and error is traced,print its stack.
-		fields = append(fields, ErrStackField(tracer.MoveStackIfNeeded(e, e.error)))
-
-		if e.error != nil {
-			fields = append(fields, ErrField(e.error))
-		}
-
-		l.With(fields...).Error(e.Error())
+		l.With(ErrFields(e)...).Error(e.Error())
 		return true
 	}
 	return false
