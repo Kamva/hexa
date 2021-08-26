@@ -110,8 +110,7 @@ func (c contextImpl) Translator() Translator {
 }
 
 func WithUser(c Context, user User) Context {
-	rawCtx := context.WithValue(c, ContextKeyUser, user)
-	return &contextImpl{Context: rawCtx}
+	return WithValue(c, ContextKeyUser, user)
 }
 
 // WithValue is just same as context.WithValue function but returns
