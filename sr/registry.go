@@ -9,83 +9,48 @@ import (
 	"sort"
 	"sync/atomic"
 
+	"github.com/kamva/hexa"
 	"github.com/kamva/hexa/hlog"
 	"github.com/kamva/tracer"
 )
 
-type Service interface{} // Currently Service interface does not needs to implement anything.
-
-type Bootable interface {
-	Boot() error
-}
-
-// Runnable is for services that need to be ran in background.
-type Runnable interface {
-	Run() error
-}
-
-type Shutdownable interface {
-	Shutdown(context.Context) error
-}
-
-// Descriptor describes the service.
-type Descriptor struct {
-	Name     string
-	Instance Service
-	Priority int
-}
-
-type ServiceRegistry interface {
-	Register(name string, instance Service)
-	RegisterByInstance(instance Service)
-	Boot() error
-	Shutdown(ctx context.Context) error
-	ShutdownCh() chan struct{}
-
-	// Descriptors returns descriptors ordered by their priority.
-	Descriptors() []*Descriptor
-	Descriptor(name string) *Descriptor
-	// Service method should return nil if service not found.
-	Service(name string) Service
-}
-
 type serviceRegistry struct {
-	l []*Descriptor
+	l []*hexa.Descriptor
 
 	booted     uint32 // is 1 if you boot services.
 	done       uint32 // is 1 if you shutdown services.
 	shutdownCh chan struct{}
 }
 
-func New() ServiceRegistry {
+func New() hexa.ServiceRegistry {
 	return &serviceRegistry{
-		l:          make([]*Descriptor, 0),
+		l:          make([]*hexa.Descriptor, 0),
 		shutdownCh: make(chan struct{}),
 	}
 }
 
-func (r *serviceRegistry) Register(name string, instance Service) {
-	r.register(&Descriptor{
+func (r *serviceRegistry) Register(name string, instance hexa.Service) {
+	r.register(&hexa.Descriptor{
 		Name:     name,
 		Instance: instance,
 		Priority: len(r.l),
 	})
 }
 
-func (r *serviceRegistry) RegisterByInstance(instance Service) {
-	r.register(&Descriptor{
+func (r *serviceRegistry) RegisterByInstance(instance hexa.Service) {
+	r.register(&hexa.Descriptor{
 		Name:     reflect.TypeOf(instance).Elem().Name(),
 		Instance: instance,
 		Priority: len(r.l),
 	})
 }
 
-func (r *serviceRegistry) register(d *Descriptor) {
+func (r *serviceRegistry) register(d *hexa.Descriptor) {
 	if r.Service(d.Name) != nil {
 		hlog.Warn("you are overwriting service in service registry", hlog.String("name", d.Name))
 	}
 
-	if _, ok := d.Instance.(Bootable); ok && atomic.LoadUint32(&r.booted) == 1 {
+	if _, ok := d.Instance.(hexa.Bootable); ok && atomic.LoadUint32(&r.booted) == 1 {
 		hlog.Debug("new registered service is bootable, but you booted your services, so the new service will not boot automatically",
 			hlog.String("name", d.Name))
 	}
@@ -100,7 +65,7 @@ func (r *serviceRegistry) Boot() error {
 	}
 
 	for _, d := range r.Descriptors() {
-		bootable, ok := d.Instance.(Bootable)
+		bootable, ok := d.Instance.(hexa.Bootable)
 		if !ok {
 			continue
 		}
@@ -123,7 +88,7 @@ func (r *serviceRegistry) Shutdown(ctx context.Context) error {
 			// sort descending.
 			sort.Slice(dl, func(i int, j int) bool { return dl[i].Priority > dl[j].Priority })
 			for _, d := range dl {
-				shutdownable, ok := d.Instance.(Shutdownable)
+				shutdownable, ok := d.Instance.(hexa.Shutdownable)
 				if !ok {
 					continue
 				}
@@ -155,12 +120,12 @@ func (r *serviceRegistry) ShutdownCh() (shutdownCh chan struct{}) {
 	return r.shutdownCh
 }
 
-func (r *serviceRegistry) Descriptors() []*Descriptor {
+func (r *serviceRegistry) Descriptors() []*hexa.Descriptor {
 	sort.Slice(r.l, func(i, j int) bool { return r.l[i].Priority < r.l[j].Priority })
 	return r.l
 }
 
-func (r *serviceRegistry) Descriptor(name string) *Descriptor {
+func (r *serviceRegistry) Descriptor(name string) *hexa.Descriptor {
 	for _, d := range r.l {
 		if d.Name == name {
 			return d
@@ -169,11 +134,11 @@ func (r *serviceRegistry) Descriptor(name string) *Descriptor {
 	return nil
 }
 
-func (r *serviceRegistry) Service(name string) Service {
+func (r *serviceRegistry) Service(name string) hexa.Service {
 	if d := r.Descriptor(name); d != nil {
 		return d.Instance
 	}
 	return nil
 }
 
-var _ ServiceRegistry = &serviceRegistry{}
+var _ hexa.ServiceRegistry = &serviceRegistry{}

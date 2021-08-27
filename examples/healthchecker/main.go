@@ -35,11 +35,11 @@ func (h *HealthExample) HealthStatus(ctx context.Context) hexa.HealthStatus {
 
 func main() {
 	l := hlog.NewPrinterDriver(hlog.DebugLevel)
-	checker := hexa.NewHealthChecker(l, "localhost:7676")
-
 	r := hexa.NewHealthReporter().AddToChecks(&HealthExample{})
 
-	gutil.PanicErr(checker.StartServer(r))
+	checker := hexa.NewHealthChecker(l, "localhost:7676", r)
+
+	gutil.PanicErr(checker.Run())
 	gutil.WaitForSignals(syscall.SIGINT, syscall.SIGTERM)
 }
 

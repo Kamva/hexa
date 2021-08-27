@@ -9,32 +9,32 @@ import (
 	"github.com/kamva/tracer"
 )
 
-var ()
-
 const (
 	LivenessStatusKey  = "liveness_status"
 	ReadinessStatusKey = "readiness_status"
 )
 
 type HealthChecker interface {
-	StartServer(r HealthReporter) error
-	StopServer() error
+	Runnable
+	Shutdownable
 }
 
 type healthChecker struct {
 	l      Logger
 	server *http.Server
 	addr   string
+	r      HealthReporter
 }
 
-func NewHealthChecker(l Logger, addr string) HealthChecker {
+func NewHealthChecker(l Logger, addr string, r HealthReporter) HealthChecker {
 	return &healthChecker{
 		l:    l,
 		addr: addr,
+		r:    r,
 	}
 }
 
-func (h *healthChecker) StartServer(r HealthReporter) error {
+func (h *healthChecker) Run() error {
 	if h.server != nil {
 		if err := h.server.Shutdown(context.Background()); err != nil && err != http.ErrServerClosed {
 			return tracer.Trace(err)
@@ -44,9 +44,9 @@ func (h *healthChecker) StartServer(r HealthReporter) error {
 	mux := http.NewServeMux()
 	h.server = &http.Server{Addr: h.addr, Handler: mux}
 
-	mux.HandleFunc("/live", h.livenessHandler(r))
-	mux.HandleFunc("/ready", h.readinessHandler(r))
-	mux.HandleFunc("/status", h.statusHandler(r))
+	mux.HandleFunc("/live", h.livenessHandler())
+	mux.HandleFunc("/ready", h.readinessHandler())
+	mux.HandleFunc("/status", h.statusHandler())
 
 	h.l.Info("start serving health check requests", StringField("address", h.addr))
 	go func() {
@@ -59,17 +59,17 @@ func (h *healthChecker) StartServer(r HealthReporter) error {
 	return nil
 }
 
-func (h *healthChecker) StopServer() error {
-	return h.server.Close()
+func (h *healthChecker) Shutdown(c context.Context) error {
+	return h.server.Shutdown(c)
 }
 
 //--------------------------------
 // HTTP Health Check Handlers
 //--------------------------------
 
-func (h *healthChecker) livenessHandler(hr HealthReporter) func(http.ResponseWriter, *http.Request) {
+func (h *healthChecker) livenessHandler() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		status := hr.LivenessStatus(r.Context())
+		status := h.r.LivenessStatus(r.Context())
 		w.Header().Set(LivenessStatusKey, string(status))
 
 		if status != StatusAlive {
@@ -81,9 +81,9 @@ func (h *healthChecker) livenessHandler(hr HealthReporter) func(http.ResponseWri
 	}
 }
 
-func (h *healthChecker) readinessHandler(hp HealthReporter) func(http.ResponseWriter, *http.Request) {
+func (h *healthChecker) readinessHandler() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		status := hp.ReadinessStatus(r.Context())
+		status := h.r.ReadinessStatus(r.Context())
 		w.Header().Set(ReadinessStatusKey, string(status))
 
 		if status != StatusReady {
@@ -95,9 +95,9 @@ func (h *healthChecker) readinessHandler(hp HealthReporter) func(http.ResponseWr
 	}
 }
 
-func (h *healthChecker) statusHandler(hp HealthReporter) func(http.ResponseWriter, *http.Request) {
+func (h *healthChecker) statusHandler() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		report := hp.HealthReport(r.Context())
+		report := h.r.HealthReport(r.Context())
 		w.Header().Set(LivenessStatusKey, string(report.Alive))
 		w.Header().Set(ReadinessStatusKey, string(report.Ready))
 		//fmt.Fprint(w, gutil.UnmarshalStruct())

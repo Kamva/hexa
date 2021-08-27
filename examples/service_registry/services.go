@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/kamva/hexa/sr"
+	"github.com/kamva/hexa"
 )
 
 type ServiceA struct {
@@ -46,8 +46,8 @@ func (s *ServiceD) Shutdown(_ context.Context) error {
 	return nil
 }
 
-var _ sr.Bootable = &ServiceA{}
-var _ sr.Bootable = &ServiceB{}
-var _ sr.Shutdownable = &ServiceB{}
-var _ sr.Shutdownable = &ServiceC{}
-var _ sr.Shutdownable = &ServiceD{}
+var _ hexa.Bootable = &ServiceA{}
+var _ hexa.Bootable = &ServiceB{}
+var _ hexa.Shutdownable = &ServiceB{}
+var _ hexa.Shutdownable = &ServiceC{}
+var _ hexa.Shutdownable = &ServiceD{}
