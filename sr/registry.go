@@ -19,6 +19,11 @@ type Bootable interface {
 	Boot() error
 }
 
+// Runnable is for services that need to be ran in background.
+type Runnable interface {
+	Run() error
+}
+
 type Shutdownable interface {
 	Shutdown(context.Context) error
 }
@@ -81,7 +86,7 @@ func (r *serviceRegistry) register(d *Descriptor) {
 	}
 
 	if _, ok := d.Instance.(Bootable); ok && atomic.LoadUint32(&r.booted) == 1 {
-		hlog.Warn("new registering service is bootable, but you booted your services, so the new service will not boot automatically",
+		hlog.Debug("new registered service is bootable, but you booted your services, so the new service will not boot automatically",
 			hlog.String("name", d.Name))
 	}
 
