@@ -143,6 +143,8 @@ github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88/go.mod h1:3w7q
 github.com/kamva/gutil v0.0.0-20200802192905-f876666b3671/go.mod h1:isEo5NPYgY0mNFbOrCbbDVTe7Cd5VujoEt1cKbG2oGg=
 github.com/kamva/gutil v0.0.0-20210520125706-2ecdd1ad2b3f h1:YBG2sEO8AvQNfExiZGiLaQIwdoJDsvPeSuRlPSv2MVM=
 github.com/kamva/gutil v0.0.0-20210520125706-2ecdd1ad2b3f/go.mod h1:+yeJ+Y3R35PgqbWDx9BecACSsOLC3gGQ/Ef5hre00ds=
+github.com/kamva/gutil v0.0.0-20210827084201-35b6a3421580 h1:YNVqKgUtekv53gpKWFx0TeFnVMBNDYikE4h7YgY3PnU=
+github.com/kamva/gutil v0.0.0-20210827084201-35b6a3421580/go.mod h1:+yeJ+Y3R35PgqbWDx9BecACSsOLC3gGQ/Ef5hre00ds=
 github.com/kamva/mgm-relation v0.0.0-20201115040639-5cb356991a32 h1:ZBEXmXL3eJ+L+ZVhYqlPiSfEq89iKDb3/DV92vGqllo=
 github.com/kamva/mgm-relation v0.0.0-20201115040639-5cb356991a32/go.mod h1:QVaDH58cFiG5lxo0PCrmXTwoIRQ7zDXjchAiWFKbwYs=
 github.com/kamva/mgm/v3 v3.1.0/go.mod h1:WeTKvDky1Qps7+7UL9ls6OOAfCMLAsIbNFsvtnwctj8=

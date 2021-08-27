@@ -34,7 +34,7 @@ type ServiceRegistry interface {
 	Register(name string, instance Service)
 	RegisterByInstance(instance Service)
 	Boot() error
-	Shutdown(ctx context.Context)
+	Shutdown(ctx context.Context) error
 	ShutdownCh() chan struct{}
 
 	// Descriptors returns descriptors ordered by their priority.
@@ -47,8 +47,8 @@ type ServiceRegistry interface {
 type serviceRegistry struct {
 	l []*Descriptor
 
-	booted     uint32
-	shutdown   uint32
+	booted     uint32 // is 1 if you boot services.
+	done       uint32 // is 1 if you shutdown services.
 	shutdownCh chan struct{}
 }
 
@@ -111,34 +111,39 @@ func (r *serviceRegistry) Boot() error {
 	return nil
 }
 
-func (r *serviceRegistry) Shutdown(ctx context.Context) {
-	if !atomic.CompareAndSwapUint32(&r.shutdown, 0, 1) {
-		hlog.Warn("skip service registry shutdown, it has been ran already!")
-		return
-	}
-	dl := r.Descriptors()
-	// sort descending.
-	sort.Slice(dl, func(i int, j int) bool { return dl[i].Priority > dl[j].Priority })
+func (r *serviceRegistry) Shutdown(ctx context.Context) error {
+	if atomic.CompareAndSwapUint32(&r.done, 0, 1) {
+		go func() {
+			dl := r.Descriptors()
+			// sort descending.
+			sort.Slice(dl, func(i int, j int) bool { return dl[i].Priority > dl[j].Priority })
+			for _, d := range dl {
+				shutdownable, ok := d.Instance.(Shutdownable)
+				if !ok {
+					continue
+				}
 
-	for _, d := range dl {
-		select {
-		case <-ctx.Done():
-			hlog.Error(`shutdown context timed out, we can not shutdown remained services`)
-		default:
-			shutdownable, ok := d.Instance.(Shutdownable)
-			if !ok {
-				continue
+				log := hlog.With(hlog.String("name", d.Name), hlog.Int("priority", d.Priority))
+				log.Debug("shutdown service")
+				if err := shutdownable.Shutdown(ctx); err != nil {
+					log.Error("failed service shutdown")
+				}
 			}
 
-			log := hlog.With(hlog.String("name", d.Name), hlog.Int("priority", d.Priority))
-			log.Debug("shutdown service")
-			if err := shutdownable.Shutdown(ctx); err != nil {
-				log.Error("failed service shutdown")
-			}
-		}
+			close(r.shutdownCh)
+		}()
+	} else {
+		hlog.Debug("skip service registry shutdown and just wait to shutdown services, it has been ran already!")
 	}
 
-	close(r.shutdownCh)
+	select {
+	case <-ctx.Done():
+		hlog.Error(`shutdown context timed out, we can not shutdown remained services`)
+		return tracer.Trace(ctx.Err())
+	case <-r.shutdownCh:
+		hlog.Info("app shutdown.")
+		return nil
+	}
 }
 
 func (r *serviceRegistry) ShutdownCh() (shutdownCh chan struct{}) {

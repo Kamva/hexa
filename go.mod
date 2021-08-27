@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/getsentry/sentry-go v0.6.1
-	github.com/kamva/gutil v0.0.0-20210520125706-2ecdd1ad2b3f
+	github.com/kamva/gutil v0.0.0-20210827084201-35b6a3421580
 	github.com/kamva/mgm-relation v0.0.0-20201115040639-5cb356991a32
 	github.com/kamva/mgm/v3 v3.3.1
 	github.com/kamva/tracer v0.0.0-20201115122932-ea39052d56cd

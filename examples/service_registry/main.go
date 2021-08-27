@@ -1,8 +1,8 @@
 package main
 
 import (
-	"context"
 	"fmt"
+	"time"
 
 	"github.com/kamva/gutil"
 	"github.com/kamva/hexa/sr"
@@ -25,12 +25,14 @@ func main() {
 	r.Register("c", c)
 
 	gutil.PanicErr(r.Boot())
-	fmt.Println("after service registration and boot")
 
 	// Register service D after boot:
 	r.Register("d", d)
 
-	go r.Shutdown(context.Background())
+	fmt.Println("after service registration and boot, press ctrl+c to shutdown services")
+
+	//go r.Shutdown(context.Background())
+	go sr.ShutdownBySignals(r, time.Second*30)
 	<-r.ShutdownCh()
 
 	fmt.Println("by by :)")
