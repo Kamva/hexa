@@ -82,7 +82,7 @@ func (r *serviceRegistry) Boot() error {
 }
 
 func (r *serviceRegistry) Shutdown(ctx context.Context) error {
-	if atomic.CompareAndSwapUint32(&r.done, 0, 1) {
+	if atomic.CompareAndSwapUint32(&r.done, 0, 1) { // if its the first time you want to shutdown services:
 		go func() {
 			dl := r.Descriptors()
 			// sort descending.
