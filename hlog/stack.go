@@ -1,6 +1,7 @@
 package hlog
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -19,6 +20,10 @@ type StackedLogger interface {
 	// LoggerByName returns logger by its name.
 	// logger can be nil if does not exists.
 	LoggerByName(name string) hexa.Logger
+
+	hexa.Bootable
+	hexa.Runnable
+	hexa.Shutdownable
 }
 
 type stackedLogger struct {
@@ -79,6 +84,47 @@ func (l *stackedLogger) Error(msg string, args ...Field) {
 	for _, logger := range l.stack {
 		logger.Error(msg, args...)
 	}
+}
+
+func (l *stackedLogger) Boot() error {
+	for _, logger := range l.stack {
+		if bootable, ok := logger.(hexa.Bootable); ok {
+			if err := bootable.Boot(); err != nil {
+				return tracer.Trace(err)
+			}
+		}
+	}
+
+	return nil
+}
+
+func (l *stackedLogger) Run() error {
+	for _, logger := range l.stack {
+		if runnable, ok := logger.(hexa.Runnable); ok {
+			if err := runnable.Run(); err != nil {
+				return tracer.Trace(err)
+			}
+		}
+	}
+
+	return nil
+}
+
+func (l *stackedLogger) Shutdown(ctx context.Context) error {
+	for _, logger := range l.stack {
+		if runnable, ok := logger.(hexa.Shutdownable); ok {
+			if err := runnable.Shutdown(ctx); err != nil {
+				return tracer.Trace(err)
+			}
+
+			// If ctx is closed
+			if err := ctx.Err(); err != nil {
+				return tracer.Trace(err)
+			}
+		}
+	}
+
+	return nil
 }
 
 type StackOptions struct {

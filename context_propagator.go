@@ -9,11 +9,11 @@ import (
 )
 
 type ContextPropagator interface {
-	// Extract extracts values from context and add to the map
-	Extract(context.Context) (map[string][]byte, error)
+	// Inject injects values from context into a map and returns the map.
+	Inject(context.Context) (map[string][]byte, error)
 
-	// Inject injects values from map to the context.
-	Inject(map[string][]byte, context.Context) (context.Context, error)
+	// Extract extract values from map and insert to the context.
+	Extract(context.Context, map[string][]byte) (context.Context, error)
 }
 
 var propagatingContextKeys = []string{
@@ -44,10 +44,10 @@ type multiPropagator struct {
 	propagators []ContextPropagator
 }
 
-func (p *multiPropagator) Extract(c context.Context) (map[string][]byte, error) {
+func (p *multiPropagator) Inject(c context.Context) (map[string][]byte, error) {
 	finalMap := make(map[string][]byte)
 	for _, p := range p.propagators {
-		m, err := p.Extract(c)
+		m, err := p.Inject(c)
 		if err != nil {
 			return nil, tracer.Trace(err)
 		}
@@ -56,10 +56,10 @@ func (p *multiPropagator) Extract(c context.Context) (map[string][]byte, error) 
 	return finalMap, nil
 }
 
-func (p *multiPropagator) Inject(m map[string][]byte, c context.Context) (context.Context, error) {
+func (p *multiPropagator) Extract(c context.Context, m map[string][]byte) (context.Context, error) {
 	var err error
 	for _, p := range p.propagators {
-		c, err = p.Inject(m, c)
+		c, err = p.Extract(c, m)
 		if err != nil {
 			return nil, tracer.Trace(err)
 		}
@@ -71,7 +71,7 @@ func (p *multiPropagator) AddPropagator(propagator ContextPropagator) {
 	p.propagators = append(p.propagators, propagator)
 }
 
-func (p *defaultContextPropagator) Extract(c context.Context) (map[string][]byte, error) {
+func (p *defaultContextPropagator) Inject(c context.Context) (map[string][]byte, error) {
 	// just extract local, correlation_id  and user
 	m := make(map[string][]byte)
 	m[ContextKeyCorrelationID] = []byte(c.Value(ContextKeyCorrelationID).(string))
@@ -88,7 +88,7 @@ func (p *defaultContextPropagator) Extract(c context.Context) (map[string][]byte
 	return m, nil
 }
 
-func (p *defaultContextPropagator) Inject(m map[string][]byte, c context.Context) (context.Context, error) {
+func (p *defaultContextPropagator) Extract(c context.Context, m map[string][]byte) (context.Context, error) {
 	for _, k := range propagatingContextKeys {
 		if _, ok := m[k]; !ok {
 			return nil, tracer.Trace(fmt.Errorf("key %s not found in map", k))
@@ -111,7 +111,7 @@ func (p *defaultContextPropagator) Inject(m map[string][]byte, c context.Context
 	return c, nil
 }
 
-func (p *keysPropagator) Extract(c context.Context) (map[string][]byte, error) {
+func (p *keysPropagator) Inject(c context.Context) (map[string][]byte, error) {
 	m := make(map[string][]byte)
 
 	for _, k := range p.keys {
@@ -125,7 +125,7 @@ func (p *keysPropagator) Extract(c context.Context) (map[string][]byte, error) {
 	return m, nil
 }
 
-func (p *keysPropagator) Inject(m map[string][]byte, c context.Context) (context.Context, error) {
+func (p *keysPropagator) Extract(c context.Context, m map[string][]byte) (context.Context, error) {
 	for _, k := range p.keys {
 		v, ok := m[k]
 		if !ok {

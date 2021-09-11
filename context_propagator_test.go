@@ -10,14 +10,13 @@ import (
 )
 
 func assertImportedContextWithParams(t *testing.T, ctx Context, params *ContextParams) {
-	assert.Nil(t,ctx.Request())
+	assert.Nil(t, ctx.Request())
 	assert.Equal(t, params.CorrelationId, ctx.CorrelationID())
 	assert.Equal(t, params.Locale, ctx.Value(ContextKeyLocale))
 	assert.Equal(t, params.User, ctx.User())
 	assert.NotNil(t, ctx.Logger())
 	assert.NotNil(t, ctx.Translator())
 }
-
 
 func TestDefaultContextPropagator_Extract(t *testing.T) {
 	context, params := newTestContext()
@@ -32,7 +31,7 @@ func TestDefaultContextPropagator_Extract(t *testing.T) {
 		ContextKeyLocale:        []byte(params.Locale),
 		ContextKeyUser:          uBytes,
 	}
-	m, err := p.Extract(context)
+	m, err := p.Inject(context)
 	assert.Nil(t, err)
 	assert.Equal(t, result, m)
 }
@@ -50,7 +49,7 @@ func TestDefaultContextPropagator_Inject(t *testing.T) {
 		ContextKeyLocale:        []byte(params.Locale),
 		ContextKeyUser:          uBytes,
 	}
-	result, err := p.Inject(payload, context.Background())
+	result, err := p.Extract(context.Background(), payload)
 	assert.Nil(t, err)
 	ctx, err := NewContextFromRawContext(result)
 	if !assert.Nil(t, err) {
