@@ -49,7 +49,7 @@ func main() {
 	otel.SetTracerProvider(tp) // set global tracer too (we don't need to it although)
 
 	ot = htel.NewOpenTelemetry(tp)
-	r.Register("open_telemetry", ot)
+	r.Register("open_telemetry", ot) // register openTelemetry as a service in the hexa service registry
 	defer r.Shutdown(context.Background())
 
 	t := ot.TracerProvider().Tracer("main-component")

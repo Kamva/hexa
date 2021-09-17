@@ -120,6 +120,11 @@ func WithValue(c Context, key interface{}, value interface{}) Context {
 }
 
 func NewContextFromRawContext(c context.Context) (Context, error) {
+	// If the provided context is a hexa context, we don't need to create a new one.
+	if hc, ok := c.(Context); ok {
+		return hc, nil
+	}
+
 	if err := validateRawContext(c); err != nil {
 		return nil, tracer.Trace(err)
 	}

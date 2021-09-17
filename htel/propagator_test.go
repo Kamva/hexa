@@ -41,7 +41,7 @@ func TestHexaPropagator_ExtractEmptyContext(t *testing.T) {
 	assert.Equalf(t, 0, len(m), "extracted map must be empty")
 }
 
-func TestHexaPropagator_Extract(t *testing.T) {
+func TestHexaPropagator_Inject(t *testing.T) {
 	otelPropagator := propagation.NewCompositeTextMapPropagator(propagation.TraceContext{})
 	hp := NewHexaPropagator(otelPropagator)
 
@@ -53,4 +53,4 @@ func TestHexaPropagator_Extract(t *testing.T) {
 	assert.Equalf(t, 1, len(m), "must insert one item to the result map")
 }
 
-// TODO: write more tests.
+// TODO: Use mock of otel.TextMapPropagator and check inject, extract using mock instead of using otel's real propagtor.
