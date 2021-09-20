@@ -64,9 +64,7 @@ func NewLogMonitor(l hexa.Logger) *event.CommandMonitor {
 }
 
 func (m *logMonitor) Started(c context.Context, e *event.CommandStartedEvent) {
-	// We can check if context is hexa context, log some data from the hexa context too.
-
-	m.l.Debug("MongoDB command started",
+	m.logger(c).Debug("MongoDB command started",
 		hlog.String("command", e.Command.String()),
 		hlog.String("db", e.DatabaseName),
 		hlog.String("command_name", e.CommandName),
@@ -76,9 +74,7 @@ func (m *logMonitor) Started(c context.Context, e *event.CommandStartedEvent) {
 }
 
 func (m *logMonitor) Succeeded(c context.Context, e *event.CommandSucceededEvent) {
-	// We can check if context is hexa context, log some data from the hexa context too.
-
-	m.l.Debug("MongoDB command succeeded",
+	m.logger(c).Debug("MongoDB command succeeded",
 		hlog.String("reply", e.Reply.String()),
 		hlog.String("command_name", e.CommandName),
 		hlog.String("request_id", strconv.FormatInt(e.RequestID, 10)),
@@ -87,12 +83,20 @@ func (m *logMonitor) Succeeded(c context.Context, e *event.CommandSucceededEvent
 }
 
 func (m *logMonitor) Failed(c context.Context, e *event.CommandFailedEvent) {
-	// We can check if context is hexa context, log some data from the hexa context too.
-
-	m.l.Debug("MongoDB command failed",
+	m.logger(c).Debug("MongoDB command failed",
 		hlog.String("failure", e.Failure),
 		hlog.String("command_name", e.CommandName),
 		hlog.String("request_id", strconv.FormatInt(e.RequestID, 10)),
 		hlog.String("connection_id", e.ConnectionID),
 	)
+}
+
+// logger returns the user's logger using context, otherwise
+// returns the its generic logger.
+func (m *logMonitor) logger(c context.Context) hexa.Logger {
+	l, ok := c.Value(hexa.ContextKeyLogger).(hexa.Logger)
+	if l == nil || !ok {
+		return m.l
+	}
+	return l
 }
