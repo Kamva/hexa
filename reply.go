@@ -1,29 +1,12 @@
 package hexa
 
-import (
-	"github.com/kamva/gutil"
-)
-
 type (
 	// Reply is reply to actions in microservices.
 	Reply interface {
-		// specifically this interface contains the error interface
-		// also, to able pass as return value in some frameworks that
-		// permit to return error and then set error handler.
-		// e.g by this  way we can pass this Reply to the ErrorHandler
-		// and error handler can check Reply type and return the proper
-		// response.
-		// in implementation of Reply we can return just empty string or
-		// special value (like "_reply") as error message.
-		error
-
-		//Is function satisfy Is interface of errors package.
-		Is(error) bool
-
 		// HTTPStatus returns the http status code for the reply.
 		HTTPStatus() int
 
-		// HTTPStatus returns the http status code for the reply.
+		// SetHTTPStatus sets the http status code for the reply.
 		SetHTTPStatus(status int) Reply
 
 		// ID is reply identifier
@@ -44,17 +27,6 @@ type (
 		data       Map
 	}
 )
-
-func (r defaultReply) Is(err error) bool {
-	// TODO: same as IsHexaErr write another IsReply function and use it.
-	e, ok := gutil.CauseErr(err).(Reply)
-	return ok && r.ID() == e.ID()
-}
-
-// Error implements to just satisfy the Reply and error interface.
-func (r defaultReply) Error() string {
-	return "_reply"
-}
 
 func (r defaultReply) HTTPStatus() int {
 	return r.httpStatus
