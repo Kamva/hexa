@@ -38,10 +38,23 @@ func Funcs() template.FuncMap {
 
 			return strings.Join(joined, ",")
 		},
-		"joinParams": func(params []MethodParam) string {
+		"joinParams": func(params []MethodParam) string { // e.g., // a,b,c
 			var joined []string
 			for _, p := range params {
 				joined = append(joined, fmt.Sprintf("%s", p.Name))
+			}
+
+			return strings.Join(joined, ",")
+		},
+		// join params with unpack operator.
+		"joinParamsWithUnpack": func(params []MethodParam) string { // e.g, a,b,c...
+			var joined []string
+			for _, p := range params {
+				mp := fmt.Sprintf("%s", p.Name)
+				if strings.Index(p.Type, "...") == 0 {
+					mp += "..."
+				}
+				joined = append(joined, mp)
 			}
 
 			return strings.Join(joined, ",")
