@@ -2,7 +2,6 @@ package mgmadapter
 
 import (
 	"github.com/kamva/hexa"
-	mgmrel "github.com/kamva/mgm-relation"
 	"github.com/kamva/mgm/v3"
 	"github.com/kamva/tracer"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -52,4 +51,3 @@ func (f *IDField) Syncing() error {
 }
 
 var _ mgm.Model = &IDField{}
-var _ mgmrel.SyncingHook = &IDField{}
