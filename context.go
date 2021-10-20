@@ -36,7 +36,7 @@ type Context interface {
 	// Request returns the current request and can be nil for not http requests.
 	Request() *http.Request
 
-	// Correlation returns the request correlation id.
+	// CorrelationID returns the request's correlation id.
 	CorrelationID() string
 
 	// User returns the user
@@ -171,7 +171,7 @@ func contextWithParams(c context.Context, p ContextParams) context.Context {
 // can be converted to a hexa context or not.
 func validateRawContext(c context.Context) error {
 	if k := getMissedKeyInContext(c, requiredContextKeys...); k != "" {
-		errMsg := fmt.Sprintf("can not found key %s in context keys to generate hexa context", k)
+		errMsg := fmt.Sprintf("can not find key %s in context keys to generate hexa context", k)
 		return tracer.Trace(errors.New(errMsg))
 	}
 
