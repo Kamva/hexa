@@ -18,6 +18,7 @@ const (
 	ContextKeyUser          = "_ctx_user"           // Value must be user
 	ContextKeyLogger        = "_ctx_logger"         // value must be Logger interface
 	ContextKeyTranslator    = "_ctx_translator"     // value must be Translator interface
+	ContextKeyStore         = "_ctx_store"          // value must be Store interface.
 )
 
 var requiredContextKeys = []string{
@@ -47,10 +48,18 @@ type Context interface {
 
 	// Translator returns the translator localized relative to the users request.
 	Translator() Translator
+
+	// Store returns the context embedded store. its default
+	// implementation is just a simple concurrency-safe map.
+	Store() Store
 }
 
 type contextImpl struct {
 	context.Context
+}
+
+func (c contextImpl) Store() Store {
+	return c.Value(ContextKeyStore).(Store)
 }
 
 func (c contextImpl) Request() *http.Request {
@@ -143,6 +152,7 @@ type ContextParams struct {
 	User          User
 	Logger        Logger
 	Translator    Translator
+	Store         Store // Optional
 }
 
 // NewContext returns new hexa Context.
@@ -150,6 +160,10 @@ type ContextParams struct {
 func NewContext(ctx context.Context, p ContextParams) Context {
 	if ctx == nil {
 		ctx = context.Background()
+	}
+
+	if p.Store == nil {
+		p.Store = newStore()
 	}
 
 	c := contextWithParams(ctx, p)
@@ -163,6 +177,7 @@ func contextWithParams(c context.Context, p ContextParams) context.Context {
 	c = context.WithValue(c, ContextKeyUser, p.User)
 	c = context.WithValue(c, ContextKeyLogger, p.Logger)
 	c = context.WithValue(c, ContextKeyTranslator, p.Translator)
+	c = context.WithValue(c, ContextKeyStore, p.Store)
 
 	return c
 }
@@ -207,6 +222,11 @@ func validateRawContext(c context.Context) error {
 	// assert translator type:
 	if _, ok := c.Value(ContextKeyTranslator).(Translator); !ok {
 		return tracer.Trace(errors.New("invalid translator for hexa context"))
+	}
+
+	// assert store type:
+	if _, ok := c.Value(ContextKeyStore).(Store); !ok {
+		return tracer.Trace(errors.New("invalid store for hexa context"))
 	}
 
 	return nil

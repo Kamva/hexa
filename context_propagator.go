@@ -72,7 +72,7 @@ func (p *multiPropagator) AddPropagator(propagator ContextPropagator) {
 }
 
 func (p *defaultContextPropagator) Inject(c context.Context) (map[string][]byte, error) {
-	// just extract local, correlation_id  and user
+	// just get local, correlation_id  and user
 	m := make(map[string][]byte)
 	m[ContextKeyCorrelationID] = []byte(c.Value(ContextKeyCorrelationID).(string))
 	m[ContextKeyLocale] = []byte(c.Value(ContextKeyLocale).(string))
@@ -107,6 +107,7 @@ func (p *defaultContextPropagator) Extract(c context.Context, m map[string][]byt
 		User:          user,
 		Logger:        p.logger,
 		Translator:    p.translator,
+		Store:         newStore(),
 	})
 	return c, nil
 }
