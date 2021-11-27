@@ -20,8 +20,8 @@ func RegisterHealthHandlers(ps Server, r hexa.HealthReporter) {
 
 func (h *healthHandlers) RegisterHandlers(ps Server) {
 	ps.Register("live", "/live", h.livenessHandler, "reports app's liveness")
-	ps.Register("ready", "/ready", h.livenessHandler, "reports app's readiness")
-	ps.Register("status", "/status", h.livenessHandler, "reports app's status")
+	ps.Register("ready", "/ready", h.readinessHandler, "reports app's readiness")
+	ps.Register("status", "/status", h.statusHandler, "reports app's status")
 }
 
 func (h *healthHandlers) livenessHandler(w http.ResponseWriter, r *http.Request) {
@@ -46,7 +46,6 @@ func (h *healthHandlers) readinessHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	w.WriteHeader(http.StatusOK)
-
 }
 
 func (h *healthHandlers) statusHandler(w http.ResponseWriter, r *http.Request) {
