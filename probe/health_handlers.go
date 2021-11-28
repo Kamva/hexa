@@ -10,6 +10,11 @@ import (
 	"github.com/kamva/tracer"
 )
 
+const (
+	livenessStatusKey  = "liveness_status"
+	readinessStatusKey = "readiness_status"
+)
+
 type healthHandlers struct {
 	r hexa.HealthReporter
 }
@@ -26,7 +31,7 @@ func (h *healthHandlers) RegisterHandlers(ps Server) {
 
 func (h *healthHandlers) livenessHandler(w http.ResponseWriter, r *http.Request) {
 	status := h.r.LivenessStatus(r.Context())
-	w.Header().Set(hexa.LivenessStatusKey, string(status))
+	w.Header().Set(livenessStatusKey, string(status))
 
 	if status != hexa.StatusAlive {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -38,7 +43,7 @@ func (h *healthHandlers) livenessHandler(w http.ResponseWriter, r *http.Request)
 
 func (h *healthHandlers) readinessHandler(w http.ResponseWriter, r *http.Request) {
 	status := h.r.ReadinessStatus(r.Context())
-	w.Header().Set(hexa.ReadinessStatusKey, string(status))
+	w.Header().Set(readinessStatusKey, string(status))
 
 	if status != hexa.StatusReady {
 		w.WriteHeader(http.StatusServiceUnavailable)
@@ -50,8 +55,8 @@ func (h *healthHandlers) readinessHandler(w http.ResponseWriter, r *http.Request
 
 func (h *healthHandlers) statusHandler(w http.ResponseWriter, r *http.Request) {
 	report := h.r.HealthReport(r.Context())
-	w.Header().Set(hexa.LivenessStatusKey, string(report.Alive))
-	w.Header().Set(hexa.ReadinessStatusKey, string(report.Ready))
+	w.Header().Set(livenessStatusKey, string(report.Alive))
+	w.Header().Set(readinessStatusKey, string(report.Ready))
 	w.Header().Set("Content-Type", "application/json")
 
 	resp := hexa.Map{

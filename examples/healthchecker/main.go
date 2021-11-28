@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
+	"net/http"
 	"syscall"
 
 	"github.com/kamva/gutil"
 	"github.com/kamva/hexa"
-	"github.com/kamva/hexa/hlog"
+	"github.com/kamva/hexa/probe"
 )
 
 type HealthExample struct {
@@ -34,12 +35,12 @@ func (h *HealthExample) HealthStatus(ctx context.Context) hexa.HealthStatus {
 }
 
 func main() {
-	l := hlog.NewPrinterDriver(hlog.DebugLevel)
 	r := hexa.NewHealthReporter().AddToChecks(&HealthExample{})
 
-	checker := hexa.NewHealthChecker(l, "localhost:7676", r)
+	ps := probe.NewServer(&http.Server{Addr: "localhost:7676"}, http.NewServeMux())
+	probe.RegisterHealthHandlers(ps, r)
 
-	gutil.PanicErr(checker.Run())
+	gutil.PanicErr(ps.Run())
 	gutil.WaitForSignals(syscall.SIGINT, syscall.SIGTERM)
 }
 
