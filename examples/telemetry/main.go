@@ -10,6 +10,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	tracesdk "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
@@ -48,7 +49,7 @@ func main() {
 	gutil.PanicErr(err)
 	otel.SetTracerProvider(tp) // set global tracer too (we don't need to it although)
 
-	ot = htel.NewOpenTelemetry(tp)
+	ot = htel.NewOpenTelemetry(tp,metric.NewNoopMeterProvider())
 	r.Register("open_telemetry", ot) // register openTelemetry as a service in the hexa service registry
 	defer r.Shutdown(context.Background())
 

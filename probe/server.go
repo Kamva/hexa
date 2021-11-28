@@ -35,7 +35,7 @@ type probeServer struct {
 	descriptors []*HandlerDescriptor
 }
 
-func NewProbeServer(server *http.Server, mux *http.ServeMux) Server {
+func NewServer(server *http.Server, mux *http.ServeMux) Server {
 	server.Handler = mux
 	pserver := &probeServer{
 		server: server,

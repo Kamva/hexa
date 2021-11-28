@@ -18,7 +18,7 @@ func main() {
 		Handler: mux,
 	}
 
-	probeServer := probe.NewProbeServer(server, mux)
+	probeServer := probe.NewServer(server, mux)
 
 	probeServer.Register("hi", "/hi", func(w http.ResponseWriter, r *http.Request) {
 		_, err := w.Write([]byte("hi"))
