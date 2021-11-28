@@ -5,6 +5,7 @@ import (
 
 	"github.com/kamva/hexa"
 	"github.com/kamva/tracer"
+	"go.opentelemetry.io/otel/metric"
 	tracesdk "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -27,18 +28,24 @@ func NewTracerProvider(tp *tracesdk.TracerProvider) *tracerProvider {
 // implement hexa services(to shutdown... them).
 type OpenTelemetry interface {
 	TracerProvider() trace.TracerProvider
-}
-
-func NewOpenTelemetry(tp trace.TracerProvider) OpenTelemetry {
-	return &openTelemetry{tp: tp}
+	MeterProvider() metric.MeterProvider
 }
 
 type openTelemetry struct {
 	tp trace.TracerProvider
+	mp metric.MeterProvider
+}
+
+func NewOpenTelemetry(tp trace.TracerProvider, mp metric.MeterProvider) OpenTelemetry {
+	return &openTelemetry{tp: tp, mp: mp}
 }
 
 func (t *openTelemetry) TracerProvider() trace.TracerProvider {
 	return t.tp
+}
+
+func (t *openTelemetry) MeterProvider() metric.MeterProvider {
+	return t.mp
 }
 
 var _ hexa.Shutdownable = &tracerProvider{}
