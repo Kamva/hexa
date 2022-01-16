@@ -2,6 +2,7 @@ package main
 
 import "fmt"
 
+// App is the core application.
 type App interface {
 	// Hi is my first comment.
 	// and this is second line.
@@ -13,6 +14,7 @@ type App interface {
 	B
 }
 
+// B implements the B section.
 type B interface {
 	// ByFromB says By from the B method :)
 	// @trace

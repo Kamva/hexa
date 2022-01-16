@@ -1,5 +1,6 @@
 package main
 
+// App is the core application.
 type errLayer struct {
 	app App
 }
@@ -15,6 +16,8 @@ func (a *errLayer) By() (string, error) {
 
 }
 
+// ByFromB says By from the B method :)
+// @trace
 func (a *errLayer) ByFromB() (string, error) {
 	r1, r2 := a.app.ByFromB()
 
@@ -28,6 +31,11 @@ func (a *errLayer) ByFromB() (string, error) {
 
 }
 
+// Hi is my first comment.
+// and this is second line.
+// we went to the third line :)
+// @myAnnotation `json:"a"`
+// @tx `retry:"4"`
 func (a *errLayer) Hi(username string, password string) (sentence string, err error) {
 	r1, r2 := a.app.Hi(username, password)
 

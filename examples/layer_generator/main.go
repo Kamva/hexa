@@ -20,7 +20,6 @@ func main() {
 	tmpl := path.Join(gutil.SourcePath(), "err_layer.tmpl")
 	output := path.Join(gutil.SourcePath(), "err_layer.go")
 
-
 	metadata, err := lg.ExtractInterfaceMetadata(src, "App")
 	if err != nil {
 		fmt.Println(tracer.StackAsString(tracer.Trace(err)))
@@ -32,8 +31,9 @@ func main() {
 		Name:      "errLayer",
 		Interface: metadata,
 	}
+	fl := lg.Funcs()
 
-	if err := lg.GenerateLayer(tmpl, lg.Funcs(), output, data,true); err != nil {
+	if err := lg.GenerateLayer(tmpl, fl, output, data, true); err != nil {
 		panic(err)
 	}
 }

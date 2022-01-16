@@ -1,10 +1,16 @@
 package {{.Package}}
 
+{{- if .Interface.Doc }}
+// {{ .Interface.Doc -}}
+{{- end}}
 type {{.Name}} struct {
     app App
 }
 
 {{ range $index, $element := .Interface.Methods -}}
+   {{- if .Doc}}
+    // {{ .Doc -}}
+   {{- end}}
     func (a *{{$.Name}}) {{$index}}({{$element.Params | joinParamsWithType}}) {{joinResultsForSignature $element.Results}} {
     {{- if $element.Results | len | eq 0}}
         a.app.{{$index}}({{$element.Params | joinParams}})
