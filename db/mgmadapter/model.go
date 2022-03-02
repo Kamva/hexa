@@ -1,3 +1,5 @@
+//go:generate msgp
+
 package mgmadapter
 
 // Entity struct contain model's default fields.

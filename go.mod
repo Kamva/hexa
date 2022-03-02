@@ -12,6 +12,7 @@ require (
 	github.com/nicksnyder/go-i18n/v2 v2.0.3
 	github.com/spf13/viper v1.6.2
 	github.com/stretchr/testify v1.7.0
+	github.com/tinylib/msgp v1.1.6
 	go.mongodb.org/mongo-driver v1.7.0
 	go.opentelemetry.io/otel v1.2.0
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.0.1
@@ -20,7 +21,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.2.0
 	go.uber.org/zap v1.14.1
 	golang.org/x/crypto v0.0.0-20201112155050-0c6587e931a9 // indirect
-	golang.org/x/tools v0.0.0-20191029190741-b9c20aec41a5
+	golang.org/x/tools v0.0.0-20201022035929-9cf592e881e9
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
 )

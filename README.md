@@ -54,6 +54,10 @@ config := hexaconfig.NewViperDriver(v)
 - [x] Implement a service (e.g `Health`) which should implement by all Hexa services to check health of that
   service [**Accepted**][Implemented].
 
+
+### Notes
+- Run `go generate ./db/...` or `go generate ./...` to generate some files after your changes in the DB models.
+
 #### Todo
 
 - [x] Where are we checking log level on logger initialization step?
