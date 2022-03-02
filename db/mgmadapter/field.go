@@ -43,8 +43,9 @@ func (f *IDField) SetID(id interface{}) {
 	f.ID = id.(primitive.ObjectID)
 }
 
-// Syncing set the ID if it's zero(empty ID).
+// Syncing sets the ID if it's zero(empty ID).
 // This is mgm-relation library hook.
+// @deprecated
 func (f *IDField) Syncing() error {
 	if f.ID.IsZero() {
 		f.ID = primitive.NewObjectID()
