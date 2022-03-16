@@ -1,53 +1,27 @@
+//go:generate easyjson
+
 package hexa
 
-import (
-	"encoding/json"
-)
-
 // HttpRespBody is the http response body format
+//easyjson:json
 type HttpRespBody struct {
-	debug     bool
-	debugData Map
-
-	Code    string `json:"code" mapstructure:"code"`
-	Message string `json:"message" mapstructure:"message"`
-	Data    Map    `json:"data" mapstructure:"data"`
+	Code    string       `json:"code"`
+	Message string       `json:"message,omitempty"`
+	Data    interface{}  `json:"data,omitempty"`
+	Debug   interface{}  `json:"debug,omitempty"` // Set this value to nil when you are on production mode.
 }
 
-// MarshalJSON marshall the body to json value.
-func (b HttpRespBody) MarshalJSON() ([]byte, error) {
-	m := map[string]interface{}{
-		"code": b.Code,
-	}
-	if b.Message != "" {
-		m["message"] = b.Message
-	}
-	if b.Data != nil {
-		m["data"] = b.Data
-	}
-	if b.debug {
-		m["_debug"] = b.debugData
-	}
-
-	return json.Marshal(m)
-}
-
-// Debug set debug flag and debug data.
-func (b HttpRespBody) Debug(debug bool, debugData Map) HttpRespBody {
-	b.debug = debug
-	b.debugData = debugData
-
+// SetDebug set debug flag and debug data.
+func (b HttpRespBody) SetDebug(debugData interface{}) HttpRespBody {
+	b.Debug = debugData
 	return b
 }
 
 // NewBody return new instance of the HttpRespBody
-func NewBody(code string, msg string, data Map) HttpRespBody {
+func NewBody(code string, msg string, data interface{}) HttpRespBody {
 	return HttpRespBody{
 		Code:    code,
 		Message: msg,
 		Data:    data,
 	}
 }
-
-// Assert HttpRespBody implements the json unmarshaller.
-var _ json.Marshaler = &HttpRespBody{}
