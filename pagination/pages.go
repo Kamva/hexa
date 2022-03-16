@@ -1,3 +1,4 @@
+//go:generate easyjson -all
 //--------------------------------
 // We Got this package (pagination) from
 // [go-rest-api](https://github.com/qiangxue/go-rest-api)
@@ -8,9 +9,10 @@ package pagination
 
 import (
 	"fmt"
-	"github.com/kamva/gutil"
 	"net/http"
 	"strings"
+
+	"github.com/kamva/gutil"
 )
 
 var (
@@ -25,19 +27,17 @@ var (
 )
 
 // Pages represents a paginated list of data items.
-type (
-	Pagination struct {
-		Page       int `json:"page"`
-		PerPage    int `json:"per_page"`
-		PageCount  int `json:"page_count"`
-		TotalCount int `json:"total_count"`
-	}
+type Pagination struct {
+	Page       int `json:"page"`
+	PerPage    int `json:"per_page"`
+	PageCount  int `json:"page_count"`
+	TotalCount int `json:"total_count"`
+}
 
-	Pages struct {
-		Pagination `json:"pagination"`
-		Items      interface{} `json:"items"`
-	}
-)
+type Pages struct {
+	Pagination `json:"pagination"`
+	Items      interface{} `json:"items"`
+}
 
 // New creates a new Pages instance.
 // The page parameter is 1-based and refers to the current page index/number.
