@@ -14,17 +14,17 @@ type (
 
 		// Data returns the extra data of the reply (e.g show this data to user).
 		// Note: we use data as translation prams also.
-		Data() Map
+		Data() interface{}
 
 		// SetData set the reply data as extra data of the reply to show to the user.
-		SetData(data Map) Reply
+		SetData(data interface{}) Reply
 	}
 
 	// defaultReply implements the Reply interface.
 	defaultReply struct {
 		httpStatus int
 		id         string
-		data       Map
+		data       interface{}
 	}
 )
 
@@ -42,11 +42,11 @@ func (r defaultReply) ID() string {
 	return r.id
 }
 
-func (r defaultReply) Data() Map {
+func (r defaultReply) Data() interface{} {
 	return r.data
 }
 
-func (r defaultReply) SetData(data Map) Reply {
+func (r defaultReply) SetData(data interface{}) Reply {
 	r.data = data
 	return r
 }

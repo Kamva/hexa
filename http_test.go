@@ -2,13 +2,22 @@ package hexa
 
 import (
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
+
+func body(code string, msg string, data interface{}) *HttpRespBody {
+	return &HttpRespBody{
+		Code:    code,
+		Message: msg,
+		Data:    data,
+	}
+}
 
 func TestHttpRespBody_MarshalJSONNoMessage(t *testing.T) {
 	data := Map{"a": "b"}
-	b := NewBody("abc", "", data)
+	b := body("abc", "", data)
 	expected, _ := json.Marshal(Map{"code": "abc", "data": data})
 
 	if m, err := b.MarshalJSON(); assert.NoError(t, err) {
@@ -17,7 +26,7 @@ func TestHttpRespBody_MarshalJSONNoMessage(t *testing.T) {
 }
 
 func TestHttpRespBody_MarshalJSONNoData(t *testing.T) {
-	b := NewBody("abc", "", nil)
+	b := body("abc", "", nil)
 	expected, _ := json.Marshal(Map{"code": "abc"})
 
 	if m, err := b.MarshalJSON(); assert.NoError(t, err) {
