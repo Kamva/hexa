@@ -16,10 +16,10 @@ type ContextPropagator interface {
 	Extract(context.Context, map[string][]byte) (context.Context, error)
 }
 
-var propagatingContextKeys = []string{
-	ContextKeyCorrelationID,
-	ContextKeyLocale,
-	ContextKeyUser,
+var propagatingContextKeys = []contextKey{
+	ctxKeyCorrelationId,
+	ctxKeyLocale,
+	ctxKeyUser,
 }
 
 // keysPropagator get a list of keys and propagate that key,values from context.
@@ -74,42 +74,42 @@ func (p *multiPropagator) AddPropagator(propagator ContextPropagator) {
 func (p *defaultContextPropagator) Inject(c context.Context) (map[string][]byte, error) {
 	// just get local, correlation_id  and user
 	m := make(map[string][]byte)
-	m[ContextKeyCorrelationID] = []byte(c.Value(ContextKeyCorrelationID).(string))
-	m[ContextKeyLocale] = []byte(c.Value(ContextKeyLocale).(string))
+	m[string(ctxKeyCorrelationId)] = []byte(CtxCorrelationId(c))
+	m[string(ctxKeyLocale)] = []byte(CtxLocale(c))
 
 	// user
-	user := c.Value(ContextKeyUser).(User)
-	uBytes, err := p.up.ToBytes(user)
-	if err != nil {
-		return nil, tracer.Trace(err)
+	user := CtxUser(c)
+	if user != nil {
+		uBytes, err := p.up.ToBytes(user)
+		if err != nil {
+			return nil, tracer.Trace(err)
+		}
+		m[string(ctxKeyUser)] = uBytes
 	}
-	m[ContextKeyUser] = uBytes
 
 	return m, nil
 }
 
 func (p *defaultContextPropagator) Extract(c context.Context, m map[string][]byte) (context.Context, error) {
 	for _, k := range propagatingContextKeys {
-		if _, ok := m[k]; !ok {
+		if _, ok := m[string(k)]; !ok {
 			return nil, tracer.Trace(fmt.Errorf("key %s not found in map", k))
 		}
 	}
-	user, err := p.up.FromBytes(m[ContextKeyUser])
-	if err != nil {
+	user, err := p.up.FromBytes(m[string(ctxKeyUser)])
+	if err != nil { // Another option would be ignoring the nil user and continue...
 		return nil, tracer.Trace(err)
 	}
 
-	// Set context values:
-	c = contextWithParams(c, ContextParams{
-		Request:       nil,
-		CorrelationId: string(m[ContextKeyCorrelationID]),
-		Locale:        string(m[ContextKeyLocale]),
-		User:          user,
-		Logger:        p.logger,
-		Translator:    p.translator,
-		Store:         newStore(),
-	})
-	return c, nil
+	return NewContext(c, ContextParams{
+		Request:        nil,
+		CorrelationId:  string(m[string(ctxKeyCorrelationId)]),
+		Locale:         string(m[string(ctxKeyLocale)]),
+		User:           user,
+		BaseLogger:     p.logger,
+		BaseTranslator: p.translator,
+		Store:          newStore(),
+	}), nil
 }
 
 func (p *keysPropagator) Inject(c context.Context) (map[string][]byte, error) {

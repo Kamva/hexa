@@ -1,12 +1,12 @@
 package hlog
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/kamva/hexa"
 )
-
 
 // TODO: fix bugs for duration(shows duration as nil) and nil error(does not show the "err" as key in map props) :
 // e.g. (use printer driver instead of zp),
@@ -42,7 +42,7 @@ func (l *printerLogger) clone() *printerLogger {
 		with:       l.cloneData(),
 	}
 }
-func (l *printerLogger) WithCtx(ctx hexa.Context, args ...Field) hexa.Logger {
+func (l *printerLogger) WithCtx(_ context.Context, args ...Field) hexa.Logger {
 	clone := l.clone()
 	clone.with = append(clone.with, args...)
 	return clone

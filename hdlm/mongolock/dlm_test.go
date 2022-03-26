@@ -20,13 +20,13 @@ import (
 var cli *mongo.Client
 var collection *mongo.Collection
 
-func newCtx(ctx context.Context) hexa.Context {
+func newCtx(ctx context.Context) context.Context {
 	return hexa.NewContext(ctx, hexa.ContextParams{
-		CorrelationId: "_cid",
-		Locale:        "def",
-		User:          hexa.NewGuest(),
-		Logger:        hlog.NewPrinterDriver(hlog.DebugLevel),
-		Translator:    hexatranslator.NewEmptyDriver(),
+		CorrelationId:  "_cid",
+		Locale:         "def",
+		User:           hexa.NewGuest(),
+		BaseLogger:     hlog.NewPrinterDriver(hlog.DebugLevel),
+		BaseTranslator: hexatranslator.NewEmptyDriver(),
 	})
 }
 
@@ -42,7 +42,7 @@ func setupDefConnection() {
 
 	collection = cli.Database("lock_labs").Collection(CollectionName)
 }
-func disconnect(){
+func disconnect() {
 	if err := cli.Disconnect(nil); err != nil {
 		panic(err)
 	}
@@ -77,7 +77,7 @@ func TestNewDlmDatabaseIndex(t *testing.T) {
 		Keys: bson.D{bson.E{Key: "expiry", Value: 1}},
 		Options: &options.IndexOptions{
 			ExpireAfterSeconds: gutil.NewInt32(0),
-			Name: gutil.NewString("expired_locks"),
+			Name:               gutil.NewString("expired_locks"),
 		},
 	})
 
@@ -86,7 +86,7 @@ func TestNewDlmDatabaseIndex(t *testing.T) {
 	_, err = collection.Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.D{bson.E{Key: "expiry", Value: 1}},
 		Options: &options.IndexOptions{
-			Name:               gutil.NewString("expired_locks"),
+			Name: gutil.NewString("expired_locks"),
 		},
 	})
 
@@ -98,7 +98,6 @@ func TestDlm_NewMutex(t *testing.T) {
 	defer disconnect()
 
 	resetCollection()
-
 
 	ttl := time.Second * 60
 	dlm, err := NewDlm(DlmOptions{
@@ -129,7 +128,6 @@ func TestDlm_NewMutexWithTTL(t *testing.T) {
 
 	resetCollection()
 
-
 	ttl := time.Second * 30
 	dlm, err := NewDlm(DlmOptions{
 		Collection:      collection,
@@ -139,8 +137,8 @@ func TestDlm_NewMutexWithTTL(t *testing.T) {
 	})
 
 	require.Nil(t, err)
-	mttl:=time.Second * 60
-	m := dlm.NewMutexWithTTL("abc",mttl)
+	mttl := time.Second * 60
+	m := dlm.NewMutexWithTTL("abc", mttl)
 	var mObj = m.(*mutex)
 	require.NotNil(t, m)
 

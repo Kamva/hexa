@@ -1,9 +1,9 @@
 package hlog
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"net"
 	"net/http"
 
 	"github.com/getsentry/sentry-go"
@@ -48,23 +48,25 @@ func (l *sentryLogger) setUser(scope *sentry.Scope, user hexa.User, r *http.Requ
 		Username:  user.Username(),
 	}
 
-	if ip, _, err := net.SplitHostPort(r.RemoteAddr); err == nil {
-		u.IPAddress = ip
-	}
+	//if ip, _, err := net.SplitHostPort(gutil.IP(r)); err == nil {
+	//	u.IPAddress = ip
+	//}
 
 	scope.SetUser(u)
 }
 
-func (l *sentryLogger) WithCtx(ctx hexa.Context, args ...Field) hexa.Logger {
+func (l *sentryLogger) WithCtx(ctx context.Context, args ...Field) hexa.Logger {
 	hub := l.hub.Clone()
 	scope := hub.Scope()
 
-	r := ctx.Request()
+	r := hexa.CtxRequest(ctx)
 	if r != nil {
 		scope.SetRequest(r)
 	}
 
-	l.setUser(scope, ctx.User(), r)
+	if user := hexa.CtxUser(ctx); user != nil {
+		l.setUser(scope, user, r)
+	}
 
 	l.addArgsToScope(scope, args)
 	return NewSentryDriverWith(hub)

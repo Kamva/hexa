@@ -94,8 +94,8 @@ func (m *logMonitor) Failed(c context.Context, e *event.CommandFailedEvent) {
 // logger returns the user's logger using context, otherwise
 // returns the its generic logger.
 func (m *logMonitor) logger(c context.Context) hexa.Logger {
-	l, ok := c.Value(hexa.ContextKeyLogger).(hexa.Logger)
-	if l == nil || !ok {
+	l := hexa.CtxLogger(c)
+	if l == nil {
 		return m.l
 	}
 	return l

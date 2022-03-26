@@ -38,7 +38,7 @@ func (l *stackedLogger) Core() interface{} {
 	return l.stack
 }
 
-func (l *stackedLogger) WithCtx(ctx hexa.Context, args ...Field) hexa.Logger {
+func (l *stackedLogger) WithCtx(ctx context.Context, args ...Field) hexa.Logger {
 	stack := make(map[string]hexa.Logger)
 	for k, logger := range l.stack {
 		stack[k] = logger.WithCtx(ctx, args...)

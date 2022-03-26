@@ -1,6 +1,10 @@
 package hlog
 
-import "github.com/kamva/hexa"
+import (
+	"context"
+
+	"github.com/kamva/hexa"
+)
 
 // initialize global with a simple printerDriver as default
 // global logger until you change it in bootstrap stage of
@@ -16,6 +20,15 @@ func SetGlobalLogger(l hexa.Logger) {
 	Message = global.Info
 	Warn = global.Warn
 	Error = global.Error
+}
+
+// CtxLogger returns the context logger with fall back to
+// the global logger
+func CtxLogger(ctx context.Context) hexa.Logger {
+	if l := hexa.CtxLogger(ctx); l != nil {
+		return l
+	}
+	return global
 }
 
 var WithCtx = global.WithCtx

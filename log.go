@@ -1,6 +1,8 @@
 package hexa
 
 import (
+	"context"
+
 	"github.com/kamva/tracer"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -89,7 +91,7 @@ type Logger interface {
 	// WithCtx gets the hexa context and some keyValues
 	// and return new logger contains key values as
 	// log fields.
-	WithCtx(ctx Context, args ...LogField) Logger
+	WithCtx(ctx context.Context, args ...LogField) Logger
 
 	// With method set key,values and return new logger
 	// contains this key values as log fields.

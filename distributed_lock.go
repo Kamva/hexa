@@ -1,6 +1,7 @@
 package hexa
 
 import (
+	"context"
 	"errors"
 	"time"
 )
@@ -39,7 +40,7 @@ type Mutex interface {
 	// behavior in our implementation should be 1, means
 	// you should try to refresh lock when user call
 	// this method again.
-	Lock(ctx Context) error
+	Lock(ctx context.Context) error
 
 	// TryLock tries to lock or returns the ErrLockAlreadyAcquired
 	// error if it acquired.
@@ -54,10 +55,10 @@ type Mutex interface {
 	// behavior in our implementation should be the option number 1, means
 	// you should try to refresh lock when user calls to
 	// this method again.
-	TryLock(ctx Context) error
+	TryLock(ctx context.Context) error
 
 	// Unlock release the lock.
 	// it should ignore if lock is already released
 	// and do not return any error.
-	Unlock(ctx Context) error
+	Unlock(ctx context.Context) error
 }

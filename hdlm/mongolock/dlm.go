@@ -113,7 +113,7 @@ type mutex struct {
 
 // Lock try to lock and if lock is held by another mutex, it wait and
 // try it again.
-func (m *mutex) Lock(c hexa.Context) error {
+func (m *mutex) Lock(c context.Context) error {
 	for {
 		err := m.TryLock(c)
 
@@ -129,7 +129,7 @@ func (m *mutex) Lock(c hexa.Context) error {
 	}
 }
 
-func (m *mutex) TryLock(c hexa.Context) error {
+func (m *mutex) TryLock(c context.Context) error {
 	m.Expiry = time.Now().Add(m.ttl)
 
 	filter := bson.M{"_id": m.ID, "$or": []bson.M{
@@ -141,14 +141,14 @@ func (m *mutex) TryLock(c hexa.Context) error {
 		Upsert: gutil.NewBool(true),
 	})
 
-	if isDup(err) {
+	if mongo.IsDuplicateKeyError(err) {
 		err = hexa.ErrLockAlreadyAcquired
 	}
 
 	return tracer.Trace(err)
 }
 
-func (m *mutex) Unlock(c hexa.Context) error {
+func (m *mutex) Unlock(c context.Context) error {
 	_, err := m.coll.DeleteOne(c, bson.M{"_id": m.ID, "owner": m.Owner})
 	return tracer.Trace(err)
 }

@@ -9,13 +9,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func assertImportedContextWithParams(t *testing.T, ctx Context, params *ContextParams) {
-	assert.Nil(t, ctx.Request())
-	assert.Equal(t, params.CorrelationId, ctx.CorrelationID())
-	assert.Equal(t, params.Locale, ctx.Value(ContextKeyLocale))
-	assert.Equal(t, params.User, ctx.User())
-	assert.NotNil(t, ctx.Logger())
-	assert.NotNil(t, ctx.Translator())
+func assertImportedContextWithParams(t *testing.T, ctx context.Context, params *ContextParams) {
+	assert.Nil(t, CtxRequest(ctx))
+	assert.Equal(t, params.CorrelationId, CtxCorrelationId(ctx))
+	assert.Equal(t, params.Locale, CtxLocale(ctx))
+	assert.Equal(t, params.User, CtxUser(ctx))
+	assert.NotNil(t, CtxLogger(ctx))
+	assert.NotNil(t, CtxTranslator(ctx))
 }
 
 func TestDefaultContextPropagator_Extract(t *testing.T) {
@@ -27,9 +27,9 @@ func TestDefaultContextPropagator_Extract(t *testing.T) {
 	uBytes, err := json.Marshal(params.User.MetaData())
 	gutil.PanicErr(err)
 	result := map[string][]byte{
-		ContextKeyCorrelationID: []byte(params.CorrelationId),
-		ContextKeyLocale:        []byte(params.Locale),
-		ContextKeyUser:          uBytes,
+		string(ctxKeyCorrelationId): []byte(params.CorrelationId),
+		string(ctxKeyLocale):        []byte(params.Locale),
+		string(ctxKeyUser):          uBytes,
 	}
 	m, err := p.Inject(context)
 	assert.Nil(t, err)
@@ -45,16 +45,11 @@ func TestDefaultContextPropagator_Inject(t *testing.T) {
 	uBytes, err := json.Marshal(params.User.MetaData())
 	gutil.PanicErr(err)
 	payload := map[string][]byte{
-		ContextKeyCorrelationID: []byte(params.CorrelationId),
-		ContextKeyLocale:        []byte(params.Locale),
-		ContextKeyUser:          uBytes,
+		string(ctxKeyCorrelationId): []byte(params.CorrelationId),
+		string(ctxKeyLocale):        []byte(params.Locale),
+		string(ctxKeyUser):          uBytes,
 	}
-	result, err := p.Extract(context.Background(), payload)
+	ctx, err := p.Extract(context.Background(), payload)
 	assert.Nil(t, err)
-	ctx, err := NewContextFromRawContext(result)
-	if !assert.Nil(t, err) {
-		return
-	}
-
 	assertImportedContextWithParams(t, ctx, params)
 }

@@ -1,5 +1,7 @@
 package hexa
 
+import "context"
+
 type emptyLogger struct {
 }
 
@@ -10,7 +12,7 @@ func (e emptyLogger) Core() interface{} {
 	return nil
 }
 
-func (e emptyLogger) WithCtx(ctx Context, args ...LogField) Logger {
+func (e emptyLogger) WithCtx(ctx context.Context, args ...LogField) Logger {
 	return e
 }
 

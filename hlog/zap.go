@@ -1,6 +1,8 @@
 package hlog
 
 import (
+	"context"
+
 	"github.com/kamva/hexa"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -14,7 +16,7 @@ func (l *zapLogger) Core() interface{} {
 	return l.logger
 }
 
-func (l *zapLogger) WithCtx(ctx hexa.Context, args ...Field) hexa.Logger {
+func (l *zapLogger) WithCtx(_ context.Context, args ...Field) hexa.Logger {
 	return l.With(args...)
 }
 
@@ -53,9 +55,9 @@ type ZapOptions struct {
 // DefaultZapConfig generate zap config using default values.
 // You can leave encoding empty to set to the default value
 // which is json.
-func DefaultZapConfig(debug bool, level zapcore.Level,encoding string) zap.Config {
-	if encoding==""{
-		encoding="json"
+func DefaultZapConfig(debug bool, level zapcore.Level, encoding string) zap.Config {
+	if encoding == "" {
+		encoding = "json"
 	}
 
 	cfg := zap.NewProductionConfig()
