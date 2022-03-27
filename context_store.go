@@ -25,6 +25,9 @@ func (s *atomicStore) Get(key string) interface{} {
 func (s *atomicStore) Set(key string, val interface{}) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
+	if s.m == nil {
+		s.m = make(map[string]interface{})
+	}
 	s.m[key] = val
 }
 
@@ -43,6 +46,10 @@ func (s *atomicStore) SetIfNotExist(key string, vp func() interface{}) interface
 	val = s.m[key] // check if exists again, maybe when we were changing the locks, someone set the value.
 	if val != nil {
 		return val
+	}
+
+	if s.m == nil {
+		s.m = make(map[string]interface{})
 	}
 
 	val = vp()

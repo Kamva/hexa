@@ -2,7 +2,6 @@ package hexa
 
 import (
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -18,23 +17,26 @@ func TestStoreImpl(t *testing.T) {
 	assert.Equal(t, "123", s.Get("abc"))
 }
 
-func TestStoreAtomic(t *testing.T) {
-	origS := newStore()
-
-	origS.Atomic(func(s Store) {
-		// Store inside the atomic function should panic when we call to the atomic.
-		assert.Panics(t, func() {
-			s.Atomic(func(s Store) {})
-		})
-		s.Set("a", "123")
-
-		// It shouldn't let us to set data:
-		go func() {
-			origS.Set("a", "abc")
-		}()
-
-		// Wait to make sure it had enough time to set the value using origS.
-		time.Sleep(time.Millisecond * 10)
-		assert.Equal(t, "123", s.Get("a").(string))
+func TestAtomicStore_SetIfNotExist(t *testing.T) {
+	s := newStore()
+	s.Set("a", "abc")
+	s.SetIfNotExist("a", func() interface{} {
+		return "def"
 	})
+	s.SetIfNotExist("b", func() interface{} {
+		return "123"
+	})
+
+	assert.Equal(t, "abc", s.Get("a").(string))
+	assert.Equal(t, "123", s.Get("b").(string))
+}
+
+func BenchmarkSetIfNotExist(b *testing.B) {
+	s := newStore()
+	for n := 0; n < b.N; n++ {
+		val := s.SetIfNotExist("a", func() interface{} {
+			return "abc"
+		})
+		_ = val
+	}
 }
