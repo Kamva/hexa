@@ -96,6 +96,7 @@ func (p *defaultContextPropagator) Extract(c context.Context, m map[string][]byt
 			return nil, tracer.Trace(fmt.Errorf("key %s not found in map", k))
 		}
 	}
+
 	user, err := p.up.FromBytes(m[string(ctxKeyUser)])
 	if err != nil { // Another option would be ignoring the nil user and continue...
 		return nil, tracer.Trace(err)

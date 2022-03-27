@@ -9,11 +9,10 @@ require (
 	github.com/kamva/tracer v0.0.0-20201115122932-ea39052d56cd
 	github.com/klauspost/compress v1.11.2 // indirect
 	github.com/labstack/gommon v0.3.0
-	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/mailru/easyjson v0.7.7
 	github.com/nicksnyder/go-i18n/v2 v2.0.3
 	github.com/spf13/viper v1.6.2
 	github.com/stretchr/testify v1.7.0
-	github.com/tinylib/msgp v1.1.6
 	go.mongodb.org/mongo-driver v1.7.0
 	go.opentelemetry.io/otel v1.2.0
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.0.1
