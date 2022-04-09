@@ -44,7 +44,9 @@ func (r *Store) CreateIndexWithOptionsIfNotExist(coll *mgm.Collection, o *option
 		if d, ok := fields[0].(bson.D); ok {
 			keys = d
 		}
-	} else {
+	}
+
+	if keys == nil { // If it not initialized yet
 		keys = make(bson.D, len(fields))
 		for i, k := range fields {
 			if key, ok := k.(string); ok {
