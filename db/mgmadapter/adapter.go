@@ -23,23 +23,42 @@ func (r Store) ReplaceErr(err error, notfoundErr error) error {
 	return tracer.Trace(err)
 }
 
-func (r Store) CreateIndexIfNotExist(coll *mgm.Collection, name string, keys bson.D) error {
-	return r.CreateIndexWithOptionsIfNotExist(coll, &options.IndexOptions{Name: gutil.NewString(name)}, keys)
+func (r Store) CreateIndexIfNotExist(coll *mgm.Collection, name string, keys ...interface{}) error {
+	return r.CreateIndexWithOptionsIfNotExist(coll, &options.IndexOptions{Name: gutil.NewString(name)}, keys...)
 }
 
-func (r Store) CreateUniqueIndexIfNotExist(coll *mgm.Collection, name string, keys bson.D) error {
+func (r Store) CreateUniqueIndexIfNotExist(coll *mgm.Collection, name string, keys ...interface{}) error {
 	o := options.IndexOptions{
 		Name:   gutil.NewString(name),
 		Unique: gutil.NewBool(true),
 	}
-	return r.CreateIndexWithOptionsIfNotExist(coll, &o, keys)
+	return r.CreateIndexWithOptionsIfNotExist(coll, &o, keys...)
 }
 
-func (r *Store) CreateIndexWithOptionsIfNotExist(coll *mgm.Collection, o *options.IndexOptions, keys bson.D) error {
+// CreateIndexWithOptionsIfNotExist creates index if it doesn't exist. fields value could be either string or bson.E.
+// One exception is if the first field value's type is bson.D, we will use it and ignore all other fields values.
+// otherwise if you send another type as field it will panic.
+func (r *Store) CreateIndexWithOptionsIfNotExist(coll *mgm.Collection, o *options.IndexOptions, fields ...interface{}) error {
+	var keys bson.D
+	if len(fields) == 1 {
+		if d, ok := fields[0].(bson.D); ok {
+			keys = d
+		}
+	} else {
+		keys = make(bson.D, len(fields))
+		for i, k := range fields {
+			if key, ok := k.(string); ok {
+				keys[i] = bson.E{Key: key, Value: 1}
+				continue
+			}
+
+			keys[i] = k.(bson.E)
+		}
+	}
+
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys:    keys,
 		Options: o,
 	})
 	return tracer.Trace(err)
 }
-
