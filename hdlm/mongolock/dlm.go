@@ -52,10 +52,10 @@ func NewDlm(o DlmOptions) (hexa.DLM, error) {
 		interval: o.WaitingInterval,
 	}
 
-	return dlm, tracer.Trace(dlm.createIndexesIfNotExists())
+	return dlm, tracer.Trace(dlm.createIndexesIfNotExist())
 }
 
-func (m *dlm) createIndexesIfNotExists() error {
+func (m *dlm) createIndexesIfNotExist() error {
 	// Please note this index doesn't have any effect on the mutex behavior,
 	// its just for cleanup.
 	_, err := m.coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{

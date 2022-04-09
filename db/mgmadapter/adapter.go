@@ -23,19 +23,19 @@ func (r Store) ReplaceErr(err error, notfoundErr error) error {
 	return tracer.Trace(err)
 }
 
-func (r Store) CreateIndexIfNotExists(coll *mgm.Collection, name string, keys bson.D) error {
-	return r.CreateIndexWithOptionsIfNotExists(coll, &options.IndexOptions{Name: gutil.NewString(name)}, keys)
+func (r Store) CreateIndexIfNotExist(coll *mgm.Collection, name string, keys bson.D) error {
+	return r.CreateIndexWithOptionsIfNotExist(coll, &options.IndexOptions{Name: gutil.NewString(name)}, keys)
 }
 
-func (r Store) CreateUniqueIndexIfNotExists(coll *mgm.Collection, name string, keys bson.D) error {
+func (r Store) CreateUniqueIndexIfNotExist(coll *mgm.Collection, name string, keys bson.D) error {
 	o := options.IndexOptions{
 		Name:   gutil.NewString(name),
 		Unique: gutil.NewBool(true),
 	}
-	return r.CreateIndexWithOptionsIfNotExists(coll, &o, keys)
+	return r.CreateIndexWithOptionsIfNotExist(coll, &o, keys)
 }
 
-func (r *Store) CreateIndexWithOptionsIfNotExists(coll *mgm.Collection, o *options.IndexOptions, keys bson.D) error {
+func (r *Store) CreateIndexWithOptionsIfNotExist(coll *mgm.Collection, o *options.IndexOptions, keys bson.D) error {
 	_, err := coll.Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys:    keys,
 		Options: o,
