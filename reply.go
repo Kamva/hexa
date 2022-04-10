@@ -56,7 +56,6 @@ func NewReply(httpStatus int, id string) Reply {
 	return defaultReply{
 		httpStatus: httpStatus,
 		id:         id,
-		data:       make(Map),
 	}
 }
 

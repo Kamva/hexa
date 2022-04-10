@@ -7,65 +7,6 @@ import (
 	"github.com/kamva/gutil"
 )
 
-type (
-	// Error is reply to actions when occur error in microservices.
-	Error interface {
-		error
-
-		// SetError set the internal error.
-		SetError(error) Error
-
-		// InternalError returns the internal error.
-		InternalError() error
-
-		//Is function satisfy Is interface of errors package.
-		Is(error) bool
-
-		// HTTPStatus returns the http status code for the Error.
-		HTTPStatus() int
-
-		// SetHTTPStatus sets the http status code for the reply.
-		SetHTTPStatus(status int) Error
-
-		// ID is error's identifier. its format should be
-		// something like "product.variant.not_found" or "lib.jwt.not_found" .
-		// as a convention we prefix our base packages (all hexa packages) with "lib".
-		ID() string
-
-		// Localize localize te message for you.
-		// you can store the gRPC localized error
-		// message and return it by this method.
-		Localize(t Translator) (string, error)
-
-		// Data returns the extra data of the Error (e.g show this data to user).
-		// Note: we use data as translation prams also.
-		Data() Map
-
-		// SetData set the Error data as extra data of the Error to show to the user.
-		SetData(data Map) Error
-
-		// ReportData returns the data that should use on reporting Error to somewhere (e.g log aggregator)
-		ReportData() Map
-
-		SetReportData(data Map) Error
-
-		// ReportIfNeeded function report the Error to the log system if
-		// http status code is in range 5XX.
-		// return value specify that reported or no.
-		ReportIfNeeded(Logger, Translator) bool
-	}
-
-	defaultError struct {
-		error
-
-		httpStatus       int
-		id               string
-		localizedMessage string
-		data             Map
-		reportData       Map
-	}
-)
-
 const (
 	// ErrKeyInternalError is the internal error key in Error
 	// messages over all of packages. use this to have just one
@@ -73,6 +14,63 @@ const (
 	// TODO: remove this key if we don't use it in our projects.
 	ErrKeyInternalError = "lib.internal_error"
 )
+
+// Error is reply to actions when occur error in microservices.
+type Error interface {
+	error
+
+	// SetError set the internal error.
+	SetError(error) Error
+
+	// InternalError returns the internal error.
+	InternalError() error
+
+	//Is function satisfy Is interface of errors package.
+	Is(error) bool
+
+	// HTTPStatus returns the http status code for the Error.
+	HTTPStatus() int
+
+	// SetHTTPStatus sets the http status code for the reply.
+	SetHTTPStatus(status int) Error
+
+	// ID is error's identifier. its format should be
+	// something like "product.variant.not_found" or "lib.jwt.not_found" .
+	// as a convention we prefix our base packages (all hexa packages) with "lib".
+	ID() string
+
+	// Localize localize te message for you.
+	// you can store the gRPC localized error
+	// message and return it by this method.
+	Localize(t Translator) (string, error)
+
+	// Data returns the extra data of the Error (e.g show this data to user).
+	// Note: we use data as translation prams also.
+	Data() Map
+
+	// SetData set the Error data as extra data of the Error to show to the user.
+	SetData(data Map) Error
+
+	// ReportData returns the data that should use on reporting Error to somewhere (e.g log aggregator)
+	ReportData() Map
+
+	SetReportData(data Map) Error
+
+	// ReportIfNeeded function report the Error to the log system if
+	// http status code is in range 5XX.
+	// return value specify that reported or no.
+	ReportIfNeeded(Logger, Translator) bool
+}
+
+type defaultError struct {
+	error
+
+	httpStatus       int
+	id               string
+	localizedMessage string
+	data             Map
+	reportData       Map
+}
 
 func (e defaultError) Error() string {
 	if e.error != nil {
@@ -152,8 +150,8 @@ func NewError(httpStatus int, id string, err error) Error {
 		error:      err,
 		httpStatus: httpStatus,
 		id:         id,
-		data:       make(Map),
-		reportData: make(Map),
+		//data:       make(Map), // Don't allocate memory at creation time.
+		//reportData: make(Map),
 	}
 }
 
@@ -164,8 +162,6 @@ func NewLocalizedError(status int, id string, localizedMsg string, err error) Er
 		httpStatus:       status,
 		id:               id,
 		localizedMessage: localizedMsg,
-		data:             make(Map),
-		reportData:       make(Map),
 	}
 }
 
