@@ -37,10 +37,11 @@ func (h *HealthExample) HealthStatus(ctx context.Context) hexa.HealthStatus {
 func main() {
 	r := hexa.NewHealthReporter().AddToChecks(&HealthExample{})
 
-	ps := probe.NewServer(&http.Server{Addr: "localhost:7676"}, http.NewServeMux())
-	probe.RegisterHealthHandlers(ps, r)
+	s := probe.NewServer(&http.Server{Addr: "localhost:7676"}, http.NewServeMux())
+	probe.RegisterHealthHandlers(s, r)
+	probe.RegisterPprofHandlers(s)
 
-	gutil.PanicErr(ps.Run())
+	gutil.PanicErr(s.Run())
 	gutil.WaitForSignals(syscall.SIGINT, syscall.SIGTERM)
 }
 
