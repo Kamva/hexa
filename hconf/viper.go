@@ -10,7 +10,7 @@ type viperConfig struct {
 	v *viper.Viper
 }
 
-func (v *viperConfig) Unmarshal(instance interface{}) error {
+func (v *viperConfig) Unmarshal(instance any) error {
 	return tracer.Trace(v.v.Unmarshal(instance))
 }
 

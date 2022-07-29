@@ -75,9 +75,9 @@ type User interface {
 	// Roles returns user's roles.
 	Roles() []string
 
-	Meta(key string) (val interface{}, exists bool)
+	Meta(key string) (val any, exists bool)
 
-	SetMeta(key string, val interface{}) (User, error)
+	SetMeta(key string, val any) (User, error)
 
 	// User must be able be export and import using this meta data.
 	// Meta data must be json serializable.
@@ -86,23 +86,23 @@ type User interface {
 
 // user is default implementation of hexa User for real users.
 type user struct {
-	meta map[string]interface{}
+	meta map[string]any
 }
 
-func (u *user) Meta(key string) (val interface{}, exists bool) {
+func (u *user) Meta(key string) (val any, exists bool) {
 	val, exists = u.meta[key]
 	return
 }
 
-func (u *user) copyMeta() (map[string]interface{}, error) {
-	m := make(map[string]interface{})
+func (u *user) copyMeta() (map[string]any, error) {
+	m := make(map[string]any)
 	if err := gutil.UnmarshalStruct(u.meta, &m); err != nil {
 		return nil, tracer.Trace(err)
 	}
 	return m, tracer.Trace(userMetaInterfaceToTrueTypedMeta(m))
 }
 
-func (u *user) SetMeta(key string, val interface{}) (User, error) {
+func (u *user) SetMeta(key string, val any) (User, error) {
 	m, err := u.copyMeta()
 	if err != nil {
 		return nil, tracer.Trace(err)
@@ -118,7 +118,7 @@ func (u *user) SetMeta(key string, val interface{}) (User, error) {
 }
 
 func (u *user) MetaData() Map {
-	m := make(map[string]interface{})
+	m := make(map[string]any)
 	for k, v := range u.meta {
 		m[k] = v
 	}
@@ -191,7 +191,7 @@ type UserParams struct {
 
 // NewUser returns new hexa user instance.
 func NewUser(p UserParams) User {
-	meta := map[string]interface{}{
+	meta := map[string]any{
 		UserMetaKeyIdentifier: p.Id,
 		UserMetaKeyUserType:   p.Type,
 		UserMetaKeyEmail:      p.Email,
@@ -232,7 +232,7 @@ func NewServiceUser(id, name string, isActive bool, roles []string) User {
 	})
 }
 
-func validateUserMetaData(meta map[string]interface{}) error {
+func validateUserMetaData(meta map[string]any) error {
 	// validate meta keys: all required meta keys must exists.
 	for _, k := range userMetaKeys {
 		if _, ok := meta[k]; !ok {
@@ -264,11 +264,11 @@ func WithUserRole(u User, role string) User {
 	return gutil.Must(u.SetMeta(UserMetaKeyRoles, roles)).(User)
 }
 
-func userMetaInterfaceToTrueTypedMeta(meta map[string]interface{}) error {
+func userMetaInterfaceToTrueTypedMeta(meta map[string]any) error {
 
 	meta[UserMetaKeyUserType] = UserType(meta[UserMetaKeyUserType].(string))
 
-	// Convert user roles from []interface{} to []string:
+	// Convert user roles from []any to []string:
 	roles := make([]string, 0)
 	err := gutil.UnmarshalStruct(meta[UserMetaKeyRoles], &roles)
 	if err != nil {

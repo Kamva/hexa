@@ -12,7 +12,7 @@ type zapLogger struct {
 	logger *zap.Logger
 }
 
-func (l *zapLogger) Core() interface{} {
+func (l *zapLogger) Core() any {
 	return l.logger
 }
 

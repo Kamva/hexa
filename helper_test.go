@@ -8,7 +8,7 @@ type emptyLogger struct {
 type emptyTranslator struct {
 }
 
-func (e emptyLogger) Core() interface{} {
+func (e emptyLogger) Core() any {
 	return nil
 }
 
@@ -43,19 +43,19 @@ func (t emptyTranslator) Localize(langs ...string) Translator {
 	return t
 }
 
-func (t emptyTranslator) Translate(key string, keyParams ...interface{}) (string, error) {
+func (t emptyTranslator) Translate(key string, keyParams ...any) (string, error) {
 	return "{test translate}", nil
 }
 
-func (t emptyTranslator) MustTranslate(key string, keyParams ...interface{}) string {
+func (t emptyTranslator) MustTranslate(key string, keyParams ...any) string {
 	return "{test translate}"
 }
 
-func (t emptyTranslator) TranslateDefault(key string, fallback string, keyParams ...interface{}) (string, error) {
+func (t emptyTranslator) TranslateDefault(key string, fallback string, keyParams ...any) (string, error) {
 	return "{test translate}", nil
 }
 
-func (t emptyTranslator) MustTranslateDefault(key string, fallback string, keyParams ...interface{}) string {
+func (t emptyTranslator) MustTranslateDefault(key string, fallback string, keyParams ...any) string {
 	return "{test translate}"
 }
 

@@ -20,10 +20,10 @@ func TestStoreImpl(t *testing.T) {
 func TestAtomicStore_SetIfNotExist(t *testing.T) {
 	s := newStore()
 	s.Set("a", "abc")
-	s.SetIfNotExist("a", func() interface{} {
+	s.SetIfNotExist("a", func() any {
 		return "def"
 	})
-	s.SetIfNotExist("b", func() interface{} {
+	s.SetIfNotExist("b", func() any {
 		return "123"
 	})
 
@@ -34,7 +34,7 @@ func TestAtomicStore_SetIfNotExist(t *testing.T) {
 func BenchmarkSetIfNotExist(b *testing.B) {
 	s := newStore()
 	for n := 0; n < b.N; n++ {
-		val := s.SetIfNotExist("a", func() interface{} {
+		val := s.SetIfNotExist("a", func() any {
 			return "abc"
 		})
 		_ = val

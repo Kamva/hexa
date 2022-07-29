@@ -6,32 +6,32 @@ import (
 
 // Store is actually a concurrency-safe map.
 type Store interface {
-	Get(key string) interface{}
-	Set(key string, val interface{})
-	SetIfNotExist(key string, val func() interface{}) interface{}
+	Get(key string) any
+	Set(key string, val any)
+	SetIfNotExist(key string, val func() any) any
 }
 
 type atomicStore struct {
 	lock sync.RWMutex
-	m    map[string]interface{}
+	m    map[string]any
 }
 
-func (s *atomicStore) Get(key string) interface{} {
+func (s *atomicStore) Get(key string) any {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 	return s.m[key]
 }
 
-func (s *atomicStore) Set(key string, val interface{}) {
+func (s *atomicStore) Set(key string, val any) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	if s.m == nil {
-		s.m = make(map[string]interface{})
+		s.m = make(map[string]any)
 	}
 	s.m[key] = val
 }
 
-func (s *atomicStore) SetIfNotExist(key string, vp func() interface{}) interface{} {
+func (s *atomicStore) SetIfNotExist(key string, vp func() any) any {
 	s.lock.RLock()
 	val := s.m[key]
 	if val != nil {
@@ -49,7 +49,7 @@ func (s *atomicStore) SetIfNotExist(key string, vp func() interface{}) interface
 	}
 
 	if s.m == nil {
-		s.m = make(map[string]interface{})
+		s.m = make(map[string]any)
 	}
 
 	val = vp()

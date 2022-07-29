@@ -43,11 +43,11 @@ type Session interface {
 
 	// Get returns the session value. it must be nil
 	// if isn't found.
-	Get(key string) (interface{}, error)
+	Get(key string) (any, error)
 
 	// Set sets the key and value in the session. nil
 	// value meaning delete the key from the session.
-	Set(key string, val interface{}) error
+	Set(key string, val any) error
 
 	Save(ctx context.Context) error
 

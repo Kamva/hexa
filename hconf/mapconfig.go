@@ -9,7 +9,7 @@ type mapConfig struct {
 	conf hexa.Map
 }
 
-func (m *mapConfig) Unmarshal(instance interface{}) error {
+func (m *mapConfig) Unmarshal(instance any) error {
 	return gutil.MapToStruct(m.conf, instance)
 }
 

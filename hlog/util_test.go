@@ -1,8 +1,9 @@
 package hlog
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFieldToKeyValString(t *testing.T) {
@@ -28,7 +29,7 @@ func TestFieldToKeyValArr(t *testing.T) {
 }
 
 func TestFieldToKeyValMap(t *testing.T) {
-	val := map[string]interface{}{"a": "b"}
+	val := map[string]any{"a": "b"}
 	f := Any("a", val)
 	k, v := fieldToKeyVal(f)
 	assert.Equal(t, k, "a")

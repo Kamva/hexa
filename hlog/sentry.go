@@ -21,7 +21,7 @@ type sentryLogger struct {
 	hub *sentry.Hub
 }
 
-func (l *sentryLogger) Core() interface{} {
+func (l *sentryLogger) Core() any {
 	return l.hub
 }
 

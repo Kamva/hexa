@@ -34,7 +34,7 @@ func (l *stackedLogger) LoggerByName(name string) hexa.Logger {
 	return l.stack[name]
 }
 
-func (l *stackedLogger) Core() interface{} {
+func (l *stackedLogger) Core() any {
 	return l.stack
 }
 

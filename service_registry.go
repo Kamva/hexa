@@ -2,7 +2,7 @@ package hexa
 
 import "context"
 
-type Service interface{} // Currently Service interface does not needs to implement anything.
+type Service any // Currently Service interface does not needs to implement anything.
 
 type Bootable interface {
 	Boot() error

@@ -19,7 +19,7 @@ func (p *userPropagator) ToBytes(u User) ([]byte, error) {
 }
 
 func (p *userPropagator) FromBytes(m []byte) (User, error) {
-	meta := make(map[string]interface{})
+	meta := make(map[string]any)
 	if err := json.Unmarshal(m, &meta); err != nil {
 		return nil, tracer.Trace(err)
 	}

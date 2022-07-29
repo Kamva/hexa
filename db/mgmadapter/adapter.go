@@ -23,11 +23,11 @@ func (r Store) ReplaceErr(err error, notfoundErr error) error {
 	return tracer.Trace(err)
 }
 
-func (r Store) CreateIndexIfNotExist(coll *mgm.Collection, name string, keys ...interface{}) error {
+func (r Store) CreateIndexIfNotExist(coll *mgm.Collection, name string, keys ...any) error {
 	return r.CreateIndexWithOptionsIfNotExist(coll, &options.IndexOptions{Name: gutil.NewString(name)}, keys...)
 }
 
-func (r Store) CreateUniqueIndexIfNotExist(coll *mgm.Collection, name string, keys ...interface{}) error {
+func (r Store) CreateUniqueIndexIfNotExist(coll *mgm.Collection, name string, keys ...any) error {
 	o := options.IndexOptions{
 		Name:   gutil.NewString(name),
 		Unique: gutil.NewBool(true),
@@ -38,7 +38,7 @@ func (r Store) CreateUniqueIndexIfNotExist(coll *mgm.Collection, name string, ke
 // CreateIndexWithOptionsIfNotExist creates index if it doesn't exist. fields value could be either string or bson.E.
 // One exception is if the first field value's type is bson.D, we will use it and ignore all other fields values.
 // otherwise if you send another type as field it will panic.
-func (r *Store) CreateIndexWithOptionsIfNotExist(coll *mgm.Collection, o *options.IndexOptions, fields ...interface{}) error {
+func (r *Store) CreateIndexWithOptionsIfNotExist(coll *mgm.Collection, o *options.IndexOptions, fields ...any) error {
 	var keys bson.D
 	if len(fields) == 1 {
 		if d, ok := fields[0].(bson.D); ok {

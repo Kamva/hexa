@@ -26,7 +26,7 @@ var (
 	PageSizeVar = "per_page"
 )
 
-// Pages represents a paginated list of data items.
+// Pagination represents pagination details of items.
 type Pagination struct {
 	Page       int `json:"page"`
 	PerPage    int `json:"per_page"`
@@ -36,7 +36,7 @@ type Pagination struct {
 
 type Pages struct {
 	Pagination `json:"pagination"`
-	Items      interface{} `json:"items"`
+	Items      any `json:"items"`
 }
 
 // New creates a new Pages instance.

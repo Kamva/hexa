@@ -23,7 +23,7 @@ func (t i18nTranslator) isEmptyMessageKey(key string) bool {
 	return key == hexa.TranslateKeyEmptyMessage
 }
 
-func (t i18nTranslator) Translate(key string, keyParams ...interface{}) (string, error) {
+func (t i18nTranslator) Translate(key string, keyParams ...any) (string, error) {
 
 	if t.isEmptyMessageKey(key) {
 		return "", nil
@@ -41,7 +41,7 @@ func (t i18nTranslator) Translate(key string, keyParams ...interface{}) (string,
 	})
 }
 
-func (t i18nTranslator) MustTranslate(key string, keyParams ...interface{}) string {
+func (t i18nTranslator) MustTranslate(key string, keyParams ...any) string {
 
 	msg, err := t.Translate(key, keyParams...)
 
@@ -52,7 +52,7 @@ func (t i18nTranslator) MustTranslate(key string, keyParams ...interface{}) stri
 	return msg
 }
 
-func (t i18nTranslator) TranslateDefault(key string, fallback string, keyParams ...interface{}) (string, error) {
+func (t i18nTranslator) TranslateDefault(key string, fallback string, keyParams ...any) (string, error) {
 	if t.isEmptyMessageKey(key) {
 		return "", nil
 	}
@@ -77,7 +77,7 @@ func (t i18nTranslator) TranslateDefault(key string, fallback string, keyParams 
 	})
 }
 
-func (t i18nTranslator) MustTranslateDefault(key string, fallback string, keyParams ...interface{}) string {
+func (t i18nTranslator) MustTranslateDefault(key string, fallback string, keyParams ...any) string {
 	msg, err := t.TranslateDefault(key, fallback, keyParams...)
 
 	if err != nil {

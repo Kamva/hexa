@@ -9,20 +9,20 @@ func (e keyTranslator) Localize(langs ...string) hexa.Translator {
 	return e
 }
 
-func (e keyTranslator) Translate(key string, keyParams ...interface{}) (string, error) {
+func (e keyTranslator) Translate(key string, keyParams ...any) (string, error) {
 	return key, nil
 }
 
-func (e keyTranslator) MustTranslate(key string, keyParams ...interface{}) string {
+func (e keyTranslator) MustTranslate(key string, keyParams ...any) string {
 	t, _ := e.Translate(key, keyParams...)
 	return t
 }
 
-func (e keyTranslator) TranslateDefault(key string, fallback string, keyParams ...interface{}) (string, error) {
+func (e keyTranslator) TranslateDefault(key string, fallback string, keyParams ...any) (string, error) {
 	return e.Translate(key, keyParams...)
 }
 
-func (e keyTranslator) MustTranslateDefault(key string, fallback string, keyParams ...interface{}) string {
+func (e keyTranslator) MustTranslateDefault(key string, fallback string, keyParams ...any) string {
 	t, _ := e.Translate(key, keyParams...)
 	return t
 }

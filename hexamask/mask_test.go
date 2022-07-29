@@ -89,7 +89,7 @@ func TestFieldMask_Mask(t *testing.T) {
 		Mask: &FieldMask{paths: []string{"c.d", "name", "age", "b", "b.val"}},
 	}
 	inp.Mask.Mask(&inp)
-	assert.Equal(t, inp.Mask.maskedFields, []interface{}{
+	assert.Equal(t, inp.Mask.maskedFields, []any{
 		&inp.Name,
 		&inp.Age,
 		&inp.B,
@@ -116,7 +116,7 @@ func TestFieldMask_IsMasked(t *testing.T) {
 		B:    B{Val: "salam"},
 	}
 
-	m := FieldMask{maskedFields: []interface{}{
+	m := FieldMask{maskedFields: []any{
 		&inp.Name,
 		&inp.Age,
 		&inp.B,

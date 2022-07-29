@@ -18,12 +18,12 @@ func (i *hexaID) String() string {
 	return i.id.Hex()
 }
 
-func (i *hexaID) Validate(id interface{}) error {
+func (i *hexaID) Validate(id any) error {
 	kid := &hexaID{}
 	return kid.From(id)
 }
 
-func (i *hexaID) From(val interface{}) error {
+func (i *hexaID) From(val any) error {
 	if val == nil {
 		return tracer.Trace(errors.New("id value is nil"))
 	}
@@ -46,13 +46,13 @@ func (i *hexaID) From(val interface{}) error {
 	return tracer.Trace(errors.New("id type is invalid and can not convert it to primitive.ObjectID"))
 }
 
-func (i *hexaID) MustFrom(id interface{}) {
+func (i *hexaID) MustFrom(id any) {
 	if err := i.From(id); err != nil {
 		panic(err)
 	}
 }
 
-func (i *hexaID) Val() interface{} {
+func (i *hexaID) Val() any {
 	return i.id
 }
 
@@ -67,7 +67,7 @@ func (i *hexaID) IsEqual(hexaID hexa.ID) bool {
 }
 
 // ID function get an id and returns IDD
-func ID(id interface{}) hexa.ID {
+func ID(id any) hexa.ID {
 	i := &hexaID{}
 	i.MustFrom(id)
 	return i

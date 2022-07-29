@@ -16,7 +16,7 @@ type TemplateData struct {
 	Interface *InterfaceMetadata
 }
 
-func GenerateLayer(tmpl string, funcs template.FuncMap, outputFile string, data interface{}, reformat bool) error {
+func GenerateLayer(tmpl string, funcs template.FuncMap, outputFile string, data any, reformat bool) error {
 	t := template.Must(template.New(path.Base(tmpl)).Funcs(funcs).ParseFiles(tmpl))
 
 	out := bytes.NewBufferString("")

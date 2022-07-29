@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func body(code string, msg string, data interface{}) *HttpRespBody {
+func body(code string, msg string, data any) *HttpRespBody {
 	return &HttpRespBody{
 		Code:    code,
 		Message: msg,

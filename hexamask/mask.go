@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
+	"strings"
+
 	"github.com/kamva/gutil"
 	"github.com/kamva/hexa"
 	"github.com/kamva/tracer"
-	"reflect"
-	"strings"
 )
 
 // FieldMask mask keep list of masked paths of a struct|map|...
@@ -18,7 +19,7 @@ import (
 // "mask" tag, otherwise it check the "json" tag.
 type FieldMask struct {
 	paths        []string
-	maskedFields []interface{}
+	maskedFields []any
 }
 
 func (fm *FieldMask) UnmarshalJSON(b []byte) error {
@@ -59,7 +60,7 @@ func (fm *FieldMask) PathIsMasked(path string) bool {
 // Note: provided value must be pointer to the value.
 // even if the field is a pointer, you must provide
 // pointer to that pointer field.
-func (fm *FieldMask) IsMasked(i interface{}) bool {
+func (fm *FieldMask) IsMasked(i any) bool {
 	if reflect.TypeOf(i).Kind() != reflect.Ptr {
 		panic("value must be interface")
 	}
@@ -77,7 +78,7 @@ func (fm *FieldMask) IsMasked(i interface{}) bool {
 // Mask masks a struct's fields and then you can check
 // to detect whether a field of that struct is masked or not.
 // Note: provided value must be pointer to a struct.
-func (fm *FieldMask) Mask(s interface{}) {
+func (fm *FieldMask) Mask(s any) {
 	v := reflect.ValueOf(s)
 	if v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.Struct {
 		panic("provided value must be a pointer to a struct")
@@ -91,13 +92,13 @@ func (fm *FieldMask) Mask(s interface{}) {
 // list.
 // Note: provided value must be a pointer of a value otherwise
 // it panic.
-func (fm *FieldMask) maskStruct(pathPrefix string, v reflect.Value) []interface{} {
+func (fm *FieldMask) maskStruct(pathPrefix string, v reflect.Value) []any {
 	if v.IsNil() || v.Elem().Kind() != reflect.Struct {
 		return nil
 	}
 	iv := v.Elem()
 	it := iv.Type()
-	maskList := make([]interface{}, 0)
+	maskList := make([]any, 0)
 	for i := 0; i < it.NumField(); i++ {
 		fieldValue := iv.Field(i)
 

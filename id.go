@@ -9,18 +9,18 @@ type ID interface {
 	fmt.Stringer
 
 	// Validate specify provided id is valid or not.
-	Validate(id interface{}) error
+	Validate(id any) error
 
 	// From convert provided value to its id.
 	// From will returns error if provided value
 	// can not convert to an native id.
-	From(id interface{}) error
+	From(id any) error
 
 	// MustFrom Same as FromString but on occur error, it will panic.
-	MustFrom(id interface{})
+	MustFrom(id any)
 
 	// Val returns the native id value (e.g ObjectID in mongo, ...).
-	Val() interface{}
+	Val() any
 
 	// IsEqual say that two hexa id are equal or not.
 	IsEqual(ID) bool

@@ -18,7 +18,7 @@ type IDField struct {
 
 // PrepareID method prepare id value to using it as id in filtering,...
 // e.g convert hex-string id value to bson.ObjectId
-func (f *IDField) PrepareID(id interface{}) (objID interface{}, err error) {
+func (f *IDField) PrepareID(id any) (objID any, err error) {
 	if idStr, ok := id.(string); ok {
 		objID, err = primitive.ObjectIDFromHex(idStr)
 
@@ -34,12 +34,12 @@ func (f *IDField) PrepareID(id interface{}) (objID interface{}, err error) {
 }
 
 // GetID method return model's id
-func (f *IDField) GetID() interface{} {
+func (f *IDField) GetID() any {
 	return f.ID
 }
 
 // SetID set id value of model's id field.
-func (f *IDField) SetID(id interface{}) {
+func (f *IDField) SetID(id any) {
 	f.ID = id.(primitive.ObjectID)
 }
 

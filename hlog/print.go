@@ -24,7 +24,7 @@ type printerLogger struct {
 	with       []Field
 }
 
-func (l *printerLogger) Core() interface{} {
+func (l *printerLogger) Core() any {
 	return fmt.Println
 }
 

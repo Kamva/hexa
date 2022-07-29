@@ -86,7 +86,7 @@ type Logger interface {
 	// Core function returns the logger core concrete struct.
 	// this is because sometimes we need to convert one logger
 	// interface to another and need to the concrete logger.
-	Core() interface{}
+	Core() any
 
 	// WithCtx gets the hexa context and some keyValues
 	// and return new logger contains key values as

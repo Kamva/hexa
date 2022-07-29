@@ -9,20 +9,20 @@ func (e emptyDriver) Localize(langs ...string) hexa.Translator {
 	return e
 }
 
-func (e emptyDriver) Translate(key string, keyParams ...interface{}) (string, error) {
+func (e emptyDriver) Translate(key string, keyParams ...any) (string, error) {
 	return "empty_translate:" + key, nil
 }
 
-func (e emptyDriver) MustTranslate(key string, keyParams ...interface{}) string {
+func (e emptyDriver) MustTranslate(key string, keyParams ...any) string {
 	t, _ := e.Translate(key, keyParams...)
 	return t
 }
 
-func (e emptyDriver) TranslateDefault(key string, fallback string, keyParams ...interface{}) (string, error) {
+func (e emptyDriver) TranslateDefault(key string, fallback string, keyParams ...any) (string, error) {
 	return e.Translate(key, keyParams...)
 }
 
-func (e emptyDriver) MustTranslateDefault(key string, fallback string, keyParams ...interface{}) string {
+func (e emptyDriver) MustTranslateDefault(key string, fallback string, keyParams ...any) string {
 	t, _ := e.Translate(key, keyParams...)
 	return t
 }
