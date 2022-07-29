@@ -145,9 +145,8 @@ func (e defaultError) shouldReport() bool {
 }
 
 // NewError returns new instance the Error interface.
-func NewError(httpStatus int, id string, err error) Error {
+func NewError(httpStatus int, id string) Error {
 	return defaultError{
-		error:      err,
 		httpStatus: httpStatus,
 		id:         id,
 		//data:       make(Map), // Don't allocate memory at creation time.
