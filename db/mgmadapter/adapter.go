@@ -5,12 +5,19 @@ import (
 	"errors"
 
 	"github.com/kamva/gutil"
+	"github.com/kamva/hexa"
 	"github.com/kamva/mgm/v3"
 	"github.com/kamva/tracer"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+func HealthPing(cli *mongo.Client) hexa.Ping {
+	return func(ctx context.Context) error {
+		return cli.Ping(ctx, nil)
+	}
+}
 
 type Store struct {
 }

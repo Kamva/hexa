@@ -8,6 +8,7 @@ import (
 	"github.com/kamva/gutil"
 	"github.com/kamva/hexa"
 	"github.com/kamva/hexa/db/mgmadapter"
+	"github.com/kamva/hexa/hlog"
 	"github.com/kamva/tracer"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -44,7 +45,7 @@ type dlm struct {
 
 func NewDlm(o DlmOptions) (hexa.DLM, error) {
 	dlm := &dlm{
-		Health: mgmadapter.NewDBHealth("distributed_locks", o.Collection.Database().Client()),
+		Health: hexa.NewPingHealth(hlog.GlobalLogger(), "distributed_locks", mgmadapter.HealthPing(o.Collection.Database().Client()), nil),
 
 		coll:     o.Collection,
 		ttl:      o.DefaultTTL,

@@ -22,6 +22,10 @@ func SetGlobalLogger(l hexa.Logger) {
 	Error = global.Error
 }
 
+func GlobalLogger() hexa.Logger {
+	return global
+}
+
 // CtxLogger returns the context logger with fall back to
 // the global logger
 func CtxLogger(ctx context.Context) hexa.Logger {
