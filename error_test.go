@@ -10,17 +10,17 @@ import (
 )
 
 func TestAsHexaErr(t *testing.T) {
-	e:=AsHexaErr(nil)
-	assert.Nil(t,e)
+	e := AsHexaErr(nil)
+	assert.Nil(t, e)
 
-	e=AsHexaErr(errors.New("test"))
-	assert.Nil(t,e)
+	e = AsHexaErr(errors.New("test"))
+	assert.Nil(t, e)
 
-	err := NewError(http.StatusBadRequest, "a", nil)
+	err := NewError(http.StatusBadRequest, "a")
 
-	hexaErr:= AsHexaErr(err)
+	hexaErr := AsHexaErr(err)
 	assert.NotNil(t, hexaErr)
 
-	hexaErr= AsHexaErr(tracer.Trace(err))
+	hexaErr = AsHexaErr(tracer.Trace(err))
 	assert.NotNil(t, hexaErr)
 }
