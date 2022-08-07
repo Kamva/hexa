@@ -29,7 +29,12 @@ func (a Annotations) Lookup(name string) *Annotation {
 	return nil
 }
 
-func annotationsFromCommentGroup(l []*ast.Comment) Annotations {
+func annotationsFromCommentGroup(cg *ast.CommentGroup) Annotations {
+	if cg == nil {
+		return nil
+	}
+	l := cg.List
+
 	annotations := make([]Annotation, 0)
 	for _, c := range l {
 		if annotationRegex.Match([]byte(c.Text)) {

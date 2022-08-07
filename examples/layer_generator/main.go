@@ -1,18 +1,17 @@
 package main
 
 import (
-	"fmt"
+	"go/parser"
 	"path"
 
 	"github.com/kamva/gutil"
 	"github.com/kamva/hexa/lg"
-	"github.com/kamva/tracer"
 )
 
 type TemplateData struct {
 	Package   string
 	Name      string // struct name for the implementation of our interface
-	Interface *lg.InterfaceMetadata
+	Interface *lg.Interface
 }
 
 func main() {
@@ -20,20 +19,25 @@ func main() {
 	tmpl := path.Join(gutil.SourcePath(), "err_layer.tmpl")
 	output := path.Join(gutil.SourcePath(), "err_layer.go")
 
-	metadata, err := lg.ExtractInterfaceMetadata(src, "App")
+	pkg, err := lg.NewPackageFromFilePaths("github.com/kamva/hexa/examples/layer_generator", parser.AllErrors|parser.ParseComments, src)
 	if err != nil {
-		fmt.Println(tracer.StackAsString(tracer.Trace(err)))
 		panic(err)
 	}
+
+	resolver := lg.NewEmbeddedResolver(nil, pkg)
+	if err := resolver.Resolve(); err != nil {
+		panic(err)
+	}
+
+	_, iface := pkg.FindInterface("App")
 
 	data := &TemplateData{
 		Package:   "main",
 		Name:      "errLayer",
-		Interface: metadata,
+		Interface: iface,
 	}
-	fl := lg.Funcs()
 
-	if err := lg.GenerateLayer(tmpl, fl, output, data, true); err != nil {
+	if err := lg.GenerateLayer(tmpl, lg.Funcs(), output, data, true); err != nil {
 		panic(err)
 	}
 }

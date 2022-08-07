@@ -11,11 +11,11 @@ type {{.Name}} struct {
    {{- if .Doc}}
     // {{ .Doc -}}
    {{- end}}
-    func (a *{{$.Name}}) {{$index}}({{$element.Params | joinParamsWithType}}) {{joinResultsForSignature $element.Results}} {
+    func (a *{{$.Name}}) {{$element.Name}}({{$element.Params | joinParamsWithType}}) {{joinResultsForSignature $element.Results}} {
     {{- if $element.Results | len | eq 0}}
-        a.app.{{$index}}({{$element.Params | joinParams}})
+        a.app.{{$element.Name}}({{$element.Params | joinParams}})
     {{else}}
-        {{$element.Results | genResultsVars}} := a.app.{{$index}}({{$element.Params | joinParams}})
+        {{$element.Results | genResultsVars}} := a.app.{{$element.Name}}({{$element.Params | joinParams}})
         {{if $element.Results | hasErrInResults}}
             if {{$element.Results | errResultVar}} != nil {
             // do something when error occured.

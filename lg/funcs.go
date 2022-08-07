@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"strings"
 	"text/template"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
-var joinResults = func(results []MethodResult) string {
+var joinResults = func(results []*MethodResult) string {
 	joined := make([]string, len(results))
 	for i, r := range results {
 		joined[i] = r.joinNameAndType()
@@ -15,7 +18,7 @@ var joinResults = func(results []MethodResult) string {
 	return strings.Join(joined, ",")
 }
 
-var joinResultsInSameNameFormat = func(results []MethodResult) string {
+var joinResultsInSameNameFormat = func(results []*MethodResult) string {
 	joined := make([]string, len(results))
 	for i, r := range results {
 		joined[i] = fmt.Sprintf("%s %s", ResultVar(i), r.Type)
@@ -30,7 +33,7 @@ func ResultVar(index int) string {
 
 func Funcs() template.FuncMap {
 	return template.FuncMap{
-		"joinParamsWithType": func(params []MethodParam) string {
+		"joinParamsWithType": func(params []*MethodParam) string {
 			var joined []string
 			for _, p := range params {
 				joined = append(joined, fmt.Sprintf("%s %s", p.Name, p.Type))
@@ -38,7 +41,7 @@ func Funcs() template.FuncMap {
 
 			return strings.Join(joined, ",")
 		},
-		"joinParams": func(params []MethodParam) string { // e.g., // a,b,c
+		"joinParams": func(params []*MethodParam) string { // e.g., // a,b,c
 			var joined []string
 			for _, p := range params {
 				joined = append(joined, fmt.Sprintf("%s", p.Name))
@@ -47,7 +50,7 @@ func Funcs() template.FuncMap {
 			return strings.Join(joined, ",")
 		},
 		// join params with unpack operator.
-		"joinParamsWithUnpack": func(params []MethodParam) string { // e.g, a,b,c...
+		"joinParamsWithUnpack": func(params []*MethodParam) string { // e.g, a,b,c...
 			var joined []string
 			for _, p := range params {
 				mp := fmt.Sprintf("%s", p.Name)
@@ -60,21 +63,21 @@ func Funcs() template.FuncMap {
 			return strings.Join(joined, ",")
 		},
 		// Example for original name is: (*dto.User, error) or (u *dto.User,e error)
-		"joinResultsForSignature": func(results []MethodResult) string {
+		"joinResultsForSignature": func(results []*MethodResult) string {
 			if len(results) == 0 || (len(results) == 1 && results[0].Name == "") {
 				return joinResults(results)
 			}
 			return fmt.Sprintf("(%s)", joinResults(results))
 		},
 		// Example for formatted name is : (r1 *dto.User,r2 err error)
-		"joinResultsForSignatureInSameNameFormat": func(results []MethodResult) string {
+		"joinResultsForSignatureInSameNameFormat": func(results []*MethodResult) string {
 			if len(results) == 0 {
 				return ""
 			}
 
 			return fmt.Sprintf("(%s)", joinResultsInSameNameFormat(results))
 		},
-		"genResultsVars": func(results []MethodResult) string {
+		"genResultsVars": func(results []*MethodResult) string {
 			genList := make([]string, len(results))
 			for i, _ := range results {
 				genList[i] = ResultVar(i)
@@ -82,10 +85,10 @@ func Funcs() template.FuncMap {
 
 			return strings.Join(genList, ",")
 		},
-		"hasErrInResults": func(results []MethodResult) bool {
+		"hasErrInResults": func(results []*MethodResult) bool {
 			return len(results) != 0 && IsError(results[len(results)-1].Type)
 		},
-		"errResultVar": func(results []MethodResult) string {
+		"errResultVar": func(results []*MethodResult) string {
 			for i, r := range results {
 				if IsError(r.Type) {
 					return ResultVar(i)
@@ -94,7 +97,7 @@ func Funcs() template.FuncMap {
 			return ""
 		},
 		"title": func(val string) string {
-			return strings.Title(val)
+			return cases.Title(language.English).String(val)
 		},
 		"hasAnnotation": func(annotations Annotations, name string) bool {
 			return annotations.Lookup(name) != nil

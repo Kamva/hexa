@@ -5,6 +5,22 @@ type errLayer struct {
 	app App
 }
 
+// Hi is my first comment.
+// and this is second line.
+// we went to the third line :)
+// @myAnnotation `json:"a"`
+// @tx `retry:"4"`
+func (a *errLayer) Hi(username string, password string) (sentence string, err error) {
+	r1, r2 := a.app.Hi(username, password)
+
+	if r2 != nil {
+		// do something when error occured.
+	}
+
+	return r1, r2
+
+}
+
 func (a *errLayer) By() (string, error) {
 	r1, r2 := a.app.By()
 
@@ -31,23 +47,7 @@ func (a *errLayer) ByFromB() (string, error) {
 
 }
 
-// Hi is my first comment.
-// and this is second line.
-// we went to the third line :)
-// @myAnnotation `json:"a"`
-// @tx `retry:"4"`
-func (a *errLayer) Hi(username string, password string) (sentence string, err error) {
-	r1, r2 := a.app.Hi(username, password)
-
-	if r2 != nil {
-		// do something when error occured.
-	}
-
-	return r1, r2
-
-}
-
-func NewErrLayer(app App) App {
+func NewErrlayer(app App) App {
 	return &errLayer{
 		app: app,
 	}

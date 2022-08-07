@@ -25,7 +25,7 @@ func Test_annotationsFromCommentGroup(t *testing.T) {
 		},
 	}
 
-	annotations := annotationsFromCommentGroup(g)
+	annotations := annotationsFromCommentGroup(&ast.CommentGroup{List: g})
 	require.Equal(t, 2, len(annotations))
 
 	first := annotations[0]
@@ -44,7 +44,7 @@ func TestAnnotations_Lookup(t *testing.T) {
 		},
 	}
 
-	annotations := annotationsFromCommentGroup(g)
+	annotations := annotationsFromCommentGroup(&ast.CommentGroup{List: g})
 	require.Equal(t, 1, len(annotations))
 	assert.Nil(t, annotations.Lookup("123"))
 	assert.Equal(t, &annotations[0], annotations.Lookup("abc"))

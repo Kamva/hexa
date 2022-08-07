@@ -13,7 +13,7 @@ import (
 type TemplateData struct {
 	Package   string
 	Name      string // struct name for the implementation of our interface
-	Interface *InterfaceMetadata
+	Interface *Interface
 }
 
 func GenerateLayer(tmpl string, funcs template.FuncMap, outputFile string, data any, reformat bool) error {
