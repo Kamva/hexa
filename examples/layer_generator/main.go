@@ -1,7 +1,6 @@
 package main
 
 import (
-	"go/parser"
 	"path"
 
 	"github.com/kamva/gutil"
@@ -19,7 +18,7 @@ func main() {
 	tmpl := path.Join(gutil.SourcePath(), "err_layer.tmpl")
 	output := path.Join(gutil.SourcePath(), "err_layer.go")
 
-	pkg, err := lg.NewPackageFromFilePaths("github.com/kamva/hexa/examples/layer_generator", parser.AllErrors|parser.ParseComments, src)
+	pkg, err := lg.NewPackageFromFilenames("github.com/kamva/hexa/examples/layer_generator", src)
 	if err != nil {
 		panic(err)
 	}
