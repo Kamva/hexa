@@ -13,7 +13,7 @@ import (
 	"github.com/kamva/tracer"
 )
 
-const defaultParseMode = parser.AllErrors | parser.ParseComments
+const DefaultParseMode = parser.AllErrors | parser.ParseComments
 
 type Import struct {
 	Name string // For regular imports this value is empty. For alias imports it's the alias.
@@ -142,7 +142,11 @@ func NewPackageFromAstPackage(pkgPath string, astPkg *ast.Package) *Package {
 	return NewPackage(pkgPath, files)
 }
 
-func SinglePackageFromDir(pkgPath string, dir string, filter func(fs.FileInfo) bool, mode parser.Mode) (*Package, error) {
+func SinglePackageFromDir(pkgPath string, dir string) (*Package, error) {
+	return SinglePackageFromDirWithOpts(pkgPath, dir, nil, DefaultParseMode)
+}
+
+func SinglePackageFromDirWithOpts(pkgPath string, dir string, filter func(fs.FileInfo) bool, mode parser.Mode) (*Package, error) {
 	fset := token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, dir, filter, mode)
 	if err != nil {
@@ -157,16 +161,16 @@ func SinglePackageFromDir(pkgPath string, dir string, filter func(fs.FileInfo) b
 	return NewPackageFromAstPackage(pkgPath, pkg), nil
 }
 
-func NewPackageFromFilenames(pkgPath string, filePaths ...string) (*Package, error) {
-	return NewPackageFromFilenamesWithOpts(pkgPath, defaultParseMode, filePaths...)
+func NewPackageFromFilenames(pkgPath string, filenames ...string) (*Package, error) {
+	return NewPackageFromFilenamesWithOpts(pkgPath, DefaultParseMode, filenames...)
 }
 
-func NewPackageFromFilenamesWithOpts(pkgPath string, mode parser.Mode, filePaths ...string) (*Package, error) {
+func NewPackageFromFilenamesWithOpts(pkgPath string, mode parser.Mode, filenames ...string) (*Package, error) {
 	var fset = token.NewFileSet()
 
-	files := make([]*File, len(filePaths))
-	for i, fpath := range filePaths {
-		astFile, err := parser.ParseFile(fset, fpath, nil, mode)
+	files := make([]*File, len(filenames))
+	for i, filename := range filenames {
+		astFile, err := parser.ParseFile(fset, filename, nil, mode)
 		if err != nil {
 			return nil, tracer.Trace(err)
 		}
@@ -180,14 +184,14 @@ func NewPackageFromFilenamesWithOpts(pkgPath string, mode parser.Mode, filePaths
 // PackagesFromDirs returns list of packages.
 // pkgDirs params is a map from package's path to the dir path.
 func PackagesFromDirs(pkgDirs map[string]string) ([]*Package, error) {
-	return PackagesFromDirsWithOpts(pkgDirs, nil, defaultParseMode)
+	return PackagesFromDirsWithOpts(pkgDirs, nil, DefaultParseMode)
 }
 
 func PackagesFromDirsWithOpts(pkgDirs map[string]string, filter func(fs.FileInfo) bool, mode parser.Mode) ([]*Package, error) {
 	packages := make([]*Package, len(pkgDirs))
 	var i int
 	for pkgPath, dir := range pkgDirs {
-		pkg, err := SinglePackageFromDir(pkgPath, dir, filter, mode)
+		pkg, err := SinglePackageFromDirWithOpts(pkgPath, dir, filter, mode)
 		if err != nil {
 			return nil, tracer.Trace(err)
 		}
@@ -247,9 +251,9 @@ func NewFile(f *ast.File) *File {
 	}
 }
 
-func NewFileByName(fname string, mode parser.Mode) (*File, error) {
+func NewFileByName(filename string, mode parser.Mode) (*File, error) {
 	fset := token.NewFileSet()
-	f, err := parser.ParseFile(fset, fname, nil, mode)
+	f, err := parser.ParseFile(fset, filename, nil, mode)
 	if err != nil {
 		return nil, tracer.Trace(err)
 	}
