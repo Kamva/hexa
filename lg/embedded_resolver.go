@@ -13,7 +13,11 @@ type EmbeddedResolver struct {
 	filter   EmbeddedResolveFilter
 }
 
-func NewEmbeddedResolver(filter EmbeddedResolveFilter, packages ...*Package) *EmbeddedResolver {
+func NewEmbeddedResolver(packages ...*Package) *EmbeddedResolver {
+	return NewEmbeddedResolverWithOpts(packages, nil)
+}
+
+func NewEmbeddedResolverWithOpts(packages []*Package, filter EmbeddedResolveFilter) *EmbeddedResolver {
 	pm := make(map[string]*Package)
 	for _, p := range packages {
 		pm[p.Path] = p
@@ -51,12 +55,12 @@ func (r *EmbeddedResolver) Resolve() error {
 	return nil
 }
 
-func (r *EmbeddedResolver) resolveIfaceMethods(p *Package, f *File, iface *Interface, em *EmbeddedField) error {
+func (r *EmbeddedResolver) resolveIfaceMethods(ifacePkg *Package, f *File, iface *Interface, em *EmbeddedField) error {
 	if (r.filter != nil && r.filter(em)) || em.IsResolved {
 		return nil
 	}
 
-	fieldPkg := p // by default, we expect embedded field be in the current package.
+	fieldPkg := ifacePkg // by default, we expect embedded field be in the current package.
 	pname, tname := parseType(em.Type)
 	if pname != "" { // Find package of the embedded field.
 		if fieldPkg = r.pm[f.ImportMap[pname]]; fieldPkg == nil {
@@ -75,17 +79,22 @@ func (r *EmbeddedResolver) resolveIfaceMethods(p *Package, f *File, iface *Inter
 		}
 	}
 
-	iface.Methods = append(iface.Methods, prepareMethodsToUseInPackage(fieldPkg, p, embeddedIface.Methods)...)
+	methods := embeddedIface.Methods
+	if !IsSamePackage(fieldPkg, ifacePkg) {
+		methods = UseMethodsInPackage(fieldPkg, methods)
+	}
+
+	iface.Methods = append(iface.Methods, methods...)
 	em.IsResolved = true
 	return nil
 }
 
-func (r *EmbeddedResolver) resolveStructFields(p *Package, f *File, strct *Struct, em *EmbeddedField) error {
-	if r.filter(em) || em.IsResolved {
+func (r *EmbeddedResolver) resolveStructFields(structPkg *Package, f *File, strct *Struct, em *EmbeddedField) error {
+	if (r.filter != nil && r.filter(em)) || em.IsResolved {
 		return nil
 	}
 
-	fieldPkg := p // by default, we expect embedded field be in the current package.
+	fieldPkg := structPkg // by default, we expect embedded field be in the current package.
 	pname, tname := parseType(em.Type)
 	if pname != "" {
 		if fieldPkg = r.pm[f.ImportMap[pname]]; fieldPkg == nil {
@@ -109,18 +118,41 @@ func (r *EmbeddedResolver) resolveStructFields(p *Package, f *File, strct *Struc
 		}
 	}
 
-	strct.Fields = append(strct.Fields, prepareFieldsToUseInPackage(fieldPkg, p, embeddedStruct.Fields)...)
+	fields := embeddedStruct.Fields
+	if !IsSamePackage(fieldPkg, structPkg) {
+		fields = UseFieldsInPackage(fieldPkg, fields)
+	}
+
+	strct.Fields = append(strct.Fields, fields...)
 	em.IsResolved = true
 	return nil
 }
 
-// prepareMethodsToUseInPackage updates the method's params and results to use in the the "to" package.
-// e.g., when want to use checkHealth(h Health) to another package, it should be checkHealth(h hexa.Health).
-func prepareMethodsToUseInPackage(from, to *Package, methods []*Method) []*Method {
-	if from == to {
-		return methods
+// UseInterfaceInPackage updates the interface to be able to use it in another package.
+func UseInterfaceInPackage(from *Package, iface *Interface) *Interface {
+	return &Interface{
+		Doc:         iface.Doc,
+		Annotations: iface.Annotations,
+		Name:        iface.Name,
+		Embedded:    UseEmbeddedFieldsInPackage(from, iface.Embedded),
+		Methods:     UseMethodsInPackage(from, iface.Methods),
 	}
+}
 
+// UseStructInPackage updates the struct to be able to use it in another package.
+func UseStructInPackage(from *Package, strct *Struct) *Struct {
+	return &Struct{
+		Doc:         strct.Doc,
+		Annotations: strct.Annotations,
+		Name:        strct.Name,
+		Embedded:    UseEmbeddedFieldsInPackage(from, strct.Embedded),
+		Fields:      UseFieldsInPackage(from, strct.Fields),
+	}
+}
+
+// UseMethodsInPackage updates the method's params and results to use in another package.
+// e.g., when want to use checkHealth(h Health) to another package, it should be checkHealth(h hexa.Health).
+func UseMethodsInPackage(from *Package, methods []*Method) []*Method {
 	l := make([]*Method, len(methods))
 	for i, m := range methods {
 		params := make([]*MethodParam, len(m.Params))
@@ -129,25 +161,16 @@ func prepareMethodsToUseInPackage(from, to *Package, methods []*Method) []*Metho
 		// add the package's name of the "from" package to methods params and results in it.
 		// e.g, converts `hi(h Health)` to `hi(h hexa.Health)` to use in non-hexa packages.
 		for i, p := range m.Params {
-			paramPkg, paramType := parseType(p.Type)
-			if paramPkg == "" {
-				paramPkg = from.Name
-			}
 			params[i] = &MethodParam{
 				Name: p.Name,
-				Type: fmt.Sprintf("%s.%s", paramPkg, paramType),
+				Type: UseTypeInPackage(from, p.Type),
 			}
 		}
 
 		for i, r := range m.Results {
-			resultPkg, resultType := parseType(r.Type)
-			if resultPkg == "" {
-				resultPkg = from.Name
-			}
-
 			results[i] = &MethodResult{
 				Name: r.Name,
-				Type: constructType(resultPkg, resultType),
+				Type: UseTypeInPackage(from, r.Type),
 			}
 		}
 
@@ -163,7 +186,24 @@ func prepareMethodsToUseInPackage(from, to *Package, methods []*Method) []*Metho
 	return l
 }
 
-// prepareFieldsToUseInPackage updates fields to be able to use in the "to" package.
+// UseEmbeddedFieldsInPackage updates the embedded fields to be able to use in another package.
+func UseEmbeddedFieldsInPackage(from *Package, fields []*EmbeddedField) []*EmbeddedField {
+	l := make([]*EmbeddedField, len(fields))
+
+	for i, field := range fields {
+		l[i] = &EmbeddedField{
+			IsResolved:  field.IsResolved,
+			Doc:         field.Doc,
+			Annotations: field.Annotations,
+			Type:        UseTypeInPackage(from, field.Type),
+			Tag:         field.Tag,
+		}
+	}
+
+	return fields
+}
+
+// UseFieldsInPackage updates fields to be able to use in the another package.
 // e.g., when we want to use
 // ```
 // type Hi struct{h Health}
@@ -172,29 +212,33 @@ func prepareMethodsToUseInPackage(from, to *Package, methods []*Method) []*Metho
 // ```
 //type Hi struct{h hexa.Health}
 // ```
-func prepareFieldsToUseInPackage(from, to *Package, fields []*Field) []*Field {
-	if from == to {
-		return fields
-	}
-
+func UseFieldsInPackage(from *Package, fields []*Field) []*Field {
 	l := make([]*Field, len(fields))
 
 	// add the package's name of the "from" package to fields.
 	// e.g, converts field `h Health` to `h hexa.Health` to use in non-hexa packages.
 	for i, field := range fields {
-		fieldPkg, fieldType := parseType(field.Type)
-		if fieldPkg == "" {
-			fieldPkg = from.Name
-		}
-
 		l[i] = &Field{
 			Doc:         field.Doc,
 			Annotations: field.Annotations,
 			Name:        field.Name,
-			Type:        constructType(fieldPkg, fieldType),
+			Type:        UseTypeInPackage(from, field.Type),
 			Tag:         field.Tag,
 		}
 	}
 
 	return l
+}
+
+// UseTypeInPackage returns the type that we can use in another package.
+// e.g., if we provide Health from the hexa package. it returns hexa.Health.
+func UseTypeInPackage(from *Package, t string) string {
+	parsedPkg, _ := parseType(t)
+
+	// actually we use isPrivateType to check if it's a primitive type, because all
+	// primitive types start with a lower case just like a private type.
+	if parsedPkg == "" && !isPrivateType(t) {
+		return SetPackageOnType(from.Name, t)
+	}
+	return t
 }

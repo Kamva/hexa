@@ -1,11 +1,22 @@
 package lg
 
 import (
-	"fmt"
 	"go/ast"
 	"path"
+	"reflect"
+	"runtime"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 )
+
+// IsPrivate returns ture if the value is a private value.
+// As you know, a type, field, interface,... is private in
+// go if it's first letter is a lowercase.
+func IsPrivate(val string) bool {
+	r, _ := utf8.DecodeRuneInString(val) // get the first rune not the first byte.
+	return r != utf8.RuneError && unicode.IsLower(r)
+}
 
 // isEmbeddedNode returns true if the field is an embedded
 // type declaration in an interface or a struct.
@@ -36,24 +47,20 @@ func importsMap(l []*Import) map[string]string {
 	return m
 }
 
-// parseType returns package name and the type.
-// e.g., hexa.Health => returns "hexa","Health"
-// e.g., Health => returns "","Health"
-func parseType(t string) (string, string) {
-	idx := strings.Index(t, ".")
-	if idx == -1 {
-		return "", t
-	}
-
-	return t[0:idx], t[idx+1:]
+func IsSamePackage(pkg *Package, target *Package) bool {
+	return pkg.Path == target.Path
 }
 
-// constructType creates type from its package name and the type name.
-// e.g., hexa, Health =>
-func constructType(pkg string, t string) string {
-	if pkg == "" {
-		return t
-	}
+func FnName(fn any) string {
+	name := runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
+	return name[strings.LastIndex(name, ".")+1:]
+}
 
-	return fmt.Sprintf("%s.%s", pkg, t)
+func Lookup(tag reflect.StructTag, keys ...string) (string, bool) {
+	for _, k := range keys {
+		if v, ok := tag.Lookup(k); ok {
+			return v, ok
+		}
+	}
+	return "", false
 }

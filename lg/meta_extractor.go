@@ -1,7 +1,6 @@
 package lg
 
 import (
-	"fmt"
 	"go/ast"
 	"reflect"
 	"strings"
@@ -62,7 +61,7 @@ func methodMeta(method *ast.Field) *Method {
 			for _, paramName := range param.Names {
 				p := MethodParam{
 					Name: paramName.Name,
-					Type: typeName(param.Type),
+					Type: typeStr(param.Type),
 				}
 				params = append(params, &p)
 			}
@@ -71,7 +70,7 @@ func methodMeta(method *ast.Field) *Method {
 
 	if funcNode.Results != nil {
 		for _, result := range funcNode.Results.List {
-			resultType := typeName(result.Type)
+			resultType := typeStr(result.Type)
 
 			// for unnamed result
 			if len(result.Names) == 0 {
@@ -104,14 +103,14 @@ func methodMeta(method *ast.Field) *Method {
 func fieldMeta(field *ast.Field) *Field {
 	var tag string
 	if field.Tag != nil {
-		tag = field.Tag.Value
+		tag = field.Tag.Value[1 : len(field.Tag.Value)-1] // remove two back-ticks(`).
 	}
 
 	return &Field{
 		Doc:         prepareComments(field.Doc.Text()),
 		Annotations: annotationsFromCommentGroup(field.Doc),
 		Name:        field.Names[0].Name,
-		Type:        typeName(field.Type),
+		Type:        typeStr(field.Type),
 		Tag:         reflect.StructTag(tag),
 	}
 }
@@ -125,23 +124,9 @@ func embeddedFieldMeta(field *ast.Field) *EmbeddedField {
 	return &EmbeddedField{
 		Doc:         prepareComments(field.Doc.Text()),
 		Annotations: annotationsFromCommentGroup(field.Doc),
-		Type:        typeName(field.Type),
+		Type:        typeStr(field.Type),
 		Tag:         reflect.StructTag(tag),
 	}
-}
-
-// typeName returns the name of the type from a "Type"
-// param of an ast Node.
-// t could be *ast.Field.Type, ...
-func typeName(t ast.Expr) string {
-	switch v := t.(type) {
-	case *ast.Ident:
-		return v.Name
-	case *ast.SelectorExpr:
-		return fmt.Sprintf("%s.%s", v.X.(*ast.Ident).Name, v.Sel.Name)
-	}
-
-	return ""
 }
 
 // prepareComments prepares comments to use in templates as comments.

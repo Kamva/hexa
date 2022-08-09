@@ -77,6 +77,13 @@ func Funcs() template.FuncMap {
 
 			return fmt.Sprintf("(%s)", joinResultsInSameNameFormat(results))
 		},
+		"joinStrings": func(prefix string, postfix string, sep string, l []string) string {
+			prefixed := make([]string, len(l))
+			for i, v := range l {
+				prefixed[i] = prefix + v + postfix
+			}
+			return strings.Join(prefixed, sep)
+		},
 		"genResultsVars": func(results []*MethodResult) string {
 			genList := make([]string, len(results))
 			for i, _ := range results {
@@ -97,7 +104,7 @@ func Funcs() template.FuncMap {
 			return ""
 		},
 		"title": func(val string) string {
-			return cases.Title(language.English).String(val)
+			return cases.Title(language.English, cases.NoLower).String(val)
 		},
 		"hasAnnotation": func(annotations Annotations, name string) bool {
 			return annotations.Lookup(name) != nil

@@ -117,6 +117,15 @@ func (f *File) FindStruct(name string) *Struct {
 	return nil
 }
 
+func (i *Interface) MethodByName(name string) *Method {
+	for _, m := range i.Methods {
+		if m.Name == name {
+			return m
+		}
+	}
+	return nil
+}
+
 func (r MethodResult) joinNameAndType() string {
 	if r.Name == "" {
 		return r.Type
@@ -221,7 +230,7 @@ func NewFile(f *ast.File) *File {
 
 	for _, dec := range f.Decls { // collect structs and interfaces in the package.
 		genDecl, ok := dec.(*ast.GenDecl)
-		if !ok {
+		if !ok || len(genDecl.Specs) == 0 {
 			continue
 		}
 
@@ -231,14 +240,12 @@ func NewFile(f *ast.File) *File {
 		}
 
 		if _, ok := t.Type.(*ast.InterfaceType); ok {
-			meta := ifaceMeta(genDecl, t)
-			interfaces = append(interfaces, meta)
+			interfaces = append(interfaces, ifaceMeta(genDecl, t))
 			continue
 		}
 
 		if _, ok := t.Type.(*ast.StructType); ok {
-			meta := structMeta(genDecl, t)
-			structs = append(structs, meta)
+			structs = append(structs, structMeta(genDecl, t))
 			continue
 		}
 	}
