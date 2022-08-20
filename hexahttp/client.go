@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"net/http/httputil"
 	urlpkg "net/url"
 	"strings"
 
 	"github.com/kamva/hexa"
+	"github.com/kamva/hexa/hlog"
 	"github.com/kamva/tracer"
 )
 
@@ -68,17 +70,26 @@ func (c *Client) GetWithOptions(url string, options ...RequestOption) (*http.Res
 	return c.DoWithOptions(req, options...)
 }
 
-func (c *Client) DoWithOptions(url *http.Request, options ...RequestOption) (*http.Response, error) {
-	if err := c.setOptions(url, options...); err != nil {
+func (c *Client) DoWithOptions(req *http.Request, options ...RequestOption) (*http.Response, error) {
+	if err := c.setOptions(req, options...); err != nil {
 		return nil, tracer.Trace(err)
 	}
-
-	res, err := c.Client.Do(url)
+	res, err := c.Do(req)
 	if err != nil {
 		return nil, tracer.Trace(err)
 	}
 
 	return res, nil
+}
+
+func (c *Client) Do(req *http.Request) (*http.Response, error) {
+	// TODO: improve it (do not dump if logger's debug mode is not enabled,dump response as well).
+	d, err := httputil.DumpRequest(req, true)
+	if err != nil {
+		return nil, tracer.Trace(err)
+	}
+	hlog.Error("sending http request", hlog.String("request", string(d)))
+	return c.Client.Do(req)
 }
 
 func (c *Client) setOptions(req *http.Request, options ...RequestOption) error {
