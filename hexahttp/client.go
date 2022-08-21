@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	LogModeNothing uint = 0
+	LogModeNone uint = 0
 
 	LogModeRequestHeaders uint = 1 << iota
 	LogModeRequestBody
