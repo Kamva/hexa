@@ -14,37 +14,82 @@ import (
 	"github.com/kamva/tracer"
 )
 
+const (
+	LogModeNothing uint = 0
+
+	LogModeRequestHeaders uint = 1 << iota
+	LogModeRequestBody
+	LogModeResponseHeaders
+	LogModeResponseBody
+
+	LogModeRequest  = LogModeRequestHeaders | LogModeRequestBody
+	LogModeResponse = LogModeResponseHeaders | LogModeResponseBody
+	LogModeAll      = LogModeRequest | LogModeResponse
+)
+
 // RequestOption is like middleware which can change request before the client send it.
 type RequestOption func(req *http.Request) error
 
 // Client is improved version of the net/http client
 type Client struct {
 	*http.Client
-	baseUrl *string
+	base    *URL
+	logMode uint
 }
 
-func NewClient(baseUrl *string) *Client {
+func NewClient(base string, logMode uint) (*Client, error) {
+	var u *URL
+	var err error
+	if base != "" {
+		u, err = NewURL(base)
+		if err != nil {
+			return nil, tracer.Trace(err)
+		}
+	}
+
+	return NewClientWithOptions(&http.Client{}, u, logMode), nil
+}
+
+// NewClientWithOptions creates a new HTTP client. base url
+// could be nil. in that case all request urls
+// must be absolute.
+func NewClientWithOptions(cli *http.Client, base *URL, logMode uint) *Client {
 	return &Client{
-		Client:  &http.Client{},
-		baseUrl: baseUrl,
+		Client:  cli,
+		base:    base,
+		logMode: logMode,
 	}
 }
 
-func (c *Client) PostFormWithOptions(url string, data urlpkg.Values, options ...RequestOption) (*http.Response, error) {
-	return c.PostWithOptions(url, "application/x-www-form-urlencoded", strings.NewReader(data.Encode()), options...)
+func (c *Client) Head(url string, options ...RequestOption) (resp *http.Response, err error) {
+	u, err := c.base.URL(url)
+	if err != nil {
+		return nil, tracer.Trace(err)
+	}
+
+	req, err := http.NewRequest("HEAD", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.Do(req, options...)
 }
 
-func (c *Client) PostJsonFormWithOptions(urlPath string, data hexa.Map, options ...RequestOption) (*http.Response, error) {
+func (c *Client) PostForm(url string, data urlpkg.Values, options ...RequestOption) (*http.Response, error) {
+	return c.Post(url, "application/x-www-form-urlencoded", strings.NewReader(data.Encode()), options...)
+}
+
+func (c *Client) PostJsonForm(urlPath string, data hexa.Map, options ...RequestOption) (*http.Response, error) {
 	rBody, err := json.Marshal(data)
 	if err != nil {
 		return nil, tracer.Trace(err)
 	}
 
-	return c.PostWithOptions(urlPath, "application/json;charset=UTF-8", bytes.NewBuffer(rBody), options...)
+	return c.Post(urlPath, "application/json;charset=UTF-8", bytes.NewBuffer(rBody), options...)
 }
 
-func (c *Client) PostWithOptions(url string, contentType string, body io.Reader, options ...RequestOption) (*http.Response, error) {
-	u, err := NewURL(c.baseUrl).URL(url)
+func (c *Client) Post(url string, contentType string, body io.Reader, options ...RequestOption) (*http.Response, error) {
+	u, err := c.base.URL(url)
 	if err != nil {
 		return nil, tracer.Trace(err)
 	}
@@ -54,11 +99,11 @@ func (c *Client) PostWithOptions(url string, contentType string, body io.Reader,
 		return nil, tracer.Trace(err)
 	}
 	req.Header.Set("Content-Type", contentType)
-	return c.DoWithOptions(req, options...)
+	return c.Do(req, options...)
 }
 
-func (c *Client) GetWithOptions(url string, options ...RequestOption) (*http.Response, error) {
-	u, err := NewURL(c.baseUrl).URL(url)
+func (c *Client) Get(url string, options ...RequestOption) (*http.Response, error) {
+	u, err := c.base.URL(url)
 	if err != nil {
 		return nil, tracer.Trace(err)
 	}
@@ -67,36 +112,39 @@ func (c *Client) GetWithOptions(url string, options ...RequestOption) (*http.Res
 	if err != nil {
 		return nil, tracer.Trace(err)
 	}
-	return c.DoWithOptions(req, options...)
+	return c.Do(req, options...)
 }
 
-func (c *Client) DoWithOptions(req *http.Request, options ...RequestOption) (*http.Response, error) {
-	if err := c.setOptions(req, options...); err != nil {
-		return nil, tracer.Trace(err)
-	}
-	res, err := c.Do(req)
-	if err != nil {
-		return nil, tracer.Trace(err)
-	}
-
-	return res, nil
-}
-
-func (c *Client) Do(req *http.Request) (*http.Response, error) {
-	// TODO: improve it (do not dump if logger's debug mode is not enabled,dump response as well).
-	d, err := httputil.DumpRequest(req, true)
-	if err != nil {
-		return nil, tracer.Trace(err)
-	}
-	hlog.Error("sending http request", hlog.String("request", string(d)))
-	return c.Client.Do(req)
-}
-
-func (c *Client) setOptions(req *http.Request, options ...RequestOption) error {
+func (c *Client) Do(req *http.Request, options ...RequestOption) (*http.Response, error) {
+	// Apply options
 	for _, o := range options {
 		if err := o(req); err != nil {
-			return tracer.Trace(err)
+			return nil, tracer.Trace(err)
 		}
 	}
-	return nil
+
+	if c.logMode&LogModeRequestHeaders != 0 {
+		dumped, err := httputil.DumpRequestOut(req, c.logMode&LogModeRequestBody != 0)
+		if err !=
+			nil {
+			return nil, tracer.Trace(err)
+		}
+
+		hlog.Info("outgoing HTTP request", hlog.String("request", string(dumped)))
+	}
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return nil, tracer.Trace(err)
+	}
+
+	if c.logMode&LogModeResponseHeaders != 0 {
+		dumped, err := httputil.DumpResponse(resp, c.logMode&LogModeResponseBody != 0)
+		if err != nil {
+			return nil, tracer.Trace(err)
+		}
+
+		hlog.Info("incoming HTTP response", hlog.String("response", string(dumped)))
+	}
+
+	return resp, nil
 }

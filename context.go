@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/kamva/gutil"
+	"github.com/kamva/hexa/hlog"
 )
 
 // key is context key.
@@ -61,12 +62,12 @@ func CtxUser(ctx context.Context) User {
 
 // WithBaseLogger sets the base logger in the context. when something change in the context
 // we'll use this base logger to update the logger
-func WithBaseLogger(ctx context.Context, l Logger) context.Context {
+func WithBaseLogger(ctx context.Context, l hlog.Logger) context.Context {
 	return updateLogger(context.WithValue(ctx, ctxKeyBaseLogger, l))
 }
 
-func CtxBaseLogger(ctx context.Context) Logger {
-	l, _ := ctx.Value(ctxKeyBaseLogger).(Logger)
+func CtxBaseLogger(ctx context.Context) hlog.Logger {
+	l, _ := ctx.Value(ctxKeyBaseLogger).(hlog.Logger)
 	return l
 }
 
@@ -94,13 +95,22 @@ func CtxStore(ctx context.Context) Store {
 // logger with extra fields. If you want to set the base logger and auto
 // update on every change in the context, use WithBaseLogger instead of
 // WithLogger.
-func WithLogger(ctx context.Context, l Logger) context.Context {
+func WithLogger(ctx context.Context, l hlog.Logger) context.Context {
 	return context.WithValue(ctx, ctxKeyLogger, l)
 }
 
-func CtxLogger(ctx context.Context) Logger {
-	l, _ := ctx.Value(ctxKeyLogger).(Logger)
+// CtxLogger returns the context logger.
+func CtxLogger(ctx context.Context) hlog.Logger {
+	l, _ := ctx.Value(ctxKeyLogger).(hlog.Logger)
 	return l
+}
+
+// Logger tries to get logger from the context, otherwise returns the default logger.
+func Logger(ctx context.Context) hlog.Logger {
+	if l := CtxLogger(ctx); l != nil {
+		return l
+	}
+	return hlog.GlobalLogger()
 }
 
 // WithTranslator sets the final localized translator. Use WithBaseTranslator
@@ -120,7 +130,7 @@ type ContextParams struct {
 	CorrelationId  string
 	Locale         string // Locale syntax is just same as HTTP Accept-Language header.
 	User           User
-	BaseLogger     Logger
+	BaseLogger     hlog.Logger
 	BaseTranslator Translator
 	Store          Store // Optional
 }
@@ -166,32 +176,32 @@ func updateTranslator(ctx context.Context) context.Context {
 	return WithTranslator(ctx, t.Localize())
 }
 
-func logFields(ctx context.Context) []LogField {
+func logFields(ctx context.Context) []hlog.Field {
 	u := CtxUser(ctx)
 	r := CtxRequest(ctx)
 	cid := CtxCorrelationId(ctx)
 
-	fields := make([]LogField, 0)
+	fields := make([]hlog.Field, 0)
 	if u != nil {
 		fields = append(fields,
-			StringField("_user_type", string(u.Type())),
-			StringField("_user_id", u.Identifier()),
-			StringField("_username", u.Username()),
+			hlog.String("_user_type", string(u.Type())),
+			hlog.String("_user_id", u.Identifier()),
+			hlog.String("_username", u.Username()),
 		)
 	}
 	if cid != "" {
-		fields = append(fields, StringField("_correlation_id", cid))
+		fields = append(fields, hlog.String("_correlation_id", cid))
 	}
 
 	if r != nil {
 		rid := r.Header.Get("X-Request-ID")
 		if rid != "" {
-			fields = append(fields, StringField("_request_id", rid))
+			fields = append(fields, hlog.String("_request_id", rid))
 		}
 
 		if ip, port, err := net.SplitHostPort(gutil.IP(r)); err == nil {
-			fields = append(fields, StringField("_ip", ip))
-			fields = append(fields, StringField("_port", port))
+			fields = append(fields, hlog.String("_ip", ip))
+			fields = append(fields, hlog.String("_port", port))
 		}
 	}
 	return fields

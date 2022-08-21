@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/kamva/gutil"
+	"github.com/kamva/hexa/hlog"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,9 +21,8 @@ func assertImportedContextWithParams(t *testing.T, ctx context.Context, params *
 
 func TestDefaultContextPropagator_Extract(t *testing.T) {
 	context, params := newTestContext()
-	l := &emptyLogger{}
 	translator := &emptyTranslator{}
-	p := NewContextPropagator(l, translator)
+	p := NewContextPropagator(hlog.GlobalLogger(), translator)
 
 	uBytes, err := json.Marshal(params.User.MetaData())
 	gutil.PanicErr(err)
@@ -38,9 +38,8 @@ func TestDefaultContextPropagator_Extract(t *testing.T) {
 
 func TestDefaultContextPropagator_Inject(t *testing.T) {
 	_, params := newTestContext()
-	l := &emptyLogger{}
 	translator := &emptyTranslator{}
-	p := NewContextPropagator(l, translator)
+	p := NewContextPropagator(hlog.GlobalLogger(), translator)
 
 	uBytes, err := json.Marshal(params.User.MetaData())
 	gutil.PanicErr(err)

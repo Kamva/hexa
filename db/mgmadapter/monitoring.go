@@ -51,10 +51,10 @@ func (m *composedMonitor) Failed(c context.Context, e *event.CommandFailedEvent)
 // logMonitor logs every command and its reply, so be careful and
 // don't use it in production mode.
 type logMonitor struct {
-	l hexa.Logger
+	l hlog.Logger
 }
 
-func NewLogMonitor(l hexa.Logger) *event.CommandMonitor {
+func NewLogMonitor(l hlog.Logger) *event.CommandMonitor {
 	m := &logMonitor{l: l}
 	return &event.CommandMonitor{
 		Started:   m.Started,
@@ -93,7 +93,7 @@ func (m *logMonitor) Failed(c context.Context, e *event.CommandFailedEvent) {
 
 // logger returns the user's logger using context, otherwise
 // returns the its generic logger.
-func (m *logMonitor) logger(c context.Context) hexa.Logger {
+func (m *logMonitor) logger(c context.Context) hlog.Logger {
 	l := hexa.CtxLogger(c)
 	if l == nil {
 		return m.l

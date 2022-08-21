@@ -25,22 +25,32 @@ func Bytes(response *http.Response, err error) ([]byte, error) {
 	return ioutil.ReadAll(response.Body)
 }
 
-// ResponseError returns http error if response status code
+// ResponseErr returns http error if response status code
 // is more than 300.
-func ResponseError(r *http.Response) error {
-	if r.StatusCode <= 300 {
-		return nil
-	}
-
-	respBytes, err := Bytes(r, nil)
+func ResponseErr(r *http.Response, err error) (*http.Response, error) {
 	if err != nil {
-		return tracer.Trace(err)
+		return r, tracer.Trace(err)
 	}
 
-	return fmt.Errorf("Http error, status: %s,  code: %d,body_length: %d, body: %s",
-		r.Status,
-		r.StatusCode,
-		len(respBytes),
-		string(respBytes),
-	)
+	if r.StatusCode <= 300 {
+		return r, nil
+	}
+
+	return r, fmt.Errorf("Http response error, status: %s,  code: %d", r.Status, r.StatusCode)
+}
+
+// ResponseErrOrBytes checks if the response doesn't have any error and error and
+// its HTTP status code is a 2xx response status code, returns the response and its
+// body content bytes.
+func ResponseErrOrBytes(r *http.Response, err error) (*http.Response, []byte, error) {
+	if r, err = ResponseErr(r, err); err != nil {
+		return r, nil, tracer.Trace(err)
+	}
+
+	b, err := Bytes(r, err)
+	if err != nil {
+		return r, nil, tracer.Trace(err)
+	}
+
+	return r, b, nil
 }

@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"time"
-
-	"github.com/kamva/hexa"
 )
 
 // TODO: fix bugs for duration(shows duration as nil) and nil error(does not show the "err" as key in map props) :
@@ -27,7 +25,9 @@ type printerLogger struct {
 func (l *printerLogger) Core() any {
 	return fmt.Println
 }
-
+func (l *printerLogger) Enabled(lvl Level) bool {
+	return l.level.CanLog(lvl)
+}
 func (l *printerLogger) cloneData() []Field {
 	dst := make([]Field, len(l.with))
 	for i, v := range l.with {
@@ -42,13 +42,13 @@ func (l *printerLogger) clone() *printerLogger {
 		with:       l.cloneData(),
 	}
 }
-func (l *printerLogger) WithCtx(_ context.Context, args ...Field) hexa.Logger {
+func (l *printerLogger) WithCtx(_ context.Context, args ...Field) Logger {
 	clone := l.clone()
 	clone.with = append(clone.with, args...)
 	return clone
 }
 
-func (l *printerLogger) With(args ...Field) hexa.Logger {
+func (l *printerLogger) With(args ...Field) Logger {
 	return l.WithCtx(nil, args...)
 }
 
@@ -85,7 +85,7 @@ func (l *printerLogger) Error(msg string, args ...Field) {
 // with printer driver.
 // Note: printer logger driver is just for test purpose.
 // dont use it in production.
-func NewPrinterDriver(l Level) hexa.Logger {
+func NewPrinterDriver(l Level) Logger {
 	return &printerLogger{
 		timeFormat: "2006-01-02T15:04:05.000-0700",
 		level:      l,
@@ -94,4 +94,4 @@ func NewPrinterDriver(l Level) hexa.Logger {
 }
 
 // Assert printerLogger implements hexa Logger.
-var _ hexa.Logger = &printerLogger{}
+var _ Logger = &printerLogger{}

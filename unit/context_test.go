@@ -7,6 +7,7 @@ import (
 	"github.com/kamva/hexa"
 	"github.com/kamva/hexa/hexatranslator"
 	"github.com/kamva/hexa/hlog"
+	"github.com/kamva/hexa/hlog/logdriver"
 	"go.uber.org/zap"
 )
 
@@ -31,7 +32,7 @@ func BenchmarkContextLogger(b *testing.B) {
 	cfg := zap.NewProductionConfig()
 	cfg.Level.SetLevel(zap.DebugLevel)
 
-	l := hlog.NewZapDriverFromConfig(cfg)
+	l := logdriver.NewZapDriverFromConfig(cfg)
 	t := hexatranslator.NewEmptyDriver()
 
 	ctx := hexa.NewContext(context.Background(), hexa.ContextParams{
@@ -46,7 +47,7 @@ func BenchmarkContextLogger(b *testing.B) {
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		l := hlog.CtxLogger(ctx)
+		l := hexa.Logger(ctx)
 		_ = l
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/kamva/hexa/hlog"
 	"github.com/kamva/tracer"
 )
 
@@ -34,7 +35,7 @@ type keysPropagator struct {
 // microservices.
 type defaultContextPropagator struct {
 	up         UserPropagator
-	logger     Logger
+	logger     hlog.Logger
 	translator Translator
 }
 
@@ -147,7 +148,7 @@ func NewMultiPropagator(propagators ...ContextPropagator) ContextPropagator {
 
 // NewContextPropagator returns new context propagator to propagate
 // the Hexa context itself.
-func NewContextPropagator(l Logger, t Translator) ContextPropagator {
+func NewContextPropagator(l hlog.Logger, t Translator) ContextPropagator {
 	return &defaultContextPropagator{up: NewUserPropagator(), logger: l, translator: t}
 }
 

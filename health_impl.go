@@ -2,18 +2,20 @@ package hexa
 
 import (
 	"context"
+
+	"github.com/kamva/hexa/hlog"
 )
 
 type Ping func(ctx context.Context) error
 
 type pingHealth struct {
-	l          Logger
+	l          hlog.Logger
 	identifier string
 	ping       Ping
 	tags       map[string]string
 }
 
-func NewPingHealth(l Logger, identifier string, ping Ping, tags map[string]string) Health {
+func NewPingHealth(l hlog.Logger, identifier string, ping Ping, tags map[string]string) Health {
 	return &pingHealth{
 		identifier: identifier,
 		ping:       ping,
@@ -27,7 +29,7 @@ func (h *pingHealth) HealthIdentifier() string {
 
 func (h *pingHealth) LivenessStatus(ctx context.Context) LivenessStatus {
 	if err := h.ping(ctx); err != nil {
-		h.l.Error("can not ping", StringField("health_identifier", h.identifier), ErrField(err))
+		h.l.Error("can not ping", hlog.String("health_identifier", h.identifier), hlog.Err(err))
 		return StatusDead
 	}
 

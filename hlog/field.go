@@ -1,25 +1,33 @@
 package hlog
 
 import (
-	"github.com/kamva/hexa"
+	"github.com/kamva/tracer"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-type Field = hexa.LogField
+const ErrorStackLogKey = "_stack"
 
-// hlog LogField helpers to create fields from types.
-var Int64 = hexa.Int64Field
-var Int32 = hexa.Int32Field
-var Int = hexa.IntField
-var Uint32 = hexa.Uint32Field
-var Uint64 = hexa.Uint64Field
-var String = hexa.StringField
-var Any = hexa.AnyField
-var Err = hexa.ErrField
-var NamedErr = hexa.NamedErrField
-var Bool = hexa.BoolField
-var Duration = hexa.DurationField
-var Time = hexa.TimeField
-var Times = hexa.TimesField
-var Timep = hexa.TimepField
-var ErrStack = hexa.ErrStackField
-var ErrFields = hexa.ErrFields
+// Type and function aliases from zap to limit the libraries scope into hexa code
+
+type Field = zapcore.Field
+
+var Int64 = zap.Int64
+var Int32 = zap.Int32
+var Int = zap.Int
+var Uint32 = zap.Uint32
+var Uint64 = zap.Uint64
+var String = zap.String
+var Any = zap.Any
+var Err = zap.Error
+var NamedErr = zap.NamedError
+var Bool = zap.Bool
+var Duration = zap.Duration
+var Time = zap.Time
+var Times = zap.Times
+var Timep = zap.Timep
+
+// ErrStack prints error stack(if exists) using logger
+func ErrStack(err error) Field {
+	return String(ErrorStackLogKey, tracer.StackAsString(err))
+}

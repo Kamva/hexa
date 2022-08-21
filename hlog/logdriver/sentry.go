@@ -1,4 +1,4 @@
-package hlog
+package logdriver
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/kamva/gutil"
 	"github.com/kamva/hexa"
+	"github.com/kamva/hexa/hlog"
 )
 
 type SentryOptions struct {
@@ -25,12 +26,21 @@ func (l *sentryLogger) Core() any {
 	return l.hub
 }
 
-func (l *sentryLogger) addArgsToScope(scope *sentry.Scope, args []Field) {
-	if len(args) == 0 {
+func (l *sentryLogger) Enabled(lvl hlog.Level) bool {
+	// For the Sentry we just support error level.
+	// Currently, we don't have a way to tell log is enabled
+	// for the Message() method on sentry or not. but we
+	// don't need to it right now.
+	return lvl == hlog.ErrorLevel
+}
+
+func (l *sentryLogger) addFieldsToScope(scope *sentry.Scope, fields []hlog.Field) {
+	if len(fields) == 0 {
 		return
 	}
-	fields := fieldsToMap(args...)
-	for key, val := range fields {
+	for _, arg := range fields {
+		key, val := hlog.FieldToKeyVal(arg)
+
 		// Just keys that begin and end with "_", set as tags.
 		if len(key) >= 2 && key[0] == '_' && key[len(key)-1] == '_' {
 			scope.SetTag(key, fmt.Sprintf("%v", val))
@@ -55,7 +65,7 @@ func (l *sentryLogger) setUser(scope *sentry.Scope, user hexa.User, r *http.Requ
 	scope.SetUser(u)
 }
 
-func (l *sentryLogger) WithCtx(ctx context.Context, args ...Field) hexa.Logger {
+func (l *sentryLogger) WithCtx(ctx context.Context, args ...hlog.Field) hlog.Logger {
 	hub := l.hub.Clone()
 	scope := hub.Scope()
 
@@ -68,41 +78,41 @@ func (l *sentryLogger) WithCtx(ctx context.Context, args ...Field) hexa.Logger {
 		l.setUser(scope, user, r)
 	}
 
-	l.addArgsToScope(scope, args)
+	l.addFieldsToScope(scope, args)
 	return NewSentryDriverWith(hub)
 }
 
 // With get some fields and set check if field's key start and end
 // with single '_' character, then insert it as tag, otherwise
 // insert it as extra data.
-func (l *sentryLogger) With(args ...Field) hexa.Logger {
+func (l *sentryLogger) With(args ...hlog.Field) hlog.Logger {
 	hub := l.hub.Clone()
-	l.addArgsToScope(hub.Scope(), args)
+	l.addFieldsToScope(hub.Scope(), args)
 	return NewSentryDriverWith(hub)
 }
 
-func (l *sentryLogger) Debug(msg string, args ...Field) {
+func (l *sentryLogger) Debug(msg string, args ...hlog.Field) {
 	// For now we do not capture debug messages in sentry.
 }
 
-func (l *sentryLogger) Info(msg string, args ...Field) {
+func (l *sentryLogger) Info(msg string, args ...hlog.Field) {
 	// For now we do not capture messages in info .
 }
 
-func (l *sentryLogger) Message(msg string, args ...Field) {
+func (l *sentryLogger) Message(msg string, args ...hlog.Field) {
 	l.With(args...).(*sentryLogger).hub.CaptureMessage(msg)
 }
 
-func (l *sentryLogger) Warn(msg string, args ...Field) {
+func (l *sentryLogger) Warn(msg string, args ...hlog.Field) {
 	// For now we do not capture message in warn.
 }
 
-func (l *sentryLogger) Error(msg string, args ...Field) {
+func (l *sentryLogger) Error(msg string, args ...hlog.Field) {
 	l.With(args...).(*sentryLogger).hub.CaptureException(errors.New(msg))
 }
 
 // NewSentryDriver return new instance of hexa logger with sentry driver.
-func NewSentryDriver(o SentryOptions) (hexa.Logger, error) {
+func NewSentryDriver(o SentryOptions) (hlog.Logger, error) {
 	client, err := sentry.NewClient(sentry.ClientOptions{
 		Dsn:         o.DSN,
 		Debug:       o.Debug,
@@ -116,9 +126,9 @@ func NewSentryDriver(o SentryOptions) (hexa.Logger, error) {
 
 // NewSentryDriverWith get the sentry hub and returns new instance
 //of sentry driver for hexa logger.
-func NewSentryDriverWith(hub *sentry.Hub) hexa.Logger {
+func NewSentryDriverWith(hub *sentry.Hub) hlog.Logger {
 	return &sentryLogger{hub}
 }
 
 // Assert sentryLogger implements hexa Logger.
-var _ hexa.Logger = &sentryLogger{}
+var _ hlog.Logger = &sentryLogger{}

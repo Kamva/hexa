@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/kamva/gutil"
+	"github.com/kamva/hexa/hlog"
 )
 
 const (
@@ -59,7 +60,7 @@ type Error interface {
 	// ReportIfNeeded function report the Error to the log system if
 	// http status code is in range 5XX.
 	// return value specify that reported or no.
-	ReportIfNeeded(Logger, Translator) bool
+	ReportIfNeeded(hlog.Logger, Translator) bool
 }
 
 type defaultError struct {
@@ -132,7 +133,7 @@ func (e defaultError) SetReportData(data Map) Error {
 	return e
 }
 
-func (e defaultError) ReportIfNeeded(l Logger, _ Translator) bool {
+func (e defaultError) ReportIfNeeded(l hlog.Logger, _ Translator) bool {
 	if e.shouldReport() {
 		l.With(ErrFields(e)...).Error(e.Error())
 		return true

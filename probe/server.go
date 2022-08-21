@@ -50,7 +50,7 @@ func NewServer(server *http.Server, mux *http.ServeMux) Server {
 
 func (s *probeServer) Run() error {
 	go func() {
-		hlog.Info("start the probe server", hexa.StringField("address", s.server.Addr))
+		hlog.Info("start the probe server", hlog.String("address", s.server.Addr))
 		err := s.server.ListenAndServe()
 		if err != nil {
 			if err == http.ErrServerClosed {
@@ -58,7 +58,7 @@ func (s *probeServer) Run() error {
 				return
 			}
 
-			hlog.Error("error on health check server", hexa.ErrStackField(tracer.Trace(err)), hexa.ErrField(err))
+			hlog.Error("error on health check server", hlog.ErrStack(tracer.Trace(err)), hlog.Err(err))
 		}
 	}()
 

@@ -1,4 +1,4 @@
-package hlog
+package logdriver
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/kamva/hexa"
+	"github.com/kamva/hexa/hlog"
 	"github.com/kamva/tracer"
 	"go.uber.org/zap"
 )
@@ -19,7 +20,7 @@ const (
 type StackedLogger interface {
 	// LoggerByName returns logger by its name.
 	// logger can be nil if does not exists.
-	LoggerByName(name string) hexa.Logger
+	LoggerByName(name string) hlog.Logger
 
 	hexa.Bootable
 	hexa.Runnable
@@ -27,10 +28,11 @@ type StackedLogger interface {
 }
 
 type stackedLogger struct {
-	stack map[string]hexa.Logger
+	lvl   hlog.Level
+	stack map[string]hlog.Logger
 }
 
-func (l *stackedLogger) LoggerByName(name string) hexa.Logger {
+func (l *stackedLogger) LoggerByName(name string) hlog.Logger {
 	return l.stack[name]
 }
 
@@ -38,49 +40,53 @@ func (l *stackedLogger) Core() any {
 	return l.stack
 }
 
-func (l *stackedLogger) WithCtx(ctx context.Context, args ...Field) hexa.Logger {
-	stack := make(map[string]hexa.Logger)
+func (l *stackedLogger) Enabled(lvl hlog.Level) bool {
+	return l.lvl.CanLog(lvl)
+}
+
+func (l *stackedLogger) WithCtx(ctx context.Context, args ...hlog.Field) hlog.Logger {
+	stack := make(map[string]hlog.Logger)
 	for k, logger := range l.stack {
 		stack[k] = logger.WithCtx(ctx, args...)
 	}
 
-	return NewStackLoggerDriverWith(stack)
+	return NewStackLoggerDriverWith(l.lvl, stack)
 }
 
-func (l *stackedLogger) With(args ...Field) hexa.Logger {
-	stack := make(map[string]hexa.Logger)
+func (l *stackedLogger) With(args ...hlog.Field) hlog.Logger {
+	stack := make(map[string]hlog.Logger)
 	for k, logger := range l.stack {
 		stack[k] = logger.With(args...)
 	}
 
-	return NewStackLoggerDriverWith(stack)
+	return NewStackLoggerDriverWith(l.lvl, stack)
 }
 
-func (l *stackedLogger) Debug(msg string, args ...Field) {
+func (l *stackedLogger) Debug(msg string, args ...hlog.Field) {
 	for _, logger := range l.stack {
 		logger.Debug(msg, args...)
 	}
 }
 
-func (l *stackedLogger) Info(msg string, args ...Field) {
+func (l *stackedLogger) Info(msg string, args ...hlog.Field) {
 	for _, logger := range l.stack {
 		logger.Info(msg, args...)
 	}
 }
 
-func (l *stackedLogger) Message(msg string, args ...Field) {
+func (l *stackedLogger) Message(msg string, args ...hlog.Field) {
 	for _, logger := range l.stack {
 		logger.Message(msg, args...)
 	}
 }
 
-func (l *stackedLogger) Warn(msg string, args ...Field) {
+func (l *stackedLogger) Warn(msg string, args ...hlog.Field) {
 	for _, logger := range l.stack {
 		logger.Warn(msg, args...)
 	}
 }
 
-func (l *stackedLogger) Error(msg string, args ...Field) {
+func (l *stackedLogger) Error(msg string, args ...hlog.Field) {
 	for _, logger := range l.stack {
 		logger.Error(msg, args...)
 	}
@@ -128,25 +134,25 @@ func (l *stackedLogger) Shutdown(ctx context.Context) error {
 }
 
 type StackOptions struct {
-	Level      Level
+	Level      hlog.Level
 	ZapConfig  zap.Config
 	SentryOpts *SentryOptions
 }
 
 // NewStackLoggerDriver return new stacked logger .
 // If logger name is invalid,it will return error.
-func NewStackLoggerDriver(stackList []string, opts StackOptions) (hexa.Logger, error) {
-	stack := make(map[string]hexa.Logger, len(stackList))
+func NewStackLoggerDriver(stackList []string, opts StackOptions) (hlog.Logger, error) {
+	stack := make(map[string]hlog.Logger, len(stackList))
 
 	for _, loggerName := range stackList {
-		var logger hexa.Logger
+		var logger hlog.Logger
 		var err error
 
 		switch strings.ToLower(loggerName) {
 		case ZapLogger:
 			stack[ZapLogger] = NewZapDriverFromConfig(opts.ZapConfig)
 		case PrinterLogger:
-			stack[PrinterLogger] = NewPrinterDriver(opts.Level)
+			stack[PrinterLogger] = hlog.NewPrinterDriver(opts.Level)
 		case SentryLogger:
 			logger, err = NewSentryDriver(*opts.SentryOpts)
 			if err != nil {
@@ -158,14 +164,14 @@ func NewStackLoggerDriver(stackList []string, opts StackOptions) (hexa.Logger, e
 		}
 	}
 
-	return NewStackLoggerDriverWith(stack), nil
+	return NewStackLoggerDriverWith(opts.Level, stack), nil
 }
 
 // NewStackLoggerDriverWith return new instance of hexa logger with stacked logger driver.
-func NewStackLoggerDriverWith(stack map[string]hexa.Logger) hexa.Logger {
-	return &stackedLogger{stack}
+func NewStackLoggerDriverWith(lvl hlog.Level, stack map[string]hlog.Logger) hlog.Logger {
+	return &stackedLogger{lvl: lvl, stack: stack}
 }
 
 // Assert stackedLogger implements hexa Logger.
-var _ hexa.Logger = &stackedLogger{}
+var _ hlog.Logger = &stackedLogger{}
 var _ StackedLogger = &stackedLogger{}

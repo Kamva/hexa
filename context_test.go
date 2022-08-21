@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/kamva/gutil"
+	"github.com/kamva/hexa/hlog"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,7 +17,7 @@ func newTestContext() (context.Context, *ContextParams) {
 		CorrelationId:  "abc",
 		Locale:         "def",
 		User:           NewGuest(),
-		BaseLogger:     &emptyLogger{},
+		BaseLogger:     hlog.GlobalLogger(),
 		BaseTranslator: &emptyTranslator{},
 	}
 	return NewContext(nil, params), &params

@@ -2,6 +2,7 @@ package hlog
 
 import (
 	"fmt"
+
 	"go.uber.org/zap/zapcore"
 )
 

@@ -1,9 +1,9 @@
-package hlog
+package logdriver
 
 import (
 	"context"
 
-	"github.com/kamva/hexa"
+	"github.com/kamva/hexa/hlog"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -16,34 +16,38 @@ func (l *zapLogger) Core() any {
 	return l.logger
 }
 
-func (l *zapLogger) WithCtx(_ context.Context, args ...Field) hexa.Logger {
+func (l *zapLogger) Enabled(lvl hlog.Level) bool {
+	return l.logger.Core().Enabled(hlog.ZapLevel(lvl))
+}
+
+func (l *zapLogger) WithCtx(_ context.Context, args ...hlog.Field) hlog.Logger {
 	return l.With(args...)
 }
 
-func (l *zapLogger) With(args ...Field) hexa.Logger {
+func (l *zapLogger) With(args ...hlog.Field) hlog.Logger {
 	if len(args) > 0 {
 		return NewZapDriver(l.logger.With(args...))
 	}
 	return l
 }
 
-func (l *zapLogger) Debug(msg string, args ...Field) {
+func (l *zapLogger) Debug(msg string, args ...hlog.Field) {
 	l.logger.Debug(msg, args...)
 }
 
-func (l *zapLogger) Info(msg string, args ...Field) {
+func (l *zapLogger) Info(msg string, args ...hlog.Field) {
 	l.logger.Info(msg, args...)
 }
 
-func (l *zapLogger) Message(msg string, args ...Field) {
+func (l *zapLogger) Message(msg string, args ...hlog.Field) {
 	l.logger.Info(msg, args...)
 }
 
-func (l *zapLogger) Warn(msg string, args ...Field) {
+func (l *zapLogger) Warn(msg string, args ...hlog.Field) {
 	l.logger.Warn(msg, args...)
 }
 
-func (l *zapLogger) Error(msg string, args ...Field) {
+func (l *zapLogger) Error(msg string, args ...hlog.Field) {
 	l.logger.Error(msg, args...)
 }
 
@@ -71,7 +75,7 @@ func DefaultZapConfig(debug bool, level zapcore.Level, encoding string) zap.Conf
 	return cfg
 }
 
-func NewZapDriverFromConfig(cfg zap.Config) hexa.Logger {
+func NewZapDriverFromConfig(cfg zap.Config) hlog.Logger {
 	l, err := cfg.Build()
 	if err != nil {
 		panic(err)
@@ -80,9 +84,9 @@ func NewZapDriverFromConfig(cfg zap.Config) hexa.Logger {
 }
 
 // NewZapDriver return new instance of hexa logger with zap driver.
-func NewZapDriver(logger *zap.Logger) hexa.Logger {
+func NewZapDriver(logger *zap.Logger) hlog.Logger {
 	return &zapLogger{logger}
 }
 
 // Assert zapLogger implements hexa Logger.
-var _ hexa.Logger = &zapLogger{}
+var _ hlog.Logger = &zapLogger{}

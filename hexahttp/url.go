@@ -2,21 +2,34 @@ package hexahttp
 
 import (
 	"errors"
-	"github.com/kamva/tracer"
 	urlpkg "net/url"
 	"path"
+
+	"github.com/kamva/tracer"
 )
 
 type URLOption func(url *urlpkg.URL) error
 
 type URL struct {
-	baseUrl *string
+	base *urlpkg.URL
 }
 
-func NewURL(baseUrl *string) *URL {
-	return &URL{
-		baseUrl: baseUrl,
+// NewURL creates a new url with the base url value.
+// we can use it to convert relative url paths to
+// absolute path.
+func NewURL(base string) (*URL, error) {
+	if base == "" {
+		return new(URL), nil
 	}
+
+	parsed, err := urlpkg.Parse(base)
+	if err != nil {
+		return nil, tracer.Trace(err)
+	}
+
+	return &URL{
+		base: parsed,
+	}, nil
 }
 
 func (u *URL) URL(url string, options ...URLOption) (resultUrl *urlpkg.URL, err error) {
@@ -39,14 +52,11 @@ func (u *URL) URL(url string, options ...URLOption) (resultUrl *urlpkg.URL, err 
 }
 
 func (u *URL) getFromBase(urlPath string) (*urlpkg.URL, error) {
-	if u.baseUrl == nil {
+	if u.base == nil {
 		return nil, tracer.Trace(errors.New("provide base url otherwise you need to send the full url"))
 	}
 
-	resultUrl, err := urlpkg.Parse(*u.baseUrl)
-	if err != nil {
-		return nil, tracer.Trace(err)
-	}
+	resultUrl := u.copyBase()
 
 	isAbsolutePath := len(urlPath) > 0 && urlPath[0] == '/'
 	if isAbsolutePath {
@@ -56,4 +66,12 @@ func (u *URL) getFromBase(urlPath string) (*urlpkg.URL, error) {
 	}
 
 	return resultUrl, nil
+}
+
+func (u *URL) copyBase() *urlpkg.URL {
+	if u.base == nil {
+		return nil
+	}
+	cpy := *u.base
+	return &cpy
 }

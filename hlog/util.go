@@ -4,7 +4,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func fieldToKeyVal(f Field) (key string, val any) {
+func FieldToKeyVal(f Field) (key string, val any) {
 	switch f.Type {
 	case zapcore.Int64Type, zapcore.Int32Type, zapcore.Int16Type, zapcore.Int8Type, zapcore.UintptrType,
 		zapcore.Uint64Type, zapcore.Uint32Type, zapcore.Uint16Type, zapcore.Uint8Type:
@@ -21,7 +21,7 @@ func fieldToKeyVal(f Field) (key string, val any) {
 func fieldsToMap(fields ...Field) map[string]any {
 	m := make(map[string]any)
 	for _, f := range fields {
-		k, v := fieldToKeyVal(f)
+		k, v := FieldToKeyVal(f)
 		m[k] = v
 	}
 	return m
