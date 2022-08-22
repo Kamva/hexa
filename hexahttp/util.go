@@ -15,11 +15,7 @@ func isValidURL(val string) bool {
 }
 
 // Bytes gets result of call from the client and then converts response body to bytes.
-func Bytes(response *http.Response, err error) ([]byte, error) {
-	if err != nil {
-		return nil, tracer.Trace(err)
-	}
-
+func Bytes(response *http.Response) ([]byte, error) {
 	defer response.Body.Close()
 
 	return ioutil.ReadAll(response.Body)
@@ -47,7 +43,7 @@ func ResponseErrOrBytes(r *http.Response, err error) (*http.Response, []byte, er
 		return r, nil, tracer.Trace(err)
 	}
 
-	b, err := Bytes(r, err)
+	b, err := Bytes(r)
 	if err != nil {
 		return r, nil, tracer.Trace(err)
 	}
