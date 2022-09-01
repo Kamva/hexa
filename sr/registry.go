@@ -126,6 +126,7 @@ func (r *serviceRegistry) Descriptors() []*hexa.Descriptor {
 }
 
 func (r *serviceRegistry) Descriptor(name string) *hexa.Descriptor {
+	// TODO: Use a map if needed (to improve performance)
 	for _, d := range r.l {
 		if d.Name == name {
 			return d
