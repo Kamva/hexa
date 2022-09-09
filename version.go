@@ -3,7 +3,7 @@ package hexa
 // Version is Hexa current version.
 const (
 	Version = "1.1.0"
-	banner=`
+	banner  = `
 
              ____                                        
 |         | |             ''..      ..''       .'.       

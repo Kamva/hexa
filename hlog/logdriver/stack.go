@@ -44,51 +44,51 @@ func (l *stackedLogger) Enabled(lvl hlog.Level) bool {
 	return l.lvl.CanLog(lvl)
 }
 
-func (l *stackedLogger) WithCtx(ctx context.Context, args ...hlog.Field) hlog.Logger {
+func (l *stackedLogger) WithCtx(ctx context.Context, fields ...hlog.Field) hlog.Logger {
 	stack := make(map[string]hlog.Logger)
 	for k, logger := range l.stack {
-		stack[k] = logger.WithCtx(ctx, args...)
+		stack[k] = logger.WithCtx(ctx, fields...)
 	}
 
 	return NewStackLoggerDriverWith(l.lvl, stack)
 }
 
-func (l *stackedLogger) With(args ...hlog.Field) hlog.Logger {
+func (l *stackedLogger) With(fields ...hlog.Field) hlog.Logger {
 	stack := make(map[string]hlog.Logger)
 	for k, logger := range l.stack {
-		stack[k] = logger.With(args...)
+		stack[k] = logger.With(fields...)
 	}
 
 	return NewStackLoggerDriverWith(l.lvl, stack)
 }
 
-func (l *stackedLogger) Debug(msg string, args ...hlog.Field) {
+func (l *stackedLogger) Debug(msg string, fields ...hlog.Field) {
 	for _, logger := range l.stack {
-		logger.Debug(msg, args...)
+		logger.Debug(msg, fields...)
 	}
 }
 
-func (l *stackedLogger) Info(msg string, args ...hlog.Field) {
+func (l *stackedLogger) Info(msg string, fields ...hlog.Field) {
 	for _, logger := range l.stack {
-		logger.Info(msg, args...)
+		logger.Info(msg, fields...)
 	}
 }
 
-func (l *stackedLogger) Message(msg string, args ...hlog.Field) {
+func (l *stackedLogger) Message(msg string, fields ...hlog.Field) {
 	for _, logger := range l.stack {
-		logger.Message(msg, args...)
+		logger.Message(msg, fields...)
 	}
 }
 
-func (l *stackedLogger) Warn(msg string, args ...hlog.Field) {
+func (l *stackedLogger) Warn(msg string, fields ...hlog.Field) {
 	for _, logger := range l.stack {
-		logger.Warn(msg, args...)
+		logger.Warn(msg, fields...)
 	}
 }
 
-func (l *stackedLogger) Error(msg string, args ...hlog.Field) {
+func (l *stackedLogger) Error(msg string, fields ...hlog.Field) {
 	for _, logger := range l.stack {
-		logger.Error(msg, args...)
+		logger.Error(msg, fields...)
 	}
 }
 

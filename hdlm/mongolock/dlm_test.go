@@ -38,12 +38,12 @@ func setupDefConnection() {
 	cli, err = mongo.NewClient(options.Client().ApplyURI("mongodb://root:12345@localhost:27017"))
 	gutil.PanicErr(err)
 
-	gutil.PanicErr(cli.Connect(nil))
+	gutil.PanicErr(cli.Connect(context.Background()))
 
 	collection = cli.Database("lock_labs").Collection(CollectionName)
 }
 func disconnect() {
-	if err := cli.Disconnect(nil); err != nil {
+	if err := cli.Disconnect(context.Background()); err != nil {
 		panic(err)
 	}
 }
@@ -115,7 +115,7 @@ func TestDlm_NewMutex(t *testing.T) {
 	now := time.Now().Add(ttl)
 	time.Sleep(time.Millisecond * 200)
 
-	assert.Nil(t, m.Lock(nil))
+	assert.Nil(t, m.Lock(context.Background()))
 	assert.Equal(t, mObj.ID, "abc")
 	assert.Equal(t, mObj.Owner, "lab")
 	assert.Equal(t, mObj.ttl, ttl)
@@ -145,7 +145,7 @@ func TestDlm_NewMutexWithTTL(t *testing.T) {
 	now := time.Now().Add(ttl)
 	time.Sleep(time.Millisecond * 200)
 
-	assert.Nil(t, m.Lock(nil))
+	assert.Nil(t, m.Lock(context.Background()))
 	assert.Equal(t, mObj.ID, "abc")
 	assert.Equal(t, mObj.Owner, "lab")
 	assert.Equal(t, mObj.ttl, mttl)
@@ -210,15 +210,16 @@ func TestDlm_NewMutexRefreshAndMultipleCall(t *testing.T) {
 	oldExpiry := mObj.Expiry
 	time.Sleep(time.Second)
 	// re-lock must update expiry:
-	assert.Nil(t, m.Lock(nil))
+	ctx := context.Background()
+	assert.Nil(t, m.Lock(ctx))
 	assert.NotEqual(t, mObj.Expiry, oldExpiry)
 	assert.True(t, mObj.Expiry.After(oldExpiry))
 
-	assert.Nil(t, m.Unlock(nil))
-	assert.Nil(t, m.Lock(nil))
-	assert.Nil(t, m.Lock(nil))
-	assert.Nil(t, m.TryLock(nil))
-	assert.Nil(t, m.Lock(nil))
+	assert.Nil(t, m.Unlock(ctx))
+	assert.Nil(t, m.Lock(ctx))
+	assert.Nil(t, m.Lock(ctx))
+	assert.Nil(t, m.TryLock(ctx))
+	assert.Nil(t, m.Lock(ctx))
 
 	// all data must be remained untouched.
 	assert.Equal(t, mObj.ID, "abc")
@@ -243,12 +244,13 @@ func TestMutexDataInDB(t *testing.T) {
 	m := dlm.NewMutex("abc")
 	var mObj = m.(*mutex)
 
+	ctx := context.Background()
 	require.NotNil(t, m)
-	assert.Nil(t, m.Lock(nil))
-	count, err := collection.CountDocuments(nil, bson.M{})
+	assert.Nil(t, m.Lock(ctx))
+	count, err := collection.CountDocuments(ctx, bson.M{})
 	assert.Nil(t, err)
 	assert.Equal(t, int64(1), count)
-	res := collection.FindOne(nil, bson.M{})
+	res := collection.FindOne(ctx, bson.M{})
 	require.Nil(t, res.Err())
 
 	var doc mutex
@@ -280,15 +282,16 @@ func TestMutex_Lock(t *testing.T) {
 		TTL:   ttl,
 	})
 
-	assert.Nil(t, m1.Lock(nil))
+	assert.Nil(t, m1.Lock(context.Background()))
 
 	start := time.Now()
 	// ctx will expire in ttl + one second later, so lock should be acquired before ttl+a second.
-	ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(ttl+time.Second))
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(ttl+time.Second))
+	defer cancel()
 	require.Nil(t, m2.Lock(newCtx(ctx)))
 
 	// we should acquire lock after ttl time.
-	assert.True(t, time.Now().Sub(start) > ttl)
+	assert.True(t, time.Since(start) > ttl)
 
 	//--------------------------------
 	// Repeat it for the m1 again
@@ -296,11 +299,12 @@ func TestMutex_Lock(t *testing.T) {
 
 	start = time.Now()
 	// ctx will expire in ttl + one second later, so lock should be acquired before ttl+a second.
-	ctx, _ = context.WithDeadline(context.Background(), time.Now().Add(ttl+time.Second))
+	ctx, cancel = context.WithDeadline(context.Background(), time.Now().Add(ttl+time.Second))
+	defer cancel()
 	require.Nil(t, m1.Lock(newCtx(ctx)))
 
 	// we should acquire lock after ttl time.
-	assert.True(t, time.Now().Sub(start) > ttl)
+	assert.True(t, time.Since(start) > ttl)
 }
 
 func TestMutex_LockAndReLock(t *testing.T) {
@@ -324,26 +328,27 @@ func TestMutex_LockAndReLock(t *testing.T) {
 		Owner: "machine-2",
 		TTL:   ttl,
 	})
-
-	assert.Nil(t, m1.Lock(nil))
+	ctx := context.Background()
+	assert.Nil(t, m1.Lock(ctx))
 
 	// re-lock the m1 mutex two times, each time after one second.
 	releaseAfter := ttl + time.Second*2
 	go func() {
 		// waiting for one second and re-lock it again, so the lock should release after ttl + 2
 		time.Sleep(time.Second)
-		assert.Nil(t, m1.Lock(nil))
+		assert.Nil(t, m1.Lock(ctx))
 		time.Sleep(time.Second)
-		assert.Nil(t, m1.Lock(nil))
+		assert.Nil(t, m1.Lock(ctx))
 	}()
 
 	start := time.Now()
 	// ctx will expire in "releaseAfter + one second" later, so lock should be acquired before ctx expiry.
-	ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(releaseAfter+time.Second))
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(releaseAfter+time.Second))
+	defer cancel()
 	require.Nil(t, m2.Lock(newCtx(ctx)))
 
 	// we should acquire lock after releaseAfter time elapsed.
-	assert.True(t, time.Now().Sub(start) > releaseAfter)
+	assert.True(t, time.Since(start) > releaseAfter)
 }
 
 func TestMutex_UnlockBeforeExpiration(t *testing.T) {
@@ -367,21 +372,23 @@ func TestMutex_UnlockBeforeExpiration(t *testing.T) {
 		TTL:   ttl,
 	})
 
-	assert.Nil(t, m1.Lock(nil))
+	ctx := context.Background()
+	assert.Nil(t, m1.Lock(ctx))
 
 	// unlock after one second.
 	releaseAfter := time.Second
 	go func() {
 		// waiting for one second and unlock it.
 		time.Sleep(time.Second)
-		assert.Nil(t, m1.Unlock(nil))
+		assert.Nil(t, m1.Unlock(ctx))
 	}()
 
 	start := time.Now()
 	// ctx will expire in "releaseAfter + one second" later, so lock should be acquired before ctx expiry.
-	ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(releaseAfter+time.Second))
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(releaseAfter+time.Second))
+	defer cancel()
 	require.Nil(t, m2.Lock(newCtx(ctx)))
 
 	// we should acquire lock after releaseAfter time elapsed.
-	assert.True(t, time.Now().Sub(start) > releaseAfter)
+	assert.True(t, time.Since(start) > releaseAfter)
 }

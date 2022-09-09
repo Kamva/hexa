@@ -17,7 +17,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson6252c418DecodeGithubComKamvaHexa(in *jlexer.Lexer, out *HttpRespBody) {
+func easyjson6252c418DecodeGithubComKamvaHexa(in *jlexer.Lexer, out *HTTPRespBody) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -66,7 +66,7 @@ func easyjson6252c418DecodeGithubComKamvaHexa(in *jlexer.Lexer, out *HttpRespBod
 		in.Consumed()
 	}
 }
-func easyjson6252c418EncodeGithubComKamvaHexa(out *jwriter.Writer, in HttpRespBody) {
+func easyjson6252c418EncodeGithubComKamvaHexa(out *jwriter.Writer, in HTTPRespBody) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -106,25 +106,25 @@ func easyjson6252c418EncodeGithubComKamvaHexa(out *jwriter.Writer, in HttpRespBo
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v HttpRespBody) MarshalJSON() ([]byte, error) {
+func (v HTTPRespBody) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
 	easyjson6252c418EncodeGithubComKamvaHexa(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v HttpRespBody) MarshalEasyJSON(w *jwriter.Writer) {
+func (v HTTPRespBody) MarshalEasyJSON(w *jwriter.Writer) {
 	easyjson6252c418EncodeGithubComKamvaHexa(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *HttpRespBody) UnmarshalJSON(data []byte) error {
+func (v *HTTPRespBody) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
 	easyjson6252c418DecodeGithubComKamvaHexa(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *HttpRespBody) UnmarshalEasyJSON(l *jlexer.Lexer) {
+func (v *HTTPRespBody) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson6252c418DecodeGithubComKamvaHexa(l, v)
 }

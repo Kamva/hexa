@@ -210,7 +210,7 @@ func UseEmbeddedFieldsInPackage(from *Package, fields []*EmbeddedField) []*Embed
 // ```
 // in another package, it should be:
 // ```
-//type Hi struct{h hexa.Health}
+// type Hi struct{h hexa.Health}
 // ```
 func UseFieldsInPackage(from *Package, fields []*Field) []*Field {
 	l := make([]*Field, len(fields))

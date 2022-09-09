@@ -32,23 +32,23 @@ func NewURL(base string) (*URL, error) {
 	}, nil
 }
 
-func (u *URL) URL(url string, options ...URLOption) (resultUrl *urlpkg.URL, err error) {
+func (u *URL) URL(url string, options ...URLOption) (resultURL *urlpkg.URL, err error) {
 	if isValidURL(url) {
-		resultUrl, err = urlpkg.Parse(url)
+		resultURL, err = urlpkg.Parse(url)
 	} else {
-		resultUrl, err = u.getFromBase(url)
+		resultURL, err = u.getFromBase(url)
 	}
 	if err != nil {
 		return nil, tracer.Trace(err)
 	}
 
 	for _, o := range options {
-		if err := o(resultUrl); err != nil {
+		if err := o(resultURL); err != nil {
 			return nil, tracer.Trace(err)
 		}
 	}
 
-	return resultUrl, nil
+	return resultURL, nil
 }
 
 func (u *URL) getFromBase(urlPath string) (*urlpkg.URL, error) {
@@ -56,16 +56,16 @@ func (u *URL) getFromBase(urlPath string) (*urlpkg.URL, error) {
 		return nil, tracer.Trace(errors.New("provide base url otherwise you need to send the full url"))
 	}
 
-	resultUrl := u.copyBase()
+	resultURL := u.copyBase()
 
 	isAbsolutePath := len(urlPath) > 0 && urlPath[0] == '/'
 	if isAbsolutePath {
-		resultUrl.Path = urlPath
+		resultURL.Path = urlPath
 	} else {
-		resultUrl.Path = path.Join(resultUrl.Path, urlPath)
+		resultURL.Path = path.Join(resultURL.Path, urlPath)
 	}
 
-	return resultUrl, nil
+	return resultURL, nil
 }
 
 func (u *URL) copyBase() *urlpkg.URL {

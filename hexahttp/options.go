@@ -2,9 +2,10 @@ package hexahttp
 
 import (
 	"fmt"
-	"github.com/kamva/hexa"
 	"net/http"
 	urlpkg "net/url"
+
+	"github.com/kamva/hexa"
 )
 
 func BasicAuth(username string, password string) RequestOption {
@@ -37,7 +38,7 @@ func AuthenticateHeader(header string, tokenType string, token string) RequestOp
 func QueryParams(params hexa.Map) RequestOption {
 	return func(req *http.Request) error {
 		u := req.URL
-		return UrlQueryParams(params)(u)
+		return URLQueryParams(params)(u)
 	}
 }
 
@@ -45,7 +46,7 @@ func QueryParams(params hexa.Map) RequestOption {
 // URL options
 //--------------------------------
 
-func UrlQueryParams(params hexa.Map) URLOption {
+func URLQueryParams(params hexa.Map) URLOption {
 	return func(u *urlpkg.URL) error {
 		q := u.Query()
 

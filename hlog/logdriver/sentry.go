@@ -91,11 +91,11 @@ func (l *sentryLogger) With(args ...hlog.Field) hlog.Logger {
 	return NewSentryDriverWith(hub)
 }
 
-func (l *sentryLogger) Debug(msg string, args ...hlog.Field) {
+func (l *sentryLogger) Debug(msg string, args ...hlog.Field) { //nolint:revive
 	// For now we do not capture debug messages in sentry.
 }
 
-func (l *sentryLogger) Info(msg string, args ...hlog.Field) {
+func (l *sentryLogger) Info(msg string, args ...hlog.Field) { //nolint:revive
 	// For now we do not capture messages in info .
 }
 
@@ -103,7 +103,7 @@ func (l *sentryLogger) Message(msg string, args ...hlog.Field) {
 	l.With(args...).(*sentryLogger).hub.CaptureMessage(msg)
 }
 
-func (l *sentryLogger) Warn(msg string, args ...hlog.Field) {
+func (l *sentryLogger) Warn(msg string, args ...hlog.Field) { //nolint:revive
 	// For now we do not capture message in warn.
 }
 
@@ -125,7 +125,7 @@ func NewSentryDriver(o SentryOptions) (hlog.Logger, error) {
 }
 
 // NewSentryDriverWith get the sentry hub and returns new instance
-//of sentry driver for hexa logger.
+// of sentry driver for hexa logger.
 func NewSentryDriverWith(hub *sentry.Hub) hlog.Logger {
 	return &sentryLogger{hub}
 }

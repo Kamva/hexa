@@ -20,10 +20,10 @@ func newTestContext() (context.Context, *ContextParams) {
 		BaseLogger:     hlog.GlobalLogger(),
 		BaseTranslator: &emptyTranslator{},
 	}
-	return NewContext(nil, params), &params
+	return NewContext(context.Background(), params), &params
 }
 
-func assertContextWithParams(t *testing.T, ctx context.Context, params *ContextParams) {
+func assertContextWithParams(ctx context.Context, t *testing.T, params *ContextParams) {
 	assert.Equal(t, params.Request, CtxRequest(ctx))
 	assert.Equal(t, params.CorrelationId, CtxCorrelationId(ctx))
 	assert.Equal(t, params.Locale, CtxLocale(ctx))
@@ -37,7 +37,7 @@ func TestNewContext(t *testing.T) {
 	if !assert.NotNil(t, ctx) {
 		return
 	}
-	assertContextWithParams(t, ctx, params)
+	assertContextWithParams(ctx, t, params)
 }
 
 func TestWithUser(t *testing.T) {
@@ -50,8 +50,8 @@ func TestWithUser(t *testing.T) {
 	assert.Equal(t, CtxUser(ctx), newUser)
 
 	// assert old context is good:
-	assertContextWithParams(t, ctx, params)
+	assertContextWithParams(ctx, t, params)
 
 	params.User = newUser
-	assertContextWithParams(t, newCtx, params)
+	assertContextWithParams(newCtx, t, params)
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func assertImportedContextWithParams(t *testing.T, ctx context.Context, params *ContextParams) {
+func assertImportedContextWithParams(ctx context.Context, t *testing.T, params *ContextParams) {
 	assert.Nil(t, CtxRequest(ctx))
 	assert.Equal(t, params.CorrelationId, CtxCorrelationId(ctx))
 	assert.Equal(t, params.Locale, CtxLocale(ctx))
@@ -50,5 +50,5 @@ func TestDefaultContextPropagator_Inject(t *testing.T) {
 	}
 	ctx, err := p.Extract(context.Background(), payload)
 	assert.Nil(t, err)
-	assertImportedContextWithParams(t, ctx, params)
+	assertImportedContextWithParams(ctx, t, params)
 }

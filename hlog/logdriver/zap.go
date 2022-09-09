@@ -20,35 +20,35 @@ func (l *zapLogger) Enabled(lvl hlog.Level) bool {
 	return l.logger.Core().Enabled(hlog.ZapLevel(lvl))
 }
 
-func (l *zapLogger) WithCtx(_ context.Context, args ...hlog.Field) hlog.Logger {
-	return l.With(args...)
+func (l *zapLogger) WithCtx(_ context.Context, fields ...hlog.Field) hlog.Logger {
+	return l.With(fields...)
 }
 
-func (l *zapLogger) With(args ...hlog.Field) hlog.Logger {
-	if len(args) > 0 {
-		return NewZapDriver(l.logger.With(args...))
+func (l *zapLogger) With(fields ...hlog.Field) hlog.Logger {
+	if len(fields) > 0 {
+		return NewZapDriver(l.logger.With(fields...))
 	}
 	return l
 }
 
-func (l *zapLogger) Debug(msg string, args ...hlog.Field) {
-	l.logger.Debug(msg, args...)
+func (l *zapLogger) Debug(msg string, fields ...hlog.Field) {
+	l.logger.Debug(msg, fields...)
 }
 
-func (l *zapLogger) Info(msg string, args ...hlog.Field) {
-	l.logger.Info(msg, args...)
+func (l *zapLogger) Info(msg string, fields ...hlog.Field) {
+	l.logger.Info(msg, fields...)
 }
 
-func (l *zapLogger) Message(msg string, args ...hlog.Field) {
-	l.logger.Info(msg, args...)
+func (l *zapLogger) Message(msg string, fields ...hlog.Field) {
+	l.logger.Info(msg, fields...)
 }
 
-func (l *zapLogger) Warn(msg string, args ...hlog.Field) {
-	l.logger.Warn(msg, args...)
+func (l *zapLogger) Warn(msg string, fields ...hlog.Field) {
+	l.logger.Warn(msg, fields...)
 }
 
-func (l *zapLogger) Error(msg string, args ...hlog.Field) {
-	l.logger.Error(msg, args...)
+func (l *zapLogger) Error(msg string, fields ...hlog.Field) {
+	l.logger.Error(msg, fields...)
 }
 
 type ZapOptions struct {

@@ -112,7 +112,7 @@ func (h healthReporter) ReadinessStatus(ctx context.Context) ReadinessStatus {
 	return StatusReady
 }
 
-func (h healthReporter) HealthReport(ctx context.Context) HealthReport {
+func (h healthReporter) HealthReport(_ context.Context) HealthReport {
 	l := HealthCheck(h.statusCheck...)
 	return HealthReport{
 		Alive:    AliveStatus(l...),

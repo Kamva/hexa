@@ -13,7 +13,7 @@ type ContextPropagator interface {
 	// Inject injects values from context into a map and returns the map.
 	Inject(context.Context) (map[string][]byte, error)
 
-	// Extract extract values from map and insert to the context.
+	// Extract extracts values from map and insert to the context.
 	Extract(context.Context, map[string][]byte) (context.Context, error)
 }
 
@@ -26,7 +26,7 @@ var propagatingContextKeys = []contextKey{
 // keysPropagator get a list of keys and propagate that key,values from context.
 // all values in the context for these keys must be string.
 type keysPropagator struct {
-	keys   []string
+	keys   []fmt.Stringer
 	strict bool
 }
 
@@ -122,7 +122,7 @@ func (p *keysPropagator) Inject(c context.Context) (map[string][]byte, error) {
 		if !ok {
 			return nil, tracer.Trace(fmt.Errorf("type of value for %s key is not string", k))
 		}
-		m[k] = []byte(val)
+		m[k.String()] = []byte(val)
 	}
 
 	return m, nil
@@ -130,7 +130,7 @@ func (p *keysPropagator) Inject(c context.Context) (map[string][]byte, error) {
 
 func (p *keysPropagator) Extract(c context.Context, m map[string][]byte) (context.Context, error) {
 	for _, k := range p.keys {
-		v, ok := m[k]
+		v, ok := m[k.String()]
 		if !ok {
 			if p.strict {
 				return nil, tracer.Trace(fmt.Errorf("value for key %s does not exist", k))
@@ -152,7 +152,7 @@ func NewContextPropagator(l hlog.Logger, t Translator) ContextPropagator {
 	return &defaultContextPropagator{up: NewUserPropagator(), logger: l, translator: t}
 }
 
-func NewKeysPropagator(keys []string, strict bool) ContextPropagator {
+func NewKeysPropagator(keys []fmt.Stringer, strict bool) ContextPropagator {
 	return &keysPropagator{keys: keys, strict: strict}
 }
 

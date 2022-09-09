@@ -1,3 +1,4 @@
+//nolint:revive
 package hexa
 
 type emptyTranslator struct {

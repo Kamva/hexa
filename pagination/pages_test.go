@@ -7,9 +7,10 @@ package pagination
 
 import (
 	"bytes"
-	"github.com/kamva/gutil"
 	"net/http"
 	"testing"
+
+	"github.com/kamva/gutil"
 
 	"github.com/stretchr/testify/assert"
 )

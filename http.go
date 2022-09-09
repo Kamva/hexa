@@ -2,9 +2,9 @@
 
 package hexa
 
-// HttpRespBody is the http response body format
-//easyjson:json
-type HttpRespBody struct {
+// HTTPRespBody is the http response body format
+// easyjson:json
+type HTTPRespBody struct {
 	Code    string `json:"code"`
 	Message string `json:"message,omitempty"`
 	Data    any    `json:"data,omitempty"`

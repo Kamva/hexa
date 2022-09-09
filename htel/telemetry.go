@@ -20,7 +20,7 @@ func (t *tracerProvider) Shutdown(ctx context.Context) error {
 	return tracer.Trace(t.TracerProvider.Shutdown(ctx))
 }
 
-func NewTracerProvider(tp *tracesdk.TracerProvider) *tracerProvider {
+func NewTracerProvider(tp *tracesdk.TracerProvider) trace.TracerProvider {
 	return &tracerProvider{tp}
 }
 

@@ -1,6 +1,5 @@
 //go:generate msgp
 
-
 package mgmadapter
 
 import "time"

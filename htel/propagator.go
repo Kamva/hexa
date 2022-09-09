@@ -21,7 +21,7 @@ func (hc HexaCarrier) Set(key string, value string) {
 func (hc HexaCarrier) Keys() []string {
 	keys := make([]string, len(hc))
 	i := 0
-	for k, _ := range hc {
+	for k := range hc {
 		keys[i] = k
 		i++
 	}

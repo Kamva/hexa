@@ -17,6 +17,7 @@ type pingHealth struct {
 
 func NewPingHealth(l hlog.Logger, identifier string, ping Ping, tags map[string]string) Health {
 	return &pingHealth{
+		l:          l,
 		identifier: identifier,
 		ping:       ping,
 		tags:       tags,

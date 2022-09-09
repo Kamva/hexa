@@ -11,15 +11,15 @@ import (
 
 func Test_annotationsFromCommentGroup(t *testing.T) {
 	g := []*ast.Comment{
-		&ast.Comment{
+		{
 			Slash: 0,
 			Text:  "// regular comment",
 		},
-		&ast.Comment{
+		{
 			Slash: 0,
 			Text:  "// @abc",
 		},
-		&ast.Comment{
+		{
 			Slash: 0,
 			Text:  "//@cde `a:\"b\"`",
 		},
@@ -38,7 +38,7 @@ func Test_annotationsFromCommentGroup(t *testing.T) {
 
 func TestAnnotations_Lookup(t *testing.T) {
 	g := []*ast.Comment{
-		&ast.Comment{
+		{
 			Slash: 0,
 			Text:  "//@abc `a:\"b\"`",
 		},

@@ -44,7 +44,7 @@ func Funcs() template.FuncMap {
 		"joinParams": func(params []*MethodParam) string { // e.g., // a,b,c
 			var joined []string
 			for _, p := range params {
-				joined = append(joined, fmt.Sprintf("%s", p.Name))
+				joined = append(joined, p.Name)
 			}
 
 			return strings.Join(joined, ",")
@@ -53,7 +53,7 @@ func Funcs() template.FuncMap {
 		"joinParamsWithUnpack": func(params []*MethodParam) string { // e.g, a,b,c...
 			var joined []string
 			for _, p := range params {
-				mp := fmt.Sprintf("%s", p.Name)
+				mp := p.Name
 				if strings.Index(p.Type, "...") == 0 {
 					mp += "..."
 				}
@@ -86,7 +86,7 @@ func Funcs() template.FuncMap {
 		},
 		"genResultsVars": func(results []*MethodResult) string {
 			genList := make([]string, len(results))
-			for i, _ := range results {
+			for i := range results {
 				genList[i] = ResultVar(i)
 			}
 

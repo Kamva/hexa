@@ -69,9 +69,13 @@ func (h *healthHandlers) statusHandler(w http.ResponseWriter, r *http.Request) {
 		hlog.Error("error on marshaling health report", hlog.ErrStack(tracer.Trace(err)))
 		resp := fmt.Sprintf(`{"err" : "%s"}`, err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(resp))
+		if _, err := w.Write([]byte(resp)); err != nil {
+			hlog.Error("error on writing heal response error", hlog.Err(err))
+		}
 		return
 	}
 
-	w.Write(b)
+	if _, err := w.Write(b); err != nil {
+		hlog.Error("error on writing health status", hlog.Err(err))
+	}
 }

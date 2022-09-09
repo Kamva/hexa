@@ -102,5 +102,5 @@ func TestWithUserRole(t *testing.T) {
 	newUser := WithUserRole(u, "abc")
 
 	assert.Equal(t, u.Roles(), []string{"a", "b"})
-	assert.Equal(t, newUser.Roles(), []string{"a", "b","abc"})
+	assert.Equal(t, newUser.Roles(), []string{"a", "b", "abc"})
 }

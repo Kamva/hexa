@@ -5,11 +5,11 @@ import "github.com/kamva/hexa"
 // keyTranslator just returns key itself as the translation result.
 type keyTranslator struct{}
 
-func (e keyTranslator) Localize(langs ...string) hexa.Translator {
+func (e keyTranslator) Localize(langs ...string) hexa.Translator { //nolint:revive
 	return e
 }
 
-func (e keyTranslator) Translate(key string, keyParams ...any) (string, error) {
+func (e keyTranslator) Translate(key string, keyParams ...any) (string, error) { //nolint:revive
 	return key, nil
 }
 
@@ -18,11 +18,11 @@ func (e keyTranslator) MustTranslate(key string, keyParams ...any) string {
 	return t
 }
 
-func (e keyTranslator) TranslateDefault(key string, fallback string, keyParams ...any) (string, error) {
+func (e keyTranslator) TranslateDefault(key string, fallback string, keyParams ...any) (string, error) { //nolint:revive
 	return e.Translate(key, keyParams...)
 }
 
-func (e keyTranslator) MustTranslateDefault(key string, fallback string, keyParams ...any) string {
+func (e keyTranslator) MustTranslateDefault(key string, fallback string, keyParams ...any) string { //nolint:revive
 	t, _ := e.Translate(key, keyParams...)
 	return t
 }

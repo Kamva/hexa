@@ -5,17 +5,27 @@ import (
 )
 
 func FieldToKeyVal(f Field) (key string, val any) {
-	switch f.Type {
-	case zapcore.Int64Type, zapcore.Int32Type, zapcore.Int16Type, zapcore.Int8Type, zapcore.UintptrType,
-		zapcore.Uint64Type, zapcore.Uint32Type, zapcore.Uint16Type, zapcore.Uint8Type:
-		val = f.Integer
-	case zapcore.StringType:
-		val = f.String
-	default:
-		val = f.Interface
+	if f.Interface != nil {
+		return f.Key, f.Interface
 	}
 
-	return f.Key, val
+	if f.String != "" || f.Type == zapcore.StringerType {
+		return f.Key, f.String
+	}
+
+	return f.Key, f.Integer
+
+	//switch f.Type {
+	//case zapcore.Int64Type, zapcore.Int32Type, zapcore.Int16Type, zapcore.Int8Type, zapcore.UintptrType,
+	//	zapcore.Uint64Type, zapcore.Uint32Type, zapcore.Uint16Type, zapcore.Uint8Type, zapcore.DurationType:
+	//	val = f.Integer
+	//case zapcore.StringType:
+	//	val = f.String
+	//default:
+	//	val = f.Interface
+	//}
+	//
+	//return f.Key, val
 }
 
 func fieldsToMap(fields ...Field) map[string]any {

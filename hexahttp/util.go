@@ -31,7 +31,7 @@ func Drain(r *http.Response) error {
 // ResponseErr returns http error if the response is not successful.
 // it drains the response.
 func ResponseErr(r *http.Response) error {
-	defer Drain(r)
+	defer Drain(r) //nolint
 	return responseErr(r)
 }
 

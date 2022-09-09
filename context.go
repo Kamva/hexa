@@ -24,6 +24,10 @@ const (
 	ctxKeyStore          contextKey = "_ctx_store"           // value MUST be Store interface.
 )
 
+func (c contextKey) String() string {
+	return string(c)
+}
+
 func WithRequest(ctx context.Context, r *http.Request) context.Context {
 	return updateLogger(context.WithValue(ctx, ctxKeyRequest, r))
 }
