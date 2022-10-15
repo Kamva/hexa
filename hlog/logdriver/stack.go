@@ -23,7 +23,6 @@ type StackedLogger interface {
 	LoggerByName(name string) hlog.Logger
 
 	hexa.Bootable
-	hexa.Runnable
 	hexa.Shutdownable
 }
 
@@ -96,18 +95,6 @@ func (l *stackedLogger) Boot() error {
 	for _, logger := range l.stack {
 		if bootable, ok := logger.(hexa.Bootable); ok {
 			if err := bootable.Boot(); err != nil {
-				return tracer.Trace(err)
-			}
-		}
-	}
-
-	return nil
-}
-
-func (l *stackedLogger) Run() error {
-	for _, logger := range l.stack {
-		if runnable, ok := logger.(hexa.Runnable); ok {
-			if err := runnable.Run(); err != nil {
 				return tracer.Trace(err)
 			}
 		}

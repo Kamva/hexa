@@ -2,6 +2,7 @@ package probe
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"sync"
 
@@ -48,21 +49,23 @@ func NewServer(server *http.Server, mux *http.ServeMux) Server {
 	return pserver
 }
 
-func (s *probeServer) Run() error {
+func (s *probeServer) Run() (<-chan error, error) {
+	done := make(chan error, 1)
 	go func() {
 		hlog.Info("start the probe server", hlog.String("address", s.server.Addr))
 		err := s.server.ListenAndServe()
-		if err != nil {
-			if err == http.ErrServerClosed {
-				hlog.Info("The probe server is closed")
-				return
-			}
-
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			hlog.Error("error on health check server", hlog.ErrStack(tracer.Trace(err)), hlog.Err(err))
+			done <- err
+			close(done)
+			return
 		}
+
+		hlog.Info("The probe server is closed")
+		close(done)
 	}()
 
-	return nil
+	return done, nil
 }
 
 func (s *probeServer) Register(name, pattern string, handler Handler, description string) {

@@ -23,8 +23,8 @@ type Runnable interface {
 	// - How to specify service had error before start running? the second return param is the
 	//   error which specifies that.
 	// - How to specify if the service had an error when it was running? the service will send
-	//   an error in the close channel and then closes it.
-	// - How to specify if the service run is done? it closes the close channel.
+	//   an error in the done channel and then closes it.
+	// - How to specify if the service run is done? it closes the done channel.
 	//
 	// Previous signature of the `Run` method was `Run() error`, and behaviour(blocking or non-blocking) was unspecified.
 	// In some of our runnable services we needed a way to know if a service is running before start running our
@@ -32,7 +32,7 @@ type Runnable interface {
 	// to it in our tests, but we didn't have any way to know it, so we specified this signature to let services return
 	// from the `Run()` method when they ran the service and also return a channel to specify if the
 	// Run is done (e.g., server is sopped). and also in this way all services are just in one mode: non-blocking.
-	Run() (close <-chan error, err error)
+	Run() (done <-chan error, err error)
 }
 
 type Shutdownable interface {

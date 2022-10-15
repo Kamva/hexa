@@ -41,7 +41,9 @@ func main() {
 	probe.RegisterHealthHandlers(s, r)
 	probe.RegisterPprofHandlers(s)
 
-	gutil.PanicErr(s.Run())
+	done, err := s.Run()
+	gutil.PanicErr(err)
+	gutil.PanicErr(<-done)
 	gutil.WaitForSignals(syscall.SIGINT, syscall.SIGTERM)
 }
 

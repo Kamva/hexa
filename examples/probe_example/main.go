@@ -27,7 +27,9 @@ func main() {
 		}
 	}, "hi server")
 
-	gutil.PanicErr(probeServer.Run())
+	done, err := probeServer.Run()
+	gutil.PanicErr(err)
+	gutil.PanicErr(<-done)
 	fmt.Println("server is listening on", addr)
 	gutil.WaitForSignals(syscall.SIGINT)
 }
