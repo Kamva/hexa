@@ -56,6 +56,9 @@ func (r *serviceRegistry) register(d *hexa.Descriptor) {
 	}
 
 	r.l = append(r.l, d)
+
+	// Sort the list by priority.
+	sort.Slice(r.l, func(i, j int) bool { return r.l[i].Priority < r.l[j].Priority })
 }
 
 func (r *serviceRegistry) Boot() error {
@@ -121,7 +124,6 @@ func (r *serviceRegistry) ShutdownCh() (shutdownCh chan struct{}) {
 }
 
 func (r *serviceRegistry) Descriptors() []*hexa.Descriptor {
-	sort.Slice(r.l, func(i, j int) bool { return r.l[i].Priority < r.l[j].Priority })
 	return r.l
 }
 

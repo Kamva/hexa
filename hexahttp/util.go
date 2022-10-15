@@ -22,10 +22,11 @@ func Bytes(r *http.Response) ([]byte, error) {
 
 // Drain drains the response body and closes its connection.
 func Drain(r *http.Response) error {
-	defer r.Body.Close()
-
-	_, err := io.Copy(ioutil.Discard, r.Body)
-	return err
+	if r.Body != nil {
+		_, _ = io.Copy(io.Discard, r.Body)
+		return r.Body.Close()
+	}
+	return nil
 }
 
 // ResponseErr returns http error if the response is not successful.
@@ -39,7 +40,7 @@ func ResponseErr(r *http.Response) error {
 // the response isn't successful.
 // It closes the response's body.
 func ResponseErrBytes(r *http.Response) ([]byte, error) {
-	defer r.Body.Close()
+	defer Drain(r) //nolint
 	if err := responseErr(r); err != nil {
 		b, _ := io.ReadAll(r.Body)
 		return b, err
@@ -52,7 +53,7 @@ func ResponseErrBytes(r *http.Response) ([]byte, error) {
 // ResponseErrOrBytes checks if the response is successful,
 // it returns the body bytes, otherwise the http error.
 func ResponseErrOrBytes(r *http.Response) ([]byte, error) {
-	defer r.Body.Close()
+	defer Drain(r) //nolint
 
 	if err := responseErr(r); err != nil {
 		return nil, tracer.Trace(err)
@@ -64,7 +65,7 @@ func ResponseErrOrBytes(r *http.Response) ([]byte, error) {
 // ResponseErrAndBytes returns the response body byes and
 // a http error if the response is not successful.
 func ResponseErrAndBytes(r *http.Response) ([]byte, error) {
-	defer r.Body.Close()
+	defer Drain(r) //nolint
 
 	b, bytesErr := Bytes(r)
 	if err := responseErr(r); err != nil {
