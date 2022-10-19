@@ -1,4 +1,4 @@
-package hexahttp
+package hurl
 
 import (
 	"errors"

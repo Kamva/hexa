@@ -1,4 +1,4 @@
-package hexahttp
+package hurl
 
 import (
 	"fmt"
@@ -15,9 +15,10 @@ func (err HTTPErr) Error() string {
 	return fmt.Sprintf("HTTP code: %d, msg: %s, status: %s", err.Code, http.StatusText(err.Code), err.Status)
 }
 
-func responseErr(r *http.Response) error {
+// ResponseErr returns http error if the response is not successful.
+func ResponseErr(r *http.Response) *HTTPErr {
 	if r.StatusCode <= 300 {
 		return nil
 	}
-	return HTTPErr{r.StatusCode, r.Status}
+	return &HTTPErr{r.StatusCode, r.Status}
 }
