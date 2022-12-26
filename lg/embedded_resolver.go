@@ -64,7 +64,7 @@ func (r *EmbeddedResolver) resolveIfaceMethods(ifacePkg *Package, f *File, iface
 	pname, tname := parseType(em.Type)
 	if pname != "" { // Find package of the embedded field.
 		if fieldPkg = r.pm[f.ImportMap[pname]]; fieldPkg == nil {
-			return tracer.Trace(fmt.Errorf("package with path %s is not parsed, add it to your parse litst please", f.ImportMap[pname]))
+			return tracer.Trace(fmt.Errorf("package with path %s is not parsed, add it to your parse lists please", f.ImportMap[pname]))
 		}
 	}
 
@@ -98,7 +98,7 @@ func (r *EmbeddedResolver) resolveStructFields(structPkg *Package, f *File, strc
 	pname, tname := parseType(em.Type)
 	if pname != "" {
 		if fieldPkg = r.pm[f.ImportMap[pname]]; fieldPkg == nil {
-			return tracer.Trace(fmt.Errorf("package with path %s is not parsed, add it to your parse litst please", f.ImportMap[pname]))
+			return tracer.Trace(fmt.Errorf("package with path %s is not parsed, add it to your parse list please", f.ImportMap[pname]))
 		}
 	}
 

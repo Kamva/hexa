@@ -57,7 +57,7 @@ config := hexaconfig.NewViperDriver(v)
 
 ### Notes
 - Run `go generate ./db/...` or `go generate ./...` to generate some files after your changes in the DB models.
-
+- Run `golangci-lint run ./...` to run the linter.
 #### Todo
 
 - [x] Where are we checking log level on logger initialization step?

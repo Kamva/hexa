@@ -64,3 +64,14 @@ func Lookup(tag reflect.StructTag, keys ...string) (string, bool) {
 	}
 	return "", false
 }
+
+func RunLayerFns(fns map[string]func() error, layerNames ...string) error {
+	for _, name := range layerNames {
+		if fn, ok := fns[name]; ok {
+			if err := fn(); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}

@@ -51,7 +51,7 @@ func Drain(r *http.Response) error {
 //	return io.ReadAll(r.Body)
 //}
 
-func ResponseErrOrDecodeJson(r *http.Response, val interface{}) error {
+func ResponseErrOrDecodeJson(r *http.Response, val interface{}) error { //nolint:revive
 	if err := ResponseErr(r); err != nil {
 		return err
 	}
