@@ -28,3 +28,10 @@ func ShutdownBySignals(sr hexa.ServiceRegistry, timeout time.Duration, signals .
 
 	return tracer.Trace(sr.Shutdown(ctx))
 }
+
+// ShutdownWithTimeout shuts down with the provided timeout.
+func ShutdownWithTimeout(r hexa.ServiceRegistry, timeout time.Duration) error {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	return tracer.Trace(r.Shutdown(ctx))
+}

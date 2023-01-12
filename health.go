@@ -112,8 +112,8 @@ func (h healthReporter) ReadinessStatus(ctx context.Context) ReadinessStatus {
 	return StatusReady
 }
 
-func (h healthReporter) HealthReport(_ context.Context) HealthReport {
-	l := HealthCheck(h.statusCheck...)
+func (h healthReporter) HealthReport(ctx context.Context) HealthReport {
+	l := HealthCheck(ctx, h.statusCheck...)
 	return HealthReport{
 		Alive:    AliveStatus(l...),
 		Ready:    ReadyStatus(l...),
@@ -124,11 +124,11 @@ func (h healthReporter) HealthReport(_ context.Context) HealthReport {
 // Assertion
 var _ HealthReporter = &healthReporter{}
 
-func HealthCheck(l ...Health) []HealthStatus {
+func HealthCheck(ctx context.Context, l ...Health) []HealthStatus {
 	// TODO: check using go routines
 	r := make([]HealthStatus, len(l))
 	for i, health := range l {
-		r[i] = health.HealthStatus(context.Background())
+		r[i] = health.HealthStatus(ctx)
 	}
 
 	return r
