@@ -44,11 +44,13 @@ type Descriptor struct {
 	Name     string
 	Instance Service
 	Priority int
+	Health   Health
 }
 
 type ServiceRegistry interface {
 	Register(name string, instance Service)
 	RegisterByInstance(instance Service)
+	RegisterByDescriptor(d *Descriptor)
 	Boot() error
 	Shutdown(ctx context.Context) error
 	ShutdownCh() chan struct{}

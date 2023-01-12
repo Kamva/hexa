@@ -30,22 +30,20 @@ func New() hexa.ServiceRegistry {
 }
 
 func (r *serviceRegistry) Register(name string, instance hexa.Service) {
-	r.register(&hexa.Descriptor{
+	r.RegisterByDescriptor(&hexa.Descriptor{
 		Name:     name,
 		Instance: instance,
-		Priority: len(r.l),
 	})
 }
 
 func (r *serviceRegistry) RegisterByInstance(instance hexa.Service) {
-	r.register(&hexa.Descriptor{
+	r.RegisterByDescriptor(&hexa.Descriptor{
 		Name:     reflect.TypeOf(instance).Elem().Name(),
 		Instance: instance,
-		Priority: len(r.l),
 	})
 }
 
-func (r *serviceRegistry) register(d *hexa.Descriptor) {
+func (r *serviceRegistry) RegisterByDescriptor(d *hexa.Descriptor) {
 	if r.Service(d.Name) != nil {
 		hlog.Warn("you are overwriting service in service registry", hlog.String("name", d.Name))
 	}
@@ -53,6 +51,20 @@ func (r *serviceRegistry) register(d *hexa.Descriptor) {
 	if _, ok := d.Instance.(hexa.Bootable); ok && atomic.LoadUint32(&r.booted) == 1 {
 		hlog.Debug("new registered service is bootable, but you booted your services, so the new service will not boot automatically",
 			hlog.String("name", d.Name))
+	}
+
+	if d.Health == nil {
+		if h, ok := d.Instance.(hexa.Health); ok {
+			d.Health = h
+		}
+	}
+
+	if h, ok := d.Instance.(hexa.Health); ok {
+		d.Health = h
+	}
+
+	if d.Priority == 0 { // Priority zero means set to the next priority value.
+		d.Priority = len(r.l) + 1 // Add +1 to begin from 1 instead of zero.
 	}
 
 	r.l = append(r.l, d)
