@@ -10,6 +10,7 @@ import (
 	"github.com/kamva/gutil"
 	"github.com/kamva/hexa"
 	"github.com/kamva/hexa/hlog"
+	"go.uber.org/zap/zapcore"
 )
 
 type SentryOptions struct {
@@ -108,7 +109,31 @@ func (l *sentryLogger) Warn(msg string, args ...hlog.Field) { //nolint:revive
 }
 
 func (l *sentryLogger) Error(msg string, args ...hlog.Field) {
-	l.With(args...).(*sentryLogger).hub.CaptureException(errors.New(msg))
+	sl := l.With(args...).(*sentryLogger)
+	if err := extractError(args); err != nil {
+		// Wrap with msg so the operation-level context is kept as the
+		// exception text while the original error's wrap chain and stack
+		// trace are preserved for Sentry's grouping.
+		sl.hub.CaptureException(fmt.Errorf("%s: %w", msg, err))
+		return
+	}
+	sl.hub.CaptureException(errors.New(msg))
+}
+
+// extractError scans the log fields for an error value (e.g. provided via
+// hlog.Err / hlog.NamedErr) and returns the first one found. Capturing the
+// original error preserves its wrap chain and stack trace in Sentry instead
+// of grouping every issue to the driver's own call site.
+func extractError(args []hlog.Field) error {
+	for _, f := range args {
+		if f.Type != zapcore.ErrorType {
+			continue
+		}
+		if err, ok := f.Interface.(error); ok && err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // NewSentryDriver return new instance of hexa logger with sentry driver.
