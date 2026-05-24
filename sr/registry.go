@@ -59,10 +59,6 @@ func (r *serviceRegistry) RegisterByDescriptor(d *hexa.Descriptor) {
 		}
 	}
 
-	if h, ok := d.Instance.(hexa.Health); ok {
-		d.Health = h
-	}
-
 	if d.Priority == 0 { // Priority zero means set to the next priority value.
 		d.Priority = len(r.l) + 1 // Add +1 to begin from 1 instead of zero.
 	}
