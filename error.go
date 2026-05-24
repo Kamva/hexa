@@ -90,6 +90,12 @@ func (e defaultError) InternalError() error {
 	return e.error
 }
 
+// Unwrap exposes the internal error so the standard errors.Is and
+// errors.As can traverse the wrapped error chain.
+func (e defaultError) Unwrap() error {
+	return e.error
+}
+
 func (e defaultError) Is(err error) bool {
 	ee := AsHexaErr(err)
 	return ee != nil && e.ID() == ee.ID()

@@ -24,3 +24,14 @@ func TestAsHexaErr(t *testing.T) {
 	hexaErr = AsHexaErr(tracer.Trace(err))
 	assert.NotNil(t, hexaErr)
 }
+
+func TestDefaultError_Unwrap(t *testing.T) {
+	sentinel := errors.New("sentinel")
+	err := NewError(http.StatusBadRequest, "lib.x").SetError(sentinel)
+
+	// errors.Is must reach the wrapped internal error through Unwrap.
+	assert.True(t, errors.Is(err, sentinel))
+
+	// A non-matching target stays false.
+	assert.False(t, errors.Is(err, errors.New("other")))
+}
