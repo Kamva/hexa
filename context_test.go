@@ -40,6 +40,14 @@ func TestNewContext(t *testing.T) {
 	assertContextWithParams(ctx, t, params)
 }
 
+func TestWithBaseTranslator(t *testing.T) {
+	tr := &emptyTranslator{}
+	ctx := WithBaseTranslator(context.Background(), tr)
+	// The base translator must be retrievable (it used to be stored under
+	// the wrong key, so CtxBaseTranslator always returned nil).
+	assert.Equal(t, tr, CtxBaseTranslator(ctx))
+}
+
 func TestWithUser(t *testing.T) {
 	ctx, params := newTestContext()
 	assert.Equal(t, CtxUser(ctx), params.User)

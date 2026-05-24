@@ -78,7 +78,7 @@ func CtxBaseLogger(ctx context.Context) hlog.Logger {
 // WithBaseTranslator sets the base Translator in the context. when you change the locale,
 // we use the base translator to set the new translator.
 func WithBaseTranslator(ctx context.Context, t Translator) context.Context {
-	return updateTranslator(context.WithValue(ctx, ctxKeyTranslator, t))
+	return updateTranslator(context.WithValue(ctx, ctxKeyBaseTranslator, t))
 }
 
 func CtxBaseTranslator(ctx context.Context) Translator {
