@@ -122,9 +122,13 @@ func (c *Client) Do(req *http.Request, options ...RequestOption) (*http.Response
 	}
 
 	if c.logMode&LogModeRequestHeaders != 0 {
+		// Redact sensitive headers for the dump only, then restore the real
+		// ones before sending so credentials aren't leaked to logs.
+		origHeader := req.Header
+		req.Header = redactHeaders(origHeader)
 		dumped, err := httputil.DumpRequestOut(req, c.logMode&LogModeRequestBody != 0)
-		if err !=
-			nil {
+		req.Header = origHeader
+		if err != nil {
 			return nil, tracer.Trace(err)
 		}
 
@@ -136,7 +140,10 @@ func (c *Client) Do(req *http.Request, options ...RequestOption) (*http.Response
 	}
 
 	if c.logMode&LogModeResponseHeaders != 0 {
+		origHeader := resp.Header
+		resp.Header = redactHeaders(origHeader)
 		dumped, err := httputil.DumpResponse(resp, c.logMode&LogModeResponseBody != 0)
+		resp.Header = origHeader
 		if err != nil {
 			return nil, tracer.Trace(err)
 		}
@@ -145,4 +152,30 @@ func (c *Client) Do(req *http.Request, options ...RequestOption) (*http.Response
 	}
 
 	return resp, nil
+}
+
+// sensitiveHeaders are request/response headers whose values are masked
+// before a message is dumped to logs, so credentials and session data don't
+// leak when LogMode*Headers is enabled.
+var sensitiveHeaders = []string{
+	"Authorization",
+	"Proxy-Authorization",
+	"Cookie",
+	"Set-Cookie",
+}
+
+// redactHeaders returns a copy of h with the values of sensitiveHeaders
+// replaced by "REDACTED". The input header is left unmodified. It is nil-safe.
+func redactHeaders(h http.Header) http.Header {
+	if h == nil {
+		return nil
+	}
+
+	clone := h.Clone()
+	for _, name := range sensitiveHeaders {
+		if len(clone.Values(name)) != 0 {
+			clone.Set(name, "REDACTED")
+		}
+	}
+	return clone
 }
