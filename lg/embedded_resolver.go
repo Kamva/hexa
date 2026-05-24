@@ -200,7 +200,7 @@ func UseEmbeddedFieldsInPackage(from *Package, fields []*EmbeddedField) []*Embed
 		}
 	}
 
-	return fields
+	return l
 }
 
 // UseFieldsInPackage updates fields to be able to use in the another package.
