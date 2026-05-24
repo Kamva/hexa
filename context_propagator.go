@@ -93,14 +93,24 @@ func (p *defaultContextPropagator) Inject(c context.Context) (map[string][]byte,
 
 func (p *defaultContextPropagator) Extract(c context.Context, m map[string][]byte) (context.Context, error) {
 	for _, k := range propagatingContextKeys {
+		// The user key is optional: Inject only writes it when a user is
+		// present, so a missing user just yields a nil user below instead
+		// of failing extraction.
+		if k == ctxKeyUser {
+			continue
+		}
 		if _, ok := m[string(k)]; !ok {
 			return nil, tracer.Trace(fmt.Errorf("key %s not found in map", k))
 		}
 	}
 
-	user, err := p.up.FromBytes(m[string(ctxKeyUser)])
-	if err != nil { // Another option would be ignoring the nil user and continue...
-		return nil, tracer.Trace(err)
+	var user User
+	if ub := m[string(ctxKeyUser)]; len(ub) > 0 {
+		u, err := p.up.FromBytes(ub)
+		if err != nil {
+			return nil, tracer.Trace(err)
+		}
+		user = u
 	}
 
 	return NewContext(c, ContextParams{

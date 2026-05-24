@@ -256,6 +256,20 @@ func validateUserMetaData(meta map[string]any) error {
 		return tracer.Trace(errors.New("invalid type for roles field in user's meta data"))
 	}
 
+	// Validate string fields so the accessors (which type-assert to string)
+	// can't panic on a user built from arbitrary/propagated meta.
+	for _, k := range []string{
+		UserMetaKeyIdentifier,
+		UserMetaKeyEmail,
+		UserMetaKeyPhone,
+		UserMetaKeyName,
+		UserMetaKeyUsername,
+	} {
+		if _, ok := meta[k].(string); !ok {
+			return tracer.Trace(fmt.Errorf("invalid type for %s field in user's meta data, expected string", k))
+		}
+	}
+
 	return nil
 }
 
