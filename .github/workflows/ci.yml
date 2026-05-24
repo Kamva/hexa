@@ -17,7 +17,9 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
+          # A modern Go that builds the dependency graph; the module still
+          # declares go 1.18 as its minimum.
+          go-version: "1.22"
           cache: true
 
       - name: Check formatting
