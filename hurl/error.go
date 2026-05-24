@@ -2,6 +2,7 @@ package hurl
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -9,7 +10,7 @@ import (
 type HTTPErr struct {
 	Code   int
 	Status string
-	Body string
+	Body   string
 }
 
 func (err HTTPErr) Error() string {
@@ -17,12 +18,13 @@ func (err HTTPErr) Error() string {
 }
 
 // ResponseErr returns http error if the response is not successful.
-func responseErr(r *http.Response) error {
+func ResponseErr(r *http.Response) error {
 	if r.StatusCode <= 300 {
 		return nil
 	}
 
 	body, _ := io.ReadAll(r.Body)
+	_ = r.Body.Close()
 
-	return HttpErr{r.StatusCode, r.Status, string(body)}
+	return HTTPErr{r.StatusCode, r.Status, string(body)}
 }
