@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: build & test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          # A modern Go that builds the dependency graph; the module still
+          # declares go 1.18 as its minimum.
+          go-version: "1.22"
+          cache: true
+
+      - name: Check formatting
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "These files are not gofmt-ed:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Build
+        run: go build ./...
+
+      - name: Test
+        run: go test ./... -race -covermode=atomic -coverprofile=coverage.out
+
+      - name: Coverage summary
+        run: go tool cover -func=coverage.out | tail -1
+
+  lint:
+    name: lint (advisory)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          # golangci-lint v1.x matches the v1-format .golangci.yaml and needs a
+          # Go toolchain it supports (the repo targets Go 1.18).
+          go-version: "1.21"
+          cache: true
+
+      # Advisory: .golangci.yaml predates any enforced CI and the code has
+      # accumulated findings (e.g. missing package comments). --issues-exit-code=0
+      # keeps this check green and surfaces findings in the job logs; remove it
+      # (and fix the findings) to turn linting into a hard gate.
+      - uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.55.2
+          args: --issues-exit-code=0 --timeout=5m

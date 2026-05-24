@@ -2,6 +2,7 @@ package mongolock
 
 import (
 	"context"
+	"os"
 	"testing"
 	"time"
 
@@ -30,12 +31,26 @@ func newCtx(ctx context.Context) context.Context {
 	})
 }
 
-func setupDefConnection() {
+// mongoURI returns the MongoDB URI for the integration tests, or skips the
+// test when it isn't configured so the default `go test ./...` run (and CI
+// without a database) stays green. Point HEXA_TEST_MONGO_URI at a live
+// MongoDB to actually exercise these tests.
+func mongoURI(t *testing.T) string {
+	uri := os.Getenv("HEXA_TEST_MONGO_URI")
+	if uri == "" {
+		t.Skip("skipping mongolock integration test; set HEXA_TEST_MONGO_URI to run it")
+	}
+	return uri
+}
+
+func setupDefConnection(t *testing.T) {
+	uri := mongoURI(t)
+
 	gutil.PanicErr(
 		mgm.SetDefaultConfig(nil, "locks"),
 	)
 	var err error
-	cli, err = mongo.NewClient(options.Client().ApplyURI("mongodb://root:12345@localhost:27017"))
+	cli, err = mongo.NewClient(options.Client().ApplyURI(uri))
 	gutil.PanicErr(err)
 
 	gutil.PanicErr(cli.Connect(context.Background()))
@@ -54,7 +69,7 @@ func resetCollection() {
 }
 
 func TestNewDlmDatabaseIndex(t *testing.T) {
-	setupDefConnection()
+	setupDefConnection(t)
 	defer disconnect()
 
 	resetCollection()
@@ -94,7 +109,7 @@ func TestNewDlmDatabaseIndex(t *testing.T) {
 }
 
 func TestDlm_NewMutex(t *testing.T) {
-	setupDefConnection()
+	setupDefConnection(t)
 	defer disconnect()
 
 	resetCollection()
@@ -123,7 +138,7 @@ func TestDlm_NewMutex(t *testing.T) {
 }
 
 func TestDlm_NewMutexWithTTL(t *testing.T) {
-	setupDefConnection()
+	setupDefConnection(t)
 	defer disconnect()
 
 	resetCollection()
@@ -153,7 +168,7 @@ func TestDlm_NewMutexWithTTL(t *testing.T) {
 }
 
 func TestDlm_NewMutexValuesWithMutexOptions(t *testing.T) {
-	setupDefConnection()
+	setupDefConnection(t)
 	defer disconnect()
 
 	resetCollection()
@@ -190,7 +205,7 @@ func TestDlm_NewMutexValuesWithMutexOptions(t *testing.T) {
 }
 
 func TestDlm_NewMutexRefreshAndMultipleCall(t *testing.T) {
-	setupDefConnection()
+	setupDefConnection(t)
 	defer disconnect()
 	resetCollection()
 
@@ -228,7 +243,7 @@ func TestDlm_NewMutexRefreshAndMultipleCall(t *testing.T) {
 }
 
 func TestMutexDataInDB(t *testing.T) {
-	setupDefConnection()
+	setupDefConnection(t)
 	defer disconnect()
 
 	resetCollection()
@@ -261,7 +276,7 @@ func TestMutexDataInDB(t *testing.T) {
 }
 
 func TestMutex_Lock(t *testing.T) {
-	setupDefConnection()
+	setupDefConnection(t)
 	defer disconnect()
 
 	resetCollection()
@@ -308,7 +323,7 @@ func TestMutex_Lock(t *testing.T) {
 }
 
 func TestMutex_LockAndReLock(t *testing.T) {
-	setupDefConnection()
+	setupDefConnection(t)
 	defer disconnect()
 
 	resetCollection()
@@ -352,7 +367,7 @@ func TestMutex_LockAndReLock(t *testing.T) {
 }
 
 func TestMutex_UnlockBeforeExpiration(t *testing.T) {
-	setupDefConnection()
+	setupDefConnection(t)
 	defer disconnect()
 	resetCollection()
 
