@@ -37,13 +37,12 @@ type Client struct {
 }
 
 func NewClient(base string, logMode uint) (*Client, error) {
-	var u *URL
-	var err error
-	if base != "" {
-		u, err = NewURL(base)
-		if err != nil {
-			return nil, tracer.Trace(err)
-		}
+	// NewURL returns a non-nil *URL even for an empty base, so methods on
+	// c.base never dereference a nil receiver. A relative request path with
+	// no base then returns a clear error instead of panicking.
+	u, err := NewURL(base)
+	if err != nil {
+		return nil, tracer.Trace(err)
 	}
 
 	return NewClientWithOptions(&http.Client{}, u, logMode), nil
