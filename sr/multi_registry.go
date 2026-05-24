@@ -11,7 +11,7 @@ type multiSearchRegistry struct {
 
 func (m *multiSearchRegistry) Descriptors() []*hexa.Descriptor {
 	l := make([]*hexa.Descriptor, 0)
-	for i := len(m.search) - 1; i > 0; i-- { // get descriptor list from registries in revert order.
+	for i := len(m.search) - 1; i >= 0; i-- { // get descriptor list from registries in revert order.
 		l = append(l, m.search[i].Descriptors()...)
 	}
 
