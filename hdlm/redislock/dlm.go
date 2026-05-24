@@ -143,12 +143,17 @@ func (m *mutex) Unlock(c context.Context) error {
 	}
 
 	err := m.lock.Release(c)
-	m.lock = nil
-	if errors.Is(err, redislock.ErrLockNotHeld) {
-		// Already released or expired: a no-op per the Mutex contract.
-		return nil
+	if err != nil && !errors.Is(err, redislock.ErrLockNotHeld) {
+		// Transient/transport failure: the lock may still be held in Redis,
+		// so keep the handle to let the caller retry Unlock instead of
+		// turning subsequent calls into no-ops.
+		return tracer.Trace(err)
 	}
-	return tracer.Trace(err)
+
+	// Released, or already gone (ErrLockNotHeld, a no-op per the Mutex
+	// contract): drop the handle.
+	m.lock = nil
+	return nil
 }
 
 var _ hexa.DLM = &dlm{}
