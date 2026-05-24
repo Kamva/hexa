@@ -4,7 +4,7 @@ __Note : Hexa is in progress, it does not have stable version until now, so use 
 
 #### Requirements:
 
-go : minimum version `1.13`
+go : minimum version `1.18`
 
 #### Install
 
