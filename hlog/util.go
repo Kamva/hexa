@@ -5,27 +5,13 @@ import (
 )
 
 func FieldToKeyVal(f Field) (key string, val any) {
-	if f.Interface != nil {
-		return f.Key, f.Interface
-	}
-
-	if f.String != "" || f.Type == zapcore.StringerType {
-		return f.Key, f.String
-	}
-
-	return f.Key, f.Integer
-
-	//switch f.Type {
-	//case zapcore.Int64Type, zapcore.Int32Type, zapcore.Int16Type, zapcore.Int8Type, zapcore.UintptrType,
-	//	zapcore.Uint64Type, zapcore.Uint32Type, zapcore.Uint16Type, zapcore.Uint8Type, zapcore.DurationType:
-	//	val = f.Integer
-	//case zapcore.StringType:
-	//	val = f.String
-	//default:
-	//	val = f.Interface
-	//}
-	//
-	//return f.Key, val
+	// Let zap decode the field into its real Go value. The previous manual
+	// logic returned f.Integer for any non-string/non-interface field, which
+	// is wrong for bool/float/duration/time fields (zap packs those into the
+	// Integer bits), and returned the Stringer object instead of its string.
+	enc := zapcore.NewMapObjectEncoder()
+	f.AddTo(enc)
+	return f.Key, enc.Fields[f.Key]
 }
 
 func fieldsToMap(fields ...Field) map[string]any {

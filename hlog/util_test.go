@@ -2,6 +2,7 @@ package hlog
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -34,4 +35,16 @@ func TestFieldToKeyValMap(t *testing.T) {
 	k, v := FieldToKeyVal(f)
 	assert.Equal(t, k, "a")
 	assert.NotNil(t, v)
+}
+
+func TestFieldToKeyValBool(t *testing.T) {
+	k, v := FieldToKeyVal(Bool("a", true))
+	assert.Equal(t, "a", k)
+	assert.Equal(t, true, v) // not int64(1)
+}
+
+func TestFieldToKeyValDuration(t *testing.T) {
+	k, v := FieldToKeyVal(Duration("a", time.Second))
+	assert.Equal(t, "a", k)
+	assert.Equal(t, time.Second, v) // not the raw nanosecond int64
 }

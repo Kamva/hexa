@@ -12,7 +12,7 @@ func SetGlobalLogger(l Logger) {
 	With = global.With
 	Debug = global.Debug
 	Info = global.Info
-	Message = global.Info
+	Message = global.Message
 	Warn = global.Warn
 	Error = global.Error
 }
