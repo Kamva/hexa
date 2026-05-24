@@ -38,7 +38,7 @@ type healthSvc struct {
 	id string
 }
 
-func (h *healthSvc) HealthIdentifier() string                          { return h.id }
+func (h *healthSvc) HealthIdentifier() string                           { return h.id }
 func (h *healthSvc) LivenessStatus(context.Context) hexa.LivenessStatus { return hexa.StatusAlive }
 func (h *healthSvc) ReadinessStatus(context.Context) hexa.ReadinessStatus {
 	return hexa.StatusReady
