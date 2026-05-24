@@ -1,10 +1,31 @@
 package hurl
 
 import (
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestRedactHeaders(t *testing.T) {
+	h := http.Header{}
+	h.Set("Authorization", "Bearer secret-token")
+	h.Add("Cookie", "session=abc")
+	h.Set("Content-Type", "application/json")
+
+	red := redactHeaders(h)
+
+	// Sensitive headers are masked in the copy.
+	assert.Equal(t, "REDACTED", red.Get("Authorization"))
+	assert.Equal(t, "REDACTED", red.Get("Cookie"))
+	// Non-sensitive headers are preserved.
+	assert.Equal(t, "application/json", red.Get("Content-Type"))
+	// The original header is untouched.
+	assert.Equal(t, "Bearer secret-token", h.Get("Authorization"))
+
+	// nil-safe.
+	assert.Nil(t, redactHeaders(nil))
+}
 
 func Test_isValidUrl(t *testing.T) {
 	urls := []struct {
