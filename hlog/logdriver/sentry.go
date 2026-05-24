@@ -111,7 +111,10 @@ func (l *sentryLogger) Warn(msg string, args ...hlog.Field) { //nolint:revive
 func (l *sentryLogger) Error(msg string, args ...hlog.Field) {
 	sl := l.With(args...).(*sentryLogger)
 	if err := extractError(args); err != nil {
-		sl.hub.CaptureException(err)
+		// Wrap with msg so the operation-level context is kept as the
+		// exception text while the original error's wrap chain and stack
+		// trace are preserved for Sentry's grouping.
+		sl.hub.CaptureException(fmt.Errorf("%s: %w", msg, err))
 		return
 	}
 	sl.hub.CaptureException(errors.New(msg))
