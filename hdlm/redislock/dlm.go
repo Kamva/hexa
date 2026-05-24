@@ -3,12 +3,13 @@ package redislock
 import (
 	"context"
 	"errors"
-	"github.com/bsm/redislock"
-	"github.com/redis/go-redis/v9"
 	"time"
 
+	"github.com/bsm/redislock"
 	"github.com/kamva/hexa"
+	"github.com/kamva/hexa/hlog"
 	"github.com/kamva/tracer"
+	"github.com/redis/go-redis/v9"
 )
 
 type DlmOptions struct {
@@ -29,6 +30,10 @@ type dlm struct {
 
 func NewDlm(o DlmOptions) (hexa.DLM, error) {
 	dlm := &dlm{
+		Health: hexa.NewPingHealth(hlog.GlobalLogger(), "distributed_locks", func(ctx context.Context) error {
+			return o.Client.Ping(ctx).Err()
+		}, nil),
+
 		client:   redislock.New(o.Client),
 		ttl:      o.DefaultTTL,
 		owner:    o.DefaultOwner,
@@ -67,7 +72,11 @@ func (m *dlm) NewMutexWithOptions(o hexa.MutexOptions) hexa.Mutex {
 
 type mutex struct {
 	client *redislock.Client
-	ttl    time.Duration
+	// lock holds the currently acquired redis lock. It is set on a
+	// successful (Try)Lock and cleared on Unlock, and carries the token
+	// required to release or refresh the lock.
+	lock *redislock.Lock
+	ttl  time.Duration
 
 	// interval is waiting time before try to lock again if
 	// lock already held by another mutex.
@@ -96,19 +105,50 @@ func (m *mutex) Lock(c context.Context) error {
 }
 
 func (m *mutex) TryLock(c context.Context) error {
-	m.Expiry = time.Now().Add(m.ttl)
+	// Use the owner as the lock token so mutexes that share an owner can
+	// release/refresh each other's lock (an empty owner yields a random
+	// token, giving each mutex its own independent lock).
+	opts := &redislock.Options{Token: m.Owner}
 
-	_, err := m.client.Obtain(c, m.ID, m.ttl, nil)
-
-	if errors.Is(err, redislock.ErrNotObtained) {
-		err = hexa.ErrLockAlreadyAcquired
+	// If we already hold the lock, refresh it instead of failing so repeated
+	// (Try)Lock calls extend the lease rather than reporting it as taken.
+	if m.lock != nil {
+		err := m.lock.Refresh(c, m.ttl, opts)
+		if err == nil {
+			m.Expiry = time.Now().Add(m.ttl)
+			return nil
+		}
+		if !errors.Is(err, redislock.ErrNotObtained) {
+			return tracer.Trace(err)
+		}
+		m.lock = nil // We lost the lock; fall through and try to obtain it again.
 	}
 
-	return tracer.Trace(err)
+	lock, err := m.client.Obtain(c, m.ID, m.ttl, opts)
+	if errors.Is(err, redislock.ErrNotObtained) {
+		return tracer.Trace(hexa.ErrLockAlreadyAcquired)
+	}
+	if err != nil {
+		return tracer.Trace(err)
+	}
+
+	m.lock = lock
+	m.Expiry = time.Now().Add(m.ttl)
+	return nil
 }
 
 func (m *mutex) Unlock(c context.Context) error {
-	return nil
+	if m.lock == nil {
+		return nil
+	}
+
+	err := m.lock.Release(c)
+	m.lock = nil
+	if errors.Is(err, redislock.ErrLockNotHeld) {
+		// Already released or expired: a no-op per the Mutex contract.
+		return nil
+	}
+	return tracer.Trace(err)
 }
 
 var _ hexa.DLM = &dlm{}
