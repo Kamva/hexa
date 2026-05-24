@@ -36,6 +36,22 @@ func TestDefaultContextPropagator_Extract(t *testing.T) {
 	assert.Equal(t, result, m)
 }
 
+func TestDefaultContextPropagator_ExtractWithoutUser(t *testing.T) {
+	p := NewContextPropagator(hlog.GlobalLogger(), &emptyTranslator{})
+
+	// Inject omits the user key when there is no user, so Extract must not
+	// require it.
+	payload := map[string][]byte{
+		string(ctxKeyCorrelationId): []byte("cid"),
+		string(ctxKeyLocale):        []byte("en"),
+	}
+
+	ctx, err := p.Extract(context.Background(), payload)
+	assert.Nil(t, err)
+	assert.Nil(t, CtxUser(ctx))
+	assert.Equal(t, "cid", CtxCorrelationId(ctx))
+}
+
 func TestDefaultContextPropagator_Inject(t *testing.T) {
 	_, params := newTestContext()
 	translator := &emptyTranslator{}
