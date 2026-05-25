@@ -93,7 +93,7 @@ func TestClient_GetPostAgainstServer(t *testing.T) {
 	t.Run("GET with option", func(t *testing.T) {
 		resp, err := c.Get("/things", BearerToken("tok"))
 		require.NoError(t, err)
-		defer Drain(resp)
+		defer func() { _ = Drain(resp) }()
 		assert.Equal(t, http.MethodGet, gotMethod)
 		assert.Equal(t, "/things", gotPath)
 		assert.Equal(t, "Bearer tok", gotAuth)
@@ -103,7 +103,7 @@ func TestClient_GetPostAgainstServer(t *testing.T) {
 	t.Run("POST JSON", func(t *testing.T) {
 		resp, err := c.PostJSON("/items", map[string]any{"a": 1})
 		require.NoError(t, err)
-		defer Drain(resp)
+		defer func() { _ = Drain(resp) }()
 		assert.Equal(t, http.MethodPost, gotMethod)
 		assert.Contains(t, gotCT, "application/json")
 		assert.JSONEq(t, `{"a":1}`, gotBody)
@@ -112,7 +112,7 @@ func TestClient_GetPostAgainstServer(t *testing.T) {
 	t.Run("POST form", func(t *testing.T) {
 		resp, err := c.PostForm("/form", url.Values{"k": {"v"}})
 		require.NoError(t, err)
-		defer Drain(resp)
+		defer func() { _ = Drain(resp) }()
 		assert.Equal(t, "application/x-www-form-urlencoded", gotCT)
 		assert.Equal(t, "k=v", gotBody)
 	})
