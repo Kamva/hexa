@@ -44,23 +44,22 @@ jobs:
         run: go tool cover -func=coverage.out | tail -1
 
   lint:
-    name: lint (advisory)
+    name: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-go@v5
         with:
-          # golangci-lint v1.x matches the v1-format .golangci.yaml and needs a
-          # Go toolchain it supports (the repo targets Go 1.18).
-          go-version: "1.21"
+          go-version: "1.22"
           cache: true
 
-      # Advisory: .golangci.yaml predates any enforced CI and the code has
-      # accumulated findings (e.g. missing package comments). --issues-exit-code=0
-      # keeps this check green and surfaces findings in the job logs; remove it
-      # (and fix the findings) to turn linting into a hard gate.
-      - uses: golangci/golangci-lint-action@v3
-        with:
-          version: v1.55.2
-          args: --issues-exit-code=0 --timeout=5m
+      # golangci-lint v1.64.x is the last v1 line; it reads the v1-format
+      # .golangci.yaml and supports modern Go toolchains. Installed directly
+      # (rather than via the action) so the version is deterministic and matches
+      # local verification. This is a hard gate: any finding fails the job.
+      - name: Install golangci-lint
+        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
+
+      - name: Lint
+        run: "$(go env GOPATH)/bin/golangci-lint run ./..."
