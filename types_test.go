@@ -11,7 +11,8 @@ func TestSecret_Masks(t *testing.T) {
 	s := Secret("super-secret")
 
 	assert.Equal(t, "****", s.String())
-	assert.Equal(t, "****", fmt.Sprintf("%s", s))
+	// Secret embedded in a formatted string is masked too (fmt uses Stringer).
+	assert.Equal(t, "value=****", fmt.Sprintf("value=%s", s))
 
 	b, err := s.MarshalJSON()
 	assert.NoError(t, err)

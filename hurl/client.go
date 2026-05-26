@@ -77,7 +77,7 @@ func (c *Client) PostForm(url string, data urlpkg.Values, options ...RequestOpti
 	return c.Post(url, "application/x-www-form-urlencoded", strings.NewReader(data.Encode()), options...)
 }
 
-func (c *Client) PostJSON(urlPath string, data interface{}, options ...RequestOption) (*http.Response, error) {
+func (c *Client) PostJSON(urlPath string, data any, options ...RequestOption) (*http.Response, error) {
 	rBody, err := json.Marshal(data)
 	if err != nil {
 		return nil, tracer.Trace(err)
