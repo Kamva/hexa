@@ -2,6 +2,7 @@ package redislock
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -91,7 +92,9 @@ func TestMutex_LockUnlock_Integration(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	key := "hexa-redislock-itest"
+	// Unique per run so the test doesn't collide with a concurrent run or a
+	// stale key on a shared Redis instance.
+	key := fmt.Sprintf("hexa-redislock-itest-%s-%d", t.Name(), time.Now().UnixNano())
 	m1 := d.NewMutex(key)
 	m2 := d.NewMutexWithOptions(hexa.MutexOptions{Key: key, Owner: "m2", TTL: 5 * time.Second})
 
