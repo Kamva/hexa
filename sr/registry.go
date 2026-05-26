@@ -7,6 +7,7 @@ import (
 	"context"
 	"reflect"
 	"sort"
+	"sync"
 	"sync/atomic"
 
 	"github.com/kamva/hexa"
@@ -15,7 +16,8 @@ import (
 )
 
 type serviceRegistry struct {
-	l []*hexa.Descriptor
+	mu sync.RWMutex
+	l  []*hexa.Descriptor
 
 	booted     uint32 // is 1 if you boot services.
 	done       uint32 // is 1 if you shutdown services.
@@ -44,7 +46,10 @@ func (r *serviceRegistry) RegisterByInstance(instance hexa.Service) {
 }
 
 func (r *serviceRegistry) RegisterByDescriptor(d *hexa.Descriptor) {
-	if r.Service(d.Name) != nil {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if r.descriptor(d.Name) != nil {
 		hlog.Warn("you are overwriting service in service registry", hlog.String("name", d.Name))
 	}
 
@@ -132,10 +137,24 @@ func (r *serviceRegistry) ShutdownCh() (shutdownCh chan struct{}) {
 }
 
 func (r *serviceRegistry) Descriptors() []*hexa.Descriptor {
-	return r.l
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	// Return a copy so callers can iterate without racing a concurrent Register.
+	out := make([]*hexa.Descriptor, len(r.l))
+	copy(out, r.l)
+	return out
 }
 
 func (r *serviceRegistry) Descriptor(name string) *hexa.Descriptor {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.descriptor(name)
+}
+
+// descriptor looks up a descriptor by name without locking; callers must hold
+// at least the read lock.
+func (r *serviceRegistry) descriptor(name string) *hexa.Descriptor {
 	// TODO: Use a map if needed (to improve performance)
 	for _, d := range r.l {
 		if d.Name == name {
@@ -146,7 +165,9 @@ func (r *serviceRegistry) Descriptor(name string) *hexa.Descriptor {
 }
 
 func (r *serviceRegistry) Service(name string) hexa.Service {
-	if d := r.Descriptor(name); d != nil {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	if d := r.descriptor(name); d != nil {
 		return d.Instance
 	}
 	return nil
