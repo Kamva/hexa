@@ -40,9 +40,16 @@ func TestLevel_CanLog(t *testing.T) {
 }
 
 func TestLevelFromString(t *testing.T) {
-	assert.Equal(t, DebugLevel, LevelFromString("debug"))
-	assert.Equal(t, ErrorLevel, LevelFromString("error"))
-	assert.Panics(t, func() { LevelFromString("nope") })
+	lvl, err := LevelFromString("debug")
+	require.NoError(t, err)
+	assert.Equal(t, DebugLevel, lvl)
+
+	lvl, err = LevelFromString("error")
+	require.NoError(t, err)
+	assert.Equal(t, ErrorLevel, lvl)
+
+	_, err = LevelFromString("nope")
+	assert.Error(t, err)
 }
 
 func TestZapLevel(t *testing.T) {
