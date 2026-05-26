@@ -37,19 +37,20 @@ func (l Level) CanLog(target Level) bool {
 	return l <= target
 }
 
-// LevelFromString converts string to log level.
-func LevelFromString(l string) Level {
+// LevelFromString converts a string to a log level, returning an error for an
+// unknown value instead of panicking.
+func LevelFromString(l string) (Level, error) {
 	switch l {
 	case DebugLevel.String():
-		return DebugLevel
+		return DebugLevel, nil
 	case InfoLevel.String():
-		return InfoLevel
+		return InfoLevel, nil
 	case WarnLevel.String():
-		return WarnLevel
+		return WarnLevel, nil
 	case ErrorLevel.String():
-		return ErrorLevel
+		return ErrorLevel, nil
 	default:
-		panic("invalid log level")
+		return 0, fmt.Errorf("invalid log level: %q", l)
 	}
 }
 
