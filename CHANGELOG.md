@@ -74,9 +74,17 @@ This project is pre-1.0 and does not yet follow semantic versioning.
 
 ### Compatibility
 
-No exported symbols were removed, renamed, or had their signatures changed.
-`hurl.ResponseErr` is newly exported (additive); the `hurl` package did not
-compile before #6.
+- No exported symbols were removed or renamed. One signature change:
+  `hlog.LevelFromString` is now `(Level, error)` instead of `Level` (#28),
+  replacing a panic on unknown input with an error return.
+- `hurl.ResponseErr` is newly exported (additive); the `hurl` package did not
+  compile before #6.
+- **Runtime dependencies pinned for v1.** `otel`, `mongo-driver`, `zap` and
+  `go-i18n` are intentionally not bumped in v1, because hexa re-exports their
+  types in its public API. otel specifically is hard-breaking — `htel` exposes
+  `metric.MeterProvider`, and otel's `metric` package went through a v0.x→v1.x
+  redesign that the trace/sdk modules are coupled to. Modernizing these lands
+  in **v2** (`github.com/kamva/hexa/v2`) alongside the other breaking work.
 
 ## [0.1.0]
 
