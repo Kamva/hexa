@@ -176,10 +176,13 @@ CI gate, test backfill, bug fixes, CHANGELOG. Remaining cleanup:
       `examples` build-smoke.
 - [ ] Land deferred items from §3: registry mutex, `LevelFromString` error,
       `hurl` status threshold, `gutil.IP(nil)` guard.
-- [ ] **Modernize dependencies** (riskiest workstream; do early in an RC):
-      otel `v1.2.0` (2021) → current, `mongo-driver 1.7.0` → current, `zap 1.14`,
-      `go-i18n 2.0.3`. Re-verify under new versions. Note: bumping otel will touch
-      `htel/` (propagator + telemetry wrappers).
+- [x] **Modernize dependencies — DECISION: deferred to v2.** Because hexa
+      re-exports `otel` / `mongo-driver` / `zap` / `go-i18n` types in its public
+      API, bumping them is consumer-facing. otel specifically is hard-breaking:
+      `htel` exposes `metric.MeterProvider`, and otel's `metric` package went
+      through a v0.x→v1.x redesign that the trace/sdk modules are coupled to.
+      v1 ships on the currently-pinned versions; the bump lands in v2 (`/v2`
+      module path) alongside the other breaking work.
 
 ### Phase 3 — API polish (informed by peer frameworks, see §5)
 - [ ] **Errors:** consider Kratos-style split — a stable machine `Reason`/ID
@@ -187,8 +190,9 @@ CI gate, test backfill, bug fixes, CHANGELOG. Remaining cleanup:
       to map **gRPC status codes**. If breaking, do it **now (pre-1.0)**.
       Current `hexa.Error` = `httpStatus` + `id` + `localizedMessage` + `data` +
       `reportData`; `errors.Is/As` now works via `Unwrap` (#12).
-- [ ] **Observability:** ensure `htel` integrates with current otel; verify hexa
-      context propagation ↔ otel span context.
+- [ ] **Observability:** verify hexa context propagation ↔ otel span context on
+      the pinned otel versions. (Migration to modern otel is a v2 concern; see
+      Phase 2.)
 - [ ] Consistency: package comments, receiver naming, globals concurrency
       (`hlog.SetGlobalLogger`, `hexatranslator.SetGlobal` mutate package vars
       without sync — fine at startup, racy if used later).
